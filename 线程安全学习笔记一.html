@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"sunskey.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta name="description" content="线程安全线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。 线程安全基本特性 原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。 可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。 有序性，保证线程内串行语义，避免指令重排。  所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="线程安全学习笔记(一)">
-<meta property="og:url" content="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
+<meta property="og:url" content="https://sunskey.github.io/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
 <meta property="og:site_name" content="Sunskey">
 <meta property="og:description" content="线程安全线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。 线程安全基本特性 原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。 可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。 有序性，保证线程内串行语义，避免指令重排。  所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的">
 <meta property="og:locale" content="zh_CN">
@@ -34,7 +34,7 @@
 <meta property="article:tag" content="线程安全">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
+<link rel="canonical" href="https://sunskey.github.io/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
 
 
 <script id="page-configurations">
@@ -169,7 +169,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.github.io/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
