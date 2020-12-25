@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2020-12-25T14:02:58.440Z</updated>
+  <updated>2020-12-25T11:31:52.493Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,19 +15,6 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>test</title>
-    <link href="https://sunskey.top/test.html"/>
-    <id>https://sunskey.top/test.html</id>
-    <published>2020-12-25T14:02:44.000Z</published>
-    <updated>2020-12-25T14:02:58.440Z</updated>
-    
-    
-    
-    
-    
-  </entry>
   
   <entry>
     <title>线程安全学习笔记(一)</title>
