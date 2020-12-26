@@ -131,4 +131,4 @@ backup:
   theme: next
   message: Back up my www.itrhx.com blog
   repository:
-    github: git@github.com:Sunskey/sunskey.github.io.git,backup
+    github: git@github.com:Sunskey/sunskey.github.io,backup
