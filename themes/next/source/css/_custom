@@ -1,0 +1,11 @@
+
+post-toc .nav .nav-child { display: block; }
+
+.post-toc ol {  
+  font-size : 13px;     
+}
+
+
+.vpower .txt-right {
+  display : none;
+}
