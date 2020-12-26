@@ -128,7 +128,7 @@ deploy:
 
 backup:
   type: git
-  theme: material-x-1.2.1
+  theme: next
   message: Back up my www.itrhx.com blog
   repository:
-    github: git@github.com:Sunskey/TRHX.github.io.git,backup
+    github: git@github.com:Sunskey/sunskey.github.io.git,backup
