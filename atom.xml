@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2020-12-31T09:19:17.522Z</updated>
+  <updated>2021-01-10T15:04:05.382Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>《做时间的朋友读书笔记》</title>
+    <link href="https://sunskey.top/learn-note01.html"/>
+    <id>https://sunskey.top/learn-note01.html</id>
+    <published>2021-01-10T14:55:59.000Z</published>
+    <updated>2021-01-10T15:04:05.382Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;blockquote&gt;
+&lt;p&gt;作者：&lt;/p&gt;
+&lt;p&gt;著作：《把时间当朋友》、《21天TOEFL核心词汇21天突破》、《财富自由之路》、《韭菜的自我修养》&lt;/p&gt;
+&lt;p&gt;新东方高级教师、创建比特基金专注互联网、比特币的投资。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4</summary>
+        
+      
+    
+    
+    
+    <category term="读书" scheme="https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/"/>
+    
+    
+    <category term="读书笔记" scheme="https://sunskey.top/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
   
   <entry>
     <title>战国时期的第一个霸主-魏国</title>
@@ -46,7 +76,7 @@
     <link href="https://sunskey.top/booklist.html"/>
     <id>https://sunskey.top/booklist.html</id>
     <published>2020-12-28T06:55:36.000Z</published>
-    <updated>2020-12-28T08:38:05.138Z</updated>
+    <updated>2021-01-10T14:57:07.150Z</updated>
     
     
       
@@ -59,10 +89,10 @@
     
     
     
-    <category term="书单" scheme="https://sunskey.top/categories/%E4%B9%A6%E5%8D%95/"/>
+    <category term="读书" scheme="https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/"/>
     
     
-    <category term="生活" scheme="https://sunskey.top/tags/%E7%94%9F%E6%B4%BB/"/>
+    <category term="书单" scheme="https://sunskey.top/tags/%E4%B9%A6%E5%8D%95/"/>
     
   </entry>
   
