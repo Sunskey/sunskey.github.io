@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-01-10T15:09:19.463Z</updated>
+  <updated>2021-01-15T09:39:30.497Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MySQL学习笔记01</title>
+    <link href="https://sunskey.top/mysql-learning-01.html"/>
+    <id>https://sunskey.top/mysql-learning-01.html</id>
+    <published>2021-01-15T09:27:14.000Z</published>
+    <updated>2021-01-15T09:39:30.497Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;mysql基础架构&quot;&gt;&lt;a href=&quot;#mysql基础架构&quot; class=&quot;headerlink&quot; title=&quot;mysql基础架构&quot;&gt;&lt;/a&gt;mysql基础架构&lt;/h3&gt;&lt;img</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
   
   <entry>
     <title>《做时间的朋友读书笔记》</title>

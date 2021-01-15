@@ -165,6 +165,191 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning-01.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning-01.html" class="post-title-link" itemprop="url">MySQL学习笔记01</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-15 17:27:14 / 修改时间：17:39:30" itemprop="dateCreated datePublished" datetime="2021-01-15T17:27:14+08:00">2021-01-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning-01.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning-01.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="mysql基础架构"><a href="#mysql基础架构" class="headerlink" title="mysql基础架构"></a>mysql基础架构</h3><img src="https://i.loli.net/2021/01/15/96nZGfYu8AJeyMk.png" style="zoom:50%;" />
+
+<p>链接器：连接器负责跟客户端建立连接、获取权限、维持和管理连接。</p>
+<p>长链接积累下来会导致内存占用太大，被系统强行杀掉，从而导致MySQL重启。</p>
+<p>解决方案：</p>
+<p>1.定期断开长链接。</p>
+<p>2.利用5.7版本以上mysql_reset_connection来重新初始化资源。这个过程不需要重连和重新做权限验证，但是会将连接恢复到刚刚创建完时的状态。</p>
+<p>查询缓存：之前的sql会以key-value 的形式存到内存中，根据语句直接返回结果。</p>
+<p>不建议使用，对表的更新会清空所有缓存。5.8版本中彻底清除了缓存功能。</p>
+<p>分析器：进行sql语句的词法分析和语法分析。</p>
+<p>优化器：执行计划生成， 确定索引。</p>
+<p>执行器：判断有无权限，根据引擎提供的接口，具体去操控存储引擎。</p>
+<h3 id="日志redo-log和binlog"><a href="#日志redo-log和binlog" class="headerlink" title="日志redo log和binlog"></a>日志redo log和binlog</h3><p>redo log:采用的是WAL(Write-Ahead Logging)技术，InnoDB会先把记录写入到redo log里面，并更新内存，I</p>
+<p>nnoDB会在适当的时候更新到磁盘里面。InnoDB 的 redo log 是固定大小的，从头开始写，写到末尾就又回到开头循环写，如下面这个图所示。</p>
+<img src="https://i.loli.net/2021/01/15/khAlLBG49Uzb1Ss.png" style="zoom:50%;" />
+
+<p>当write pos追check point是，就代表着要更新进磁盘，然后把checkout point 往前推进。有了redo log，即使是发生崩溃或者重启，数据也不会丢失，这个能力为称为crash-safe。InnoDB 引擎特有的日志。</p>
+<p>Binlog:Server层特有的操作日志，称为bingo（归档日志）。binlog没有crash-safe 能力。</p>
+<p>两种日志的区别：</p>
+<p>1.bin log是server层的日志，而redo log是属于InnoDB特有的。</p>
+<p>2.redo是物理日志，记录的做的什么修改。而binlog是逻辑日志，记录语句的原始逻辑。</p>
+<p>3.redo log是循环写，而bin log是追加写，不会覆盖。</p>
+<p>update 流程顺序</p>
+<img src="https://i.loli.net/2021/01/15/NRSnYqxbfC9V1Gv.png" style="zoom:50%;" />
+
+
+
+<p>两阶段提交：为了让redo log和bin log日志具有一致性。</p>
+<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p>事务就是要保证一组数据库操作，要么全部成功，要么全部失败。具有ACID特性</p>
+<p>A：原子性</p>
+<p>C：一致性</p>
+<p>I：隔离性</p>
+<p>D: 持久性</p>
+<p>事务隔离级别</p>
+<p>1.读未提交：指一个事务能读到另一个事务还未提交的数据。</p>
+<p>2.读己提交：一个事务提交后，它做的变更在能被其他事务看见。</p>
+<p>3.可重复读：一个事务在执行过程中，总跟启动时看到的数据是一致的。</p>
+<p>4.串行话：对同一条记录会加锁，当出现锁冲突的时候，必须等待前一个事务执行完成。</p>
+<p>事务的启动方式：</p>
+<p>1.显示启动，begin或者start tranction。配套提交commit，回滚语句rollback。</p>
+<p>2.set autocommit = 0 ,执行语句的时候自动开启，直到主动commit或者rollback。</p>
+<p>执行 commit work and chain，则是提交事务并自动启动下一个事务。</p>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>索引的作用：索引就是为了提交数据的查询效率，就像是书的目录。</p>
+<p>索引的结构：</p>
+<p>哈希表：只用于等值查询的场景。</p>
+<p>有序数组：适用于等值查询和范围查询的场景，插入和删除成本过高，适用于静态存储。</p>
+<p>N叉树：比较均衡，插入和查询的效率为logN。</p>
+<p>主键索引：存储整行数据。在InnoDB中，也为称为聚簇索引。</p>
+<p>非主键索引：存储主键索引的值。在InnoDB中，也为称为非聚簇索引。</p>
+<p>覆盖索引：覆盖索引可以减少树的搜索次数，显著提升查询性能。</p>
+<h3 id="MySQL锁"><a href="#MySQL锁" class="headerlink" title="MySQL锁"></a>MySQL锁</h3><p>全局锁：对整个数据库实例加锁。提供了全局读锁的方法，命令是Flush tables with read lock。</p>
+<p>加锁后，整个数据处于只读操作，任何线程的修改、事务等命令将被阻塞。</p>
+<p>使用场景：全库逻辑备份。</p>
+<p>为什么不使用set global readonly=true的方式</p>
+<p>1.readonly有时被用来执行判断逻辑，例如：主从库。</p>
+<p>2.readonly不会主动释放，会让整个库一直处于只读状态，风险较高。</p>
+<p>表级锁：表锁和元数据锁MDL（meta data lock）</p>
+<p>1.表锁的语法：lock tables … read/write。在链接断开的时候自动释放，也会限制别的线程和本线程的操作对象。</p>
+<p>2.MDL 不需要显示的使用，在访问一个表的时候自动加上。MDL的作用是保证读写的正确性。MDL是MySQL 5.5时引入，当对一个表进行增删改查的时候，会加MDL读锁。当对表的结构做变更的时候，加MDL写锁。</p>
+<p>读锁之间不互斥，读写锁，写锁之间互斥。</p>
+<p>如何安全的给小表加字段</p>
+<p>1.kill掉长事务，事务不提交，就会一直占着MDL锁。</p>
+<p>2.在alter table语句中设置等待时间</p>
+<p>对于全部是InnnoDB引擎的表，备份选择建议使用single-transaction参数。</p>
+<p>行锁：针对数据表中行记录的锁。</p>
+<p>InnoDB事务中，行锁是在需要的时候才加上的，但并不是不需要了就立即释放，而是要等到事务结束时才释放。</p>
+<p>死锁和死锁检测</p>
+<p>当并发系统中不同线程出现循环等待资源，涉及的线程都在等待别的线程释放资源，就会导致这几个线程都进入无限等待的情况，称为死锁。</p>
+<p>死锁实例</p>
+<img src="https://i.loli.net/2020/12/03/VGsXBvhdHlPwerQ.png" style="zoom:50%;" />
+
+<p>事务A和事务B会相互等待。</p>
+<p>死锁解决方案</p>
+<p>1.直接进入等待超时，可以设置innodb_lock_wait_timeout 来等待。</p>
+<p>2.发起死锁检测，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数innodb_deadlock_detect 设置为 on。死锁检测会耗费大量的cpu资源，每次都需要判断自己的加入是否导致了死锁。</p>
+<p>死锁检测的方法</p>
+<p>1.确保程序中一定不会出现死锁。</p>
+<p>2.控制并发度。</p>
+<p>begin和start transaction 命令并不是一个事务的起点，在执行到它们第一个操作InnoDB表的语句，事务才真正启动。如果想立马开启事务，可以使用start transaction with consistent snapshot。</p>
+<p>MVCC的实现原理</p>
+<p>每次数据更新的时候，会生成一个新的数据版本，并且把transaction id 赋值给这个数据版本的事务ID，记为row_trx_id。</p>
+<img src="https://i.loli.net/2021/01/15/6I4KdnDWZVa9jeR.png" style="zoom:50%;" />
+
+<p>对于当前事务的启动瞬间来说，一个数据的row trx_id，有以下几种可能。</p>
+<p>1.如果落在了绿色部分，表示这个版本是已经提交的事务或者是当前事务自己生成的，这个数据是可见的。</p>
+<p>2.如果落在了红色部分，则表示这个版本是将来启动的事务生成的，是肯定不可见的。</p>
+<p>3.如果落在黄色部分，包括两种情况：</p>
+<p> a.若 row trx_id 在数组中，表示这个版本是由未提交的事务生成的，不可见；</p>
+<p> b.若row trx_id 不再数组中，表示这个版本是已经提交了的事务生成的，可见；</p>
+<p>InnoDB利用了“所有数据都有多个版本”的这个特性，实现了“秒级创建快照”能力。</p>
+<p>一个数据版本，对于一个事务视图，除了自己的更新总是可见以外，有三种情况：</p>
+<p>1.版本未提交，不可见；</p>
+<p>2.版本已提交，但是是在视图创建后提交的，不可见；</p>
+<p>3.版本已提交，而且是在视图创建前提交的，可见。</p>
+<p>更新数据都是先读后写的，而这个读，只能是当前版本的值，成为当前读。</p>
+<p>除了 update 语句外，select 语句如果加锁，也是当前读。</p>
+<p>加入读锁（S锁，共享锁）：select k from t where id=1 lock in share mode;</p>
+<p>加入写锁（X锁，拍他锁）：select k from t where id=1 for update;</p>
+<p>事务的可重复读怎么实现的？</p>
+<p>可重复读的核心就是一致性读；而事务更新数据的时候，只能用当前读。如果当前的记录的行锁被其他事务占用的话，就需要进入锁等待。</p>
+<p>读已提交和可重复读的逻辑类似，主要的区别是：</p>
+<p>1.可重复读的隔离级别下，只需要在事务开的时候创建一致性视图，之后事务里的其他查询都公用这个一致性视图。</p>
+<p>2.在读提交隔离级别下，每一个语句执行前都会重新计算出一个新的视图。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/learn-note01.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -733,7 +918,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -746,7 +931,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
