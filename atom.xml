@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-01-15T09:39:30.497Z</updated>
+  <updated>2021-01-17T15:10:33.401Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Redis学习笔记01</title>
+    <link href="https://sunskey.top/learn-redis01.html"/>
+    <id>https://sunskey.top/learn-redis01.html</id>
+    <published>2021-01-17T15:08:58.000Z</published>
+    <updated>2021-01-17T15:10:33.401Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;Redis-key的淘汰策略&quot;&gt;&lt;a href=&quot;#Redis-key的淘汰策略&quot; class=&quot;headerlink&quot; title=&quot;Redis key的淘汰策略&quot;&gt;&lt;/a&gt;Redis key的淘汰策略&lt;/h3&gt;&lt;h4 id=&quot;过期策略&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="Redis" scheme="https://sunskey.top/tags/Redis/"/>
+    
+  </entry>
   
   <entry>
     <title>MySQL学习笔记01</title>

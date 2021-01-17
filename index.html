@@ -165,6 +165,133 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/learn-redis01.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/learn-redis01.html" class="post-title-link" itemprop="url">Redis学习笔记01</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-17 23:08:58 / 修改时间：23:10:33" itemprop="dateCreated datePublished" datetime="2021-01-17T23:08:58+08:00">2021-01-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/learn-redis01.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/learn-redis01.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="Redis-key的淘汰策略"><a href="#Redis-key的淘汰策略" class="headerlink" title="Redis key的淘汰策略"></a>Redis key的淘汰策略</h3><h4 id="过期策略"><a href="#过期策略" class="headerlink" title="过期策略"></a>过期策略</h4><h5 id="定时删除"><a href="#定时删除" class="headerlink" title="定时删除"></a>定时删除</h5><p>在设置某个key 的过期时间的同时，创建一个定时器，让定时器在该过期时间到来时，立即执行对其进行删除的操作。</p>
+<h5 id="定期删除"><a href="#定期删除" class="headerlink" title="定期删除"></a>定期删除</h5><p>每隔一段时间，我们就对一些key进行检查，删除里面过期的key。</p>
+<h5 id="惰性删除"><a href="#惰性删除" class="headerlink" title="惰性删除"></a>惰性删除</h5><p>在客户端访问这个key的时候，redis对key的过期时间进行检查，如果过期了就立即删除，不会返回东西。会导致很多过期的key仍然存在内存中。</p>
+<p>Redis就是使用<strong>惰性删除</strong>和<strong>定期删除</strong>两种策略配合使用。</p>
+<h5 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h5><p><strong>惰性删除</strong>：Redis的惰性删除策略由 db.c/expireIfNeeded 函数实现.</p>
+<p><strong>定期删除</strong>：由redis.c/activeExpireCycle 函数实现，函数以一定的频率运行，每次运行时，都从一定数量的数据库中取出一定数量的随机键进行检查，并删除其中的过期键(默认没100ms一次)。</p>
+<h4 id="内存的淘汰策略"><a href="#内存的淘汰策略" class="headerlink" title="内存的淘汰策略"></a>内存的淘汰策略</h4><p>默认无限制，通常设置为物理内存的3/4。</p>
+<p>当现有内存大于maxmemory时，便会触发redis主动淘汰内存方式，通过设置maxmemory-policy，有如下几种淘汰方式。</p>
+<ul>
+<li>volatile-lru：利用LRU算法移除设置过过期时间的key</li>
+<li>allkeys-lru: 利用LRU算法移除任何key。<strong>通常使用该方式</strong>。</li>
+<li>volatile-random : 移除设置过过期时间的随机key。</li>
+<li>allkeys-random: 无差别的随机移除。</li>
+<li>volatile-ttl：移除即将过期的key</li>
+<li>noeviction: 不移除任何key，只是返回一个写错误，<strong>默认选项</strong>，一般不会选用。</li>
+</ul>
+<h3 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h3><p>为了避免内存中的数据丢失，Redis提供了对持久化的支持，可以选择不同的方式保存到磁盘中。</p>
+<h4 id="RDB-Redis-Database"><a href="#RDB-Redis-Database" class="headerlink" title="RDB(Redis Database)"></a><strong>RDB</strong>(Redis Database)</h4><p>在指定的时间间隔内将内存中的数据集快照写入磁盘，也就是Snapshot快照，恢复时将快照文件直接读入内存。</p>
+<h5 id="Snapshot的两种模式"><a href="#Snapshot的两种模式" class="headerlink" title="Snapshot的两种模式"></a>Snapshot的两种模式</h5><p>1.SAVE: save只管保存，其他的不管，全部阻塞。</p>
+<p>2.BGSAVE: Redis会在异步后台(fork子进程)进行快照操作，主进程仍然可以响应客户端的请求，保存完成后通知主进程，可以通过lastsave命令获取最后一次成功执行快照的时间。</p>
+<h5 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h5><ul>
+<li>适合大规模的数据恢复</li>
+<li>对数据完整性和一致性要求不高</li>
+<li>与AOF模式相比，通过RDB文件恢复数据比较快</li>
+<li>通过fork进程的方式备份，对Redis服务器的性能影响较小。</li>
+</ul>
+<h5 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h5><ul>
+<li>每隔一段时间备份，会丢失最后一次快照后的数据</li>
+<li>Fork的时候，内存消耗大，会占用2倍的内存</li>
+<li>使用save时会造成Redis服务器阻塞，导致不可用。</li>
+<li>使用bgsave fork子进程时，如果数据量太大，forks的过程也会发生阻塞另外比较费内存。</li>
+</ul>
+<h4 id="AOF（Append-Only-File）"><a href="#AOF（Append-Only-File）" class="headerlink" title="AOF（Append-Only-File）"></a><strong>AOF</strong>（Append-Only-File）</h4><p>以日志的形式来记录每个写操作，将Redis执行过的所有写指令。只许追加但不可以改写文件。redis载入AOF文件的时候，会创建一个虚拟的client，把AOF中每一条命令都执行一遍。在RDB和AOF备份文件都有的情况下，redis会优先执行AOF中的文件。</p>
+<h5 id="AOF备份的三种策略"><a href="#AOF备份的三种策略" class="headerlink" title="AOF备份的三种策略"></a>AOF备份的三种策略</h5><ul>
+<li>always:将缓存区的内容总是及时写到AOF文件中。</li>
+<li>everysec: 将缓存区的内容每隔一秒写入AOF文件中(默认策略)。</li>
+<li>no: 写入AOF文件中的操作由操作系统决定，一般系统会等到缓存区被填满，才会同步数据到磁盘。</li>
+</ul>
+<h5 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h5><p>为了解决AOF文件膨胀的问题，Redis提供AOF重写功能：Redis服务器可以创建一个新的AOF文件来替换旧文件，Redis保证新旧两个文件所保存的数据库状态一样。</p>
+<p>AOF_REWRITE这个函数会保证服务器的高性能，会Fork子进程进而执行AOF重写程序，同时，为了保障主进程和AOF文件数据不一致的问题。Redis增加了 一个AOF缓存区，等子进程完成后 ，会将AOF缓存区中的内容写入到新的AOF文件中。</p>
+<p>默认重写出发机制时上次rewrite后大小的一倍并且文件大于64MB。</p>
+<h5 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h5><p>1.AOF只是追加文件，对服务器的影响小。</p>
+<p>2.可以采用不同的策略，在数据的完整性和性能之间做出平衡性。</p>
+<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><p>1.一般AOF文件要大于RDB文件恢复数据的速度比RDB慢</p>
+<p>2.aof运行效率慢于rdb，同步策略效率较好，不同步效率与rdb相同。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning-01.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -918,7 +1045,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -931,7 +1058,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
