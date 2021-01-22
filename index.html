@@ -165,6 +165,151 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html" class="post-title-link" itemprop="url">“Java性能调优与测试”</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 13:24:58 / 修改时间：13:26:13" itemprop="dateCreated datePublished" datetime="2021-01-22T13:24:58+08:00">2021-01-22</time>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="后台服务出现明显“变慢”"><a href="#后台服务出现明显“变慢”" class="headerlink" title="后台服务出现明显“变慢”"></a>后台服务出现明显“变慢”</h4><h5 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h5><p>1.检查应用本身的错误日志。</p>
+<p>2.可以检查系统级别的资源占用情况，例如CPU、内存是否被其他进程大量占用。</p>
+<p>3.监控Java 服务自身，例如GC 日志里面是否观察到FULL GC等恶劣情况，或者其他进程大量占用，并且这种占用是否不符合系统的正常运行情况。</p>
+<p>4.如果不能定位具体问题，对应用进行Profing也是个办法，但会影响系统的响应速度。</p>
+<p>5.定位错误后，采取相应的不久措施。</p>
+<h5 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h5><p>1.自上而下。从应用的顶层，逐步深入到具体的不同模块。</p>
+<p>2.自下而上。从类似CPU这种硬件底层，判断Cache-Miss之类的问题和调优机会，出发点是指令级别优化。</p>
+<p>自上而下(单机应用)</p>
+<p>系统性能分析中，<strong>CPU、内存和IO</strong>是主要关注项。</p>
+<p>CPU排查</p>
+<p>查看负载有没有明显的变化，利用top和jstack 找出最耗费CPU的线程。利用vmstat，查看上下文切换的数量，</p>
+<p>如果每秒上下文切换很高，并且比系统中断高很多，就表明有可能是因为不合理的多线程调度导致的。</p>
+<p>内存排查</p>
+<p>利用free 之类查看内存使用，进一步判断swap使用情况，top命令输出中Virt作为虚拟内存使用量，就是物理内存（Res）和swap 求和。</p>
+<p>IO排查</p>
+<p>利用iostat等命令判断磁盘的健康情况。</p>
+<p><img src="https://i.loli.net/2021/01/22/rGQo2IV57uCEq9l.png"></p>
+<p>JVM 层面的性能分析</p>
+<p>1.利用JMC、JConsole等工具进行运行时监控。</p>
+<p>2.利用各种工具，在运行时进行堆转存储分析，获取各种角度的统计数据。</p>
+<p>3.GC 日志等手段，诊断 Full GC 、Minor GC、或者引用堆积。</p>
+<p>4.应用Profiling，来实现从Hotspot JVM内部收集底层信息，通常会有2%左右的损耗。</p>
+<h4 id="Lambda让程序“慢30倍”？"><a href="#Lambda让程序“慢30倍”？" class="headerlink" title="Lambda让程序“慢30倍”？"></a>Lambda让程序“慢30倍”？</h4><p>一般来说，可以认为Lambda/Stream 提供了与传统方式接近对等的性能。主要的开销：初始化的开销。</p>
+<p>Lambda并不是语法糖，而是一种新的工作机制。在首次调用时，JVM需要为其构建。如果 Java 应用启动过程中引入很多Lambda语句，会导致启动过程变慢。</p>
+<p>通过引入基准测试，可以定义性能对比的明确条件、具体的指标，进而保证得到<strong>定量的、可重复的</strong>对比数据，这是工程中的实际需要。 </p>
+<h5 id="微基准测试"><a href="#微基准测试" class="headerlink" title="微基准测试"></a>微基准测试</h5><p>当需要对一个大型软件的某小部分的性能评估时，就可以考虑微基准测试。</p>
+<p>微基准测试通常是API级别的验证，一般是偏基础、底层平台开发者的需求。（通常使用Benchmark）。</p>
+<h5 id="微基准框架"><a href="#微基准框架" class="headerlink" title="微基准框架"></a>微基准框架</h5><p>目前最为广泛的框架之一就是 JMH。如果做 Java API级别的性能对比，JMH往往是首选。</p>
+<h5 id="微基准框架测试过程的闭坑"><a href="#微基准框架测试过程的闭坑" class="headerlink" title="微基准框架测试过程的闭坑"></a>微基准框架测试过程的闭坑</h5><p>1.保证代码经过了足够并且合适的预热。JVM会对代码进行优化，JIT会一定条件下将代码编译本地代码。</p>
+<p>2.防止 JVM 进行无效代码消除，尽量保证方法有返回值，而不是void方法。</p>
+<p>3.防止发生常量折叠。JVM 如果发现计算过程依赖常量，就可能会直接计算结果。JMH提供了State机制来解决这个问题。</p>
+<p>4.避免GC 对程序的影响，可以采用 Serial GC 或者 JDK 11引入的Epsilon GC，从而排除相关的影响。</p>
+<h4 id="JVM优化代码"><a href="#JVM优化代码" class="headerlink" title="JVM优化代码"></a>JVM优化代码</h4><p>JVM 在对代码执行的优化可分为运行时优化(runtime)和即时编译器(JIT)优化。</p>
+<h5 id="运行时优化"><a href="#运行时优化" class="headerlink" title="运行时优化"></a>运行时优化</h5><p>主要是解释执行和动态编译通用的一些机制，比如锁机制、内存分配机制(如TLAB)等。还有一些专门用于优化解释执行效率的，比如说模版解释器、内联缓存等。</p>
+<h5 id="即时编译器优化"><a href="#即时编译器优化" class="headerlink" title="即时编译器优化"></a>即时编译器优化</h5><p>指将热点的代码以方法为单位转换成机器码，直接运行在底层硬件之上。比如静态编译器可以使用方法内联、逃逸分析以及基于profile的投机性优化。</p>
+<h5 id="Java优化的落地"><a href="#Java优化的落地" class="headerlink" title="Java优化的落地"></a>Java优化的落地</h5><img src="https://i.loli.net/2021/01/22/QWa2uXfHVqlw5YM.png" style="zoom:50%;" />
+
+<p>编译期：编译器或者相关API等奖源码转换为字节码的过程，可以直接利用反编译工具，查看细节。</p>
+<p>JVM运行时的优化：通常是编译器和解释器共同作用的结果。 </p>
+<img src="https://i.loli.net/2021/01/22/Rz1P83MLwnfyBli.png" style="zoom:67%;" />
+
+<p>解释器和编译器会进行一些通用的优化。例如锁优化和Intrinsic 机制。</p>
+<p>即时编译器：通过对方法调用的计数统计，甄别出热点代码，编译为本地点吗。另一个优化场景，则是针对热点循环代码，利用栈上替换技术。JIT可以看作基于两个计数器实现，方法计数器和回边计数器提供给JVM 统计数据，以定位到热点代码。</p>
+<h5 id="勘查优化"><a href="#勘查优化" class="headerlink" title="勘查优化"></a>勘查优化</h5><ul>
+<li>编译器查看</li>
+</ul>
+<p>-XX:+PrintCompilation 打印编译的细节</p>
+<p>XX:UnlockDiagnosticVMOptions -XX:+LogCompilation -XX:LogFile=  输出更多的编译细节</p>
+<p>-XX:+PrintInlining   打印内联的发生</p>
+<ul>
+<li>代码缓存</li>
+</ul>
+<p>可以利用 JMC、JConsole 等查看具体的统计信息。</p>
+<ul>
+<li>调整热点代码门限值</li>
+</ul>
+<p>利用CompileThreshold 调整JIT的默认门限，利用UseCounterDecay关闭计数器衰减。</p>
+<ul>
+<li>调整Code Cache 大小</li>
+</ul>
+<p>利用XX:ReservedCodeCacheSize调整Code Cache的大小，可以调整初始化大小-XX:InitialCodeCacheSize</p>
+<ul>
+<li>调整编译器线程数，或者选择适当的编译器模式</li>
+</ul>
+<p>client模式只会有一个编译线程。而server模式是默认两个，C1和C2，会根据CPU内核数目计算C1 和 C2 的数值。</p>
+<p>增强的多处理器中，增大编译线程数，可能会充分利用CPU资源，但是当系统繁忙时，反而会导致线程争抢过多资源。</p>
+<ul>
+<li>其他的优化</li>
+</ul>
+<p>减少进入安全点。</p>
+<p>在 JIT 过程中，逆优化等场景需要插入安全点。</p>
+<p>常规的锁优化解决。利用-XX:-UseBiasedLocking 关闭偏向锁。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/learn-redis01.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1045,7 +1190,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

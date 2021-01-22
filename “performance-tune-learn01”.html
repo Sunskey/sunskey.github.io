@@ -20,20 +20,24 @@
     var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Redis key的淘汰策略过期策略定时删除在设置某个key 的过期时间的同时，创建一个定时器，让定时器在该过期时间到来时，立即执行对其进行删除的操作。 定期删除每隔一段时间，我们就对一些key进行检查，删除里面过期的key。 惰性删除在客户端访问这个key的时候，redis对key的过期时间进行检查，如果过期了就立即删除，不会返回东西。会导致很多过期的key仍然存在内存中。 Redis就是使用惰">
+  <meta name="description" content="后台服务出现明显“变慢”具体步骤1.检查应用本身的错误日志。 2.可以检查系统级别的资源占用情况，例如CPU、内存是否被其他进程大量占用。 3.监控Java 服务自身，例如GC 日志里面是否观察到FULL GC等恶劣情况，或者其他进程大量占用，并且这种占用是否不符合系统的正常运行情况。 4.如果不能定位具体问题，对应用进行Profing也是个办法，但会影响系统的响应速度。 5.定位错误后，采取相应">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Redis学习笔记01">
-<meta property="og:url" content="https://sunskey.top/learn-redis01.html">
+<meta property="og:title" content="“Java性能调优与测试”">
+<meta property="og:url" content="https://sunskey.top/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html">
 <meta property="og:site_name" content="Sunskey">
-<meta property="og:description" content="Redis key的淘汰策略过期策略定时删除在设置某个key 的过期时间的同时，创建一个定时器，让定时器在该过期时间到来时，立即执行对其进行删除的操作。 定期删除每隔一段时间，我们就对一些key进行检查，删除里面过期的key。 惰性删除在客户端访问这个key的时候，redis对key的过期时间进行检查，如果过期了就立即删除，不会返回东西。会导致很多过期的key仍然存在内存中。 Redis就是使用惰">
+<meta property="og:description" content="后台服务出现明显“变慢”具体步骤1.检查应用本身的错误日志。 2.可以检查系统级别的资源占用情况，例如CPU、内存是否被其他进程大量占用。 3.监控Java 服务自身，例如GC 日志里面是否观察到FULL GC等恶劣情况，或者其他进程大量占用，并且这种占用是否不符合系统的正常运行情况。 4.如果不能定位具体问题，对应用进行Profing也是个办法，但会影响系统的响应速度。 5.定位错误后，采取相应">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-01-17T15:08:58.000Z">
-<meta property="article:modified_time" content="2021-01-17T15:10:33.401Z">
+<meta property="og:image" content="https://i.loli.net/2021/01/22/rGQo2IV57uCEq9l.png">
+<meta property="og:image" content="https://i.loli.net/2021/01/22/QWa2uXfHVqlw5YM.png">
+<meta property="og:image" content="https://i.loli.net/2021/01/22/Rz1P83MLwnfyBli.png">
+<meta property="article:published_time" content="2021-01-22T05:24:58.000Z">
+<meta property="article:modified_time" content="2021-01-22T05:26:13.796Z">
 <meta property="article:author" content="Sunskey">
-<meta property="article:tag" content="Redis">
+<meta property="article:tag" content="java, hexo, blog, next">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/01/22/rGQo2IV57uCEq9l.png">
 
-<link rel="canonical" href="https://sunskey.top/learn-redis01.html">
+<link rel="canonical" href="https://sunskey.top/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html">
 
 
 <script id="page-configurations">
@@ -46,7 +50,7 @@
   };
 </script>
 
-  <title>Redis学习笔记01 | Sunskey</title>
+  <title>“Java性能调优与测试” | Sunskey</title>
   
 
 
@@ -168,7 +172,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/learn-redis01.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -181,7 +185,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Redis学习笔记01
+          “Java性能调优与测试”
         </h1>
 
         <div class="post-meta">
@@ -192,16 +196,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-01-17 23:08:58 / 修改时间：23:10:33" itemprop="dateCreated datePublished" datetime="2021-01-17T23:08:58+08:00">2021-01-17</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
+              <time title="创建时间：2021-01-22 13:24:58 / 修改时间：13:26:13" itemprop="dateCreated datePublished" datetime="2021-01-22T13:24:58+08:00">2021-01-22</time>
             </span>
 
           
@@ -220,8 +215,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/learn-redis01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/learn-redis01.html" itemprop="commentCount"></span>
+    <a title="valine" href="/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -237,51 +232,78 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="Redis-key的淘汰策略"><a href="#Redis-key的淘汰策略" class="headerlink" title="Redis key的淘汰策略"></a>Redis key的淘汰策略</h3><h4 id="过期策略"><a href="#过期策略" class="headerlink" title="过期策略"></a>过期策略</h4><h5 id="定时删除"><a href="#定时删除" class="headerlink" title="定时删除"></a>定时删除</h5><p>在设置某个key 的过期时间的同时，创建一个定时器，让定时器在该过期时间到来时，立即执行对其进行删除的操作。</p>
-<h5 id="定期删除"><a href="#定期删除" class="headerlink" title="定期删除"></a>定期删除</h5><p>每隔一段时间，我们就对一些key进行检查，删除里面过期的key。</p>
-<h5 id="惰性删除"><a href="#惰性删除" class="headerlink" title="惰性删除"></a>惰性删除</h5><p>在客户端访问这个key的时候，redis对key的过期时间进行检查，如果过期了就立即删除，不会返回东西。会导致很多过期的key仍然存在内存中。</p>
-<p>Redis就是使用<strong>惰性删除</strong>和<strong>定期删除</strong>两种策略配合使用。</p>
-<h5 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h5><p><strong>惰性删除</strong>：Redis的惰性删除策略由 db.c/expireIfNeeded 函数实现.</p>
-<p><strong>定期删除</strong>：由redis.c/activeExpireCycle 函数实现，函数以一定的频率运行，每次运行时，都从一定数量的数据库中取出一定数量的随机键进行检查，并删除其中的过期键(默认没100ms一次)。</p>
-<h4 id="内存的淘汰策略"><a href="#内存的淘汰策略" class="headerlink" title="内存的淘汰策略"></a>内存的淘汰策略</h4><p>默认无限制，通常设置为物理内存的3/4。</p>
-<p>当现有内存大于maxmemory时，便会触发redis主动淘汰内存方式，通过设置maxmemory-policy，有如下几种淘汰方式。</p>
+        <h4 id="后台服务出现明显“变慢”"><a href="#后台服务出现明显“变慢”" class="headerlink" title="后台服务出现明显“变慢”"></a>后台服务出现明显“变慢”</h4><h5 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h5><p>1.检查应用本身的错误日志。</p>
+<p>2.可以检查系统级别的资源占用情况，例如CPU、内存是否被其他进程大量占用。</p>
+<p>3.监控Java 服务自身，例如GC 日志里面是否观察到FULL GC等恶劣情况，或者其他进程大量占用，并且这种占用是否不符合系统的正常运行情况。</p>
+<p>4.如果不能定位具体问题，对应用进行Profing也是个办法，但会影响系统的响应速度。</p>
+<p>5.定位错误后，采取相应的不久措施。</p>
+<h5 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h5><p>1.自上而下。从应用的顶层，逐步深入到具体的不同模块。</p>
+<p>2.自下而上。从类似CPU这种硬件底层，判断Cache-Miss之类的问题和调优机会，出发点是指令级别优化。</p>
+<p>自上而下(单机应用)</p>
+<p>系统性能分析中，<strong>CPU、内存和IO</strong>是主要关注项。</p>
+<p>CPU排查</p>
+<p>查看负载有没有明显的变化，利用top和jstack 找出最耗费CPU的线程。利用vmstat，查看上下文切换的数量，</p>
+<p>如果每秒上下文切换很高，并且比系统中断高很多，就表明有可能是因为不合理的多线程调度导致的。</p>
+<p>内存排查</p>
+<p>利用free 之类查看内存使用，进一步判断swap使用情况，top命令输出中Virt作为虚拟内存使用量，就是物理内存（Res）和swap 求和。</p>
+<p>IO排查</p>
+<p>利用iostat等命令判断磁盘的健康情况。</p>
+<p><img src="https://i.loli.net/2021/01/22/rGQo2IV57uCEq9l.png"></p>
+<p>JVM 层面的性能分析</p>
+<p>1.利用JMC、JConsole等工具进行运行时监控。</p>
+<p>2.利用各种工具，在运行时进行堆转存储分析，获取各种角度的统计数据。</p>
+<p>3.GC 日志等手段，诊断 Full GC 、Minor GC、或者引用堆积。</p>
+<p>4.应用Profiling，来实现从Hotspot JVM内部收集底层信息，通常会有2%左右的损耗。</p>
+<h4 id="Lambda让程序“慢30倍”？"><a href="#Lambda让程序“慢30倍”？" class="headerlink" title="Lambda让程序“慢30倍”？"></a>Lambda让程序“慢30倍”？</h4><p>一般来说，可以认为Lambda/Stream 提供了与传统方式接近对等的性能。主要的开销：初始化的开销。</p>
+<p>Lambda并不是语法糖，而是一种新的工作机制。在首次调用时，JVM需要为其构建。如果 Java 应用启动过程中引入很多Lambda语句，会导致启动过程变慢。</p>
+<p>通过引入基准测试，可以定义性能对比的明确条件、具体的指标，进而保证得到<strong>定量的、可重复的</strong>对比数据，这是工程中的实际需要。 </p>
+<h5 id="微基准测试"><a href="#微基准测试" class="headerlink" title="微基准测试"></a>微基准测试</h5><p>当需要对一个大型软件的某小部分的性能评估时，就可以考虑微基准测试。</p>
+<p>微基准测试通常是API级别的验证，一般是偏基础、底层平台开发者的需求。（通常使用Benchmark）。</p>
+<h5 id="微基准框架"><a href="#微基准框架" class="headerlink" title="微基准框架"></a>微基准框架</h5><p>目前最为广泛的框架之一就是 JMH。如果做 Java API级别的性能对比，JMH往往是首选。</p>
+<h5 id="微基准框架测试过程的闭坑"><a href="#微基准框架测试过程的闭坑" class="headerlink" title="微基准框架测试过程的闭坑"></a>微基准框架测试过程的闭坑</h5><p>1.保证代码经过了足够并且合适的预热。JVM会对代码进行优化，JIT会一定条件下将代码编译本地代码。</p>
+<p>2.防止 JVM 进行无效代码消除，尽量保证方法有返回值，而不是void方法。</p>
+<p>3.防止发生常量折叠。JVM 如果发现计算过程依赖常量，就可能会直接计算结果。JMH提供了State机制来解决这个问题。</p>
+<p>4.避免GC 对程序的影响，可以采用 Serial GC 或者 JDK 11引入的Epsilon GC，从而排除相关的影响。</p>
+<h4 id="JVM优化代码"><a href="#JVM优化代码" class="headerlink" title="JVM优化代码"></a>JVM优化代码</h4><p>JVM 在对代码执行的优化可分为运行时优化(runtime)和即时编译器(JIT)优化。</p>
+<h5 id="运行时优化"><a href="#运行时优化" class="headerlink" title="运行时优化"></a>运行时优化</h5><p>主要是解释执行和动态编译通用的一些机制，比如锁机制、内存分配机制(如TLAB)等。还有一些专门用于优化解释执行效率的，比如说模版解释器、内联缓存等。</p>
+<h5 id="即时编译器优化"><a href="#即时编译器优化" class="headerlink" title="即时编译器优化"></a>即时编译器优化</h5><p>指将热点的代码以方法为单位转换成机器码，直接运行在底层硬件之上。比如静态编译器可以使用方法内联、逃逸分析以及基于profile的投机性优化。</p>
+<h5 id="Java优化的落地"><a href="#Java优化的落地" class="headerlink" title="Java优化的落地"></a>Java优化的落地</h5><img src="https://i.loli.net/2021/01/22/QWa2uXfHVqlw5YM.png" style="zoom:50%;" />
+
+<p>编译期：编译器或者相关API等奖源码转换为字节码的过程，可以直接利用反编译工具，查看细节。</p>
+<p>JVM运行时的优化：通常是编译器和解释器共同作用的结果。 </p>
+<img src="https://i.loli.net/2021/01/22/Rz1P83MLwnfyBli.png" style="zoom:67%;" />
+
+<p>解释器和编译器会进行一些通用的优化。例如锁优化和Intrinsic 机制。</p>
+<p>即时编译器：通过对方法调用的计数统计，甄别出热点代码，编译为本地点吗。另一个优化场景，则是针对热点循环代码，利用栈上替换技术。JIT可以看作基于两个计数器实现，方法计数器和回边计数器提供给JVM 统计数据，以定位到热点代码。</p>
+<h5 id="勘查优化"><a href="#勘查优化" class="headerlink" title="勘查优化"></a>勘查优化</h5><ul>
+<li>编译器查看</li>
+</ul>
+<p>-XX:+PrintCompilation 打印编译的细节</p>
+<p>XX:UnlockDiagnosticVMOptions -XX:+LogCompilation -XX:LogFile=  输出更多的编译细节</p>
+<p>-XX:+PrintInlining   打印内联的发生</p>
 <ul>
-<li>volatile-lru：利用LRU算法移除设置过过期时间的key</li>
-<li>allkeys-lru: 利用LRU算法移除任何key。<strong>通常使用该方式</strong>。</li>
-<li>volatile-random : 移除设置过过期时间的随机key。</li>
-<li>allkeys-random: 无差别的随机移除。</li>
-<li>volatile-ttl：移除即将过期的key</li>
-<li>noeviction: 不移除任何key，只是返回一个写错误，<strong>默认选项</strong>，一般不会选用。</li>
+<li>代码缓存</li>
 </ul>
-<h3 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h3><p>为了避免内存中的数据丢失，Redis提供了对持久化的支持，可以选择不同的方式保存到磁盘中。</p>
-<h4 id="RDB-Redis-Database"><a href="#RDB-Redis-Database" class="headerlink" title="RDB(Redis Database)"></a><strong>RDB</strong>(Redis Database)</h4><p>在指定的时间间隔内将内存中的数据集快照写入磁盘，也就是Snapshot快照，恢复时将快照文件直接读入内存。</p>
-<h5 id="Snapshot的两种模式"><a href="#Snapshot的两种模式" class="headerlink" title="Snapshot的两种模式"></a>Snapshot的两种模式</h5><p>1.SAVE: save只管保存，其他的不管，全部阻塞。</p>
-<p>2.BGSAVE: Redis会在异步后台(fork子进程)进行快照操作，主进程仍然可以响应客户端的请求，保存完成后通知主进程，可以通过lastsave命令获取最后一次成功执行快照的时间。</p>
-<h5 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h5><ul>
-<li>适合大规模的数据恢复</li>
-<li>对数据完整性和一致性要求不高</li>
-<li>与AOF模式相比，通过RDB文件恢复数据比较快</li>
-<li>通过fork进程的方式备份，对Redis服务器的性能影响较小。</li>
+<p>可以利用 JMC、JConsole 等查看具体的统计信息。</p>
+<ul>
+<li>调整热点代码门限值</li>
 </ul>
-<h5 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h5><ul>
-<li>每隔一段时间备份，会丢失最后一次快照后的数据</li>
-<li>Fork的时候，内存消耗大，会占用2倍的内存</li>
-<li>使用save时会造成Redis服务器阻塞，导致不可用。</li>
-<li>使用bgsave fork子进程时，如果数据量太大，forks的过程也会发生阻塞另外比较费内存。</li>
+<p>利用CompileThreshold 调整JIT的默认门限，利用UseCounterDecay关闭计数器衰减。</p>
+<ul>
+<li>调整Code Cache 大小</li>
 </ul>
-<h4 id="AOF（Append-Only-File）"><a href="#AOF（Append-Only-File）" class="headerlink" title="AOF（Append-Only-File）"></a><strong>AOF</strong>（Append-Only-File）</h4><p>以日志的形式来记录每个写操作，将Redis执行过的所有写指令。只许追加但不可以改写文件。redis载入AOF文件的时候，会创建一个虚拟的client，把AOF中每一条命令都执行一遍。在RDB和AOF备份文件都有的情况下，redis会优先执行AOF中的文件。</p>
-<h5 id="AOF备份的三种策略"><a href="#AOF备份的三种策略" class="headerlink" title="AOF备份的三种策略"></a>AOF备份的三种策略</h5><ul>
-<li>always:将缓存区的内容总是及时写到AOF文件中。</li>
-<li>everysec: 将缓存区的内容每隔一秒写入AOF文件中(默认策略)。</li>
-<li>no: 写入AOF文件中的操作由操作系统决定，一般系统会等到缓存区被填满，才会同步数据到磁盘。</li>
+<p>利用XX:ReservedCodeCacheSize调整Code Cache的大小，可以调整初始化大小-XX:InitialCodeCacheSize</p>
+<ul>
+<li>调整编译器线程数，或者选择适当的编译器模式</li>
 </ul>
-<h5 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h5><p>为了解决AOF文件膨胀的问题，Redis提供AOF重写功能：Redis服务器可以创建一个新的AOF文件来替换旧文件，Redis保证新旧两个文件所保存的数据库状态一样。</p>
-<p>AOF_REWRITE这个函数会保证服务器的高性能，会Fork子进程进而执行AOF重写程序，同时，为了保障主进程和AOF文件数据不一致的问题。Redis增加了 一个AOF缓存区，等子进程完成后 ，会将AOF缓存区中的内容写入到新的AOF文件中。</p>
-<p>默认重写出发机制时上次rewrite后大小的一倍并且文件大于64MB。</p>
-<h5 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h5><p>1.AOF只是追加文件，对服务器的影响小。</p>
-<p>2.可以采用不同的策略，在数据的完整性和性能之间做出平衡性。</p>
-<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><p>1.一般AOF文件要大于RDB文件恢复数据的速度比RDB慢</p>
-<p>2.aof运行效率慢于rdb，同步策略效率较好，不同步效率与rdb相同。</p>
+<p>client模式只会有一个编译线程。而server模式是默认两个，C1和C2，会根据CPU内核数目计算C1 和 C2 的数值。</p>
+<p>增强的多处理器中，增大编译线程数，可能会充分利用CPU资源，但是当系统繁忙时，反而会导致线程争抢过多资源。</p>
+<ul>
+<li>其他的优化</li>
+</ul>
+<p>减少进入安全点。</p>
+<p>在 JIT 过程中，逆优化等场景需要插入安全点。</p>
+<p>常规的锁优化解决。利用-XX:-UseBiasedLocking 关闭偏向锁。</p>
 
     </div>
 
@@ -290,9 +312,6 @@
     
 
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Redis/" rel="tag"># Redis</a>
-          </div>
 
         
 
@@ -300,13 +319,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/mysql-learning-01.html" rel="prev" title="MySQL学习笔记01">
-      <i class="fa fa-chevron-left"></i> MySQL学习笔记01
+    <a href="/learn-redis01.html" rel="prev" title="Redis学习笔记01">
+      <i class="fa fa-chevron-left"></i> Redis学习笔记01
     </a></div>
-      <div class="post-nav-item">
-    <a href="/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html" rel="next" title="“Java性能调优与测试”">
-      “Java性能调优与测试” <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -366,7 +382,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-key%E7%9A%84%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="nav-number">1.</span> <span class="nav-text">Redis key的淘汰策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E6%9C%9F%E7%AD%96%E7%95%A5"><span class="nav-number">1.1.</span> <span class="nav-text">过期策略</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9A%E6%97%B6%E5%88%A0%E9%99%A4"><span class="nav-number">1.1.1.</span> <span class="nav-text">定时删除</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9A%E6%9C%9F%E5%88%A0%E9%99%A4"><span class="nav-number">1.1.2.</span> <span class="nav-text">定期删除</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%83%B0%E6%80%A7%E5%88%A0%E9%99%A4"><span class="nav-number">1.1.3.</span> <span class="nav-text">惰性删除</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.1.4.</span> <span class="nav-text">实现方式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%9A%84%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="nav-number">1.2.</span> <span class="nav-text">内存的淘汰策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">Redis持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RDB-Redis-Database"><span class="nav-number">2.1.</span> <span class="nav-text">RDB(Redis Database)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Snapshot%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.1.1.</span> <span class="nav-text">Snapshot的两种模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E5%8A%BF"><span class="nav-number">2.1.2.</span> <span class="nav-text">优势</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A3%E5%8A%BF"><span class="nav-number">2.1.3.</span> <span class="nav-text">劣势</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF%EF%BC%88Append-Only-File%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">AOF（Append-Only-File）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF%E5%A4%87%E4%BB%BD%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AD%96%E7%95%A5"><span class="nav-number">2.2.1.</span> <span class="nav-text">AOF备份的三种策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF%E9%87%8D%E5%86%99"><span class="nav-number">2.2.2.</span> <span class="nav-text">AOF重写</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">2.2.3.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">2.2.4.</span> <span class="nav-text">缺点</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8E%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%87%BA%E7%8E%B0%E6%98%8E%E6%98%BE%E2%80%9C%E5%8F%98%E6%85%A2%E2%80%9D"><span class="nav-number">1.</span> <span class="nav-text">后台服务出现明显“变慢”</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.1.</span> <span class="nav-text">具体步骤</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">性能分析</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda%E8%AE%A9%E7%A8%8B%E5%BA%8F%E2%80%9C%E6%85%A230%E5%80%8D%E2%80%9D%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">Lambda让程序“慢30倍”？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95"><span class="nav-number">2.1.</span> <span class="nav-text">微基准测试</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E5%9F%BA%E5%87%86%E6%A1%86%E6%9E%B6"><span class="nav-number">2.2.</span> <span class="nav-text">微基准框架</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E5%9F%BA%E5%87%86%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B%E7%9A%84%E9%97%AD%E5%9D%91"><span class="nav-number">2.3.</span> <span class="nav-text">微基准框架测试过程的闭坑</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">JVM优化代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E4%BC%98%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">运行时优化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A8%E4%BC%98%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text">即时编译器优化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Java%E4%BC%98%E5%8C%96%E7%9A%84%E8%90%BD%E5%9C%B0"><span class="nav-number">3.3.</span> <span class="nav-text">Java优化的落地</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8B%98%E6%9F%A5%E4%BC%98%E5%8C%96"><span class="nav-number">3.4.</span> <span class="nav-text">勘查优化</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
