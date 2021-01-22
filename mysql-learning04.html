@@ -20,18 +20,20 @@
     var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="做时间的朋友">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Sunskey">
-<meta property="og:url" content="https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/index.html">
+  <meta name="description" content="count(*)很“慢”？实现方式1.MyISAM引擎把一个表的总行数存在磁盘上，执行count(*)的时候会直接返回这个数。 2.InnoDB时，则需要一行一行的从引擎里面读出来，然后累计计数。 对于count(*)这样的操作，MySQL优化器会找到最小的那棵树来遍历。再保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。 show table status命令是采用采样">
+<meta property="og:type" content="article">
+<meta property="og:title" content="count(*)很“慢”？">
+<meta property="og:url" content="https://sunskey.top/mysql-learning04.html">
 <meta property="og:site_name" content="Sunskey">
-<meta property="og:description" content="做时间的朋友">
+<meta property="og:description" content="count(*)很“慢”？实现方式1.MyISAM引擎把一个表的总行数存在磁盘上，执行count(*)的时候会直接返回这个数。 2.InnoDB时，则需要一行一行的从引擎里面读出来，然后累计计数。 对于count(*)这样的操作，MySQL优化器会找到最小的那棵树来遍历。再保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。 show table status命令是采用采样">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-22T11:35:58.000Z">
+<meta property="article:modified_time" content="2021-01-22T11:40:47.066Z">
 <meta property="article:author" content="Sunskey">
-<meta property="article:tag" content="java, hexo, blog, next">
+<meta property="article:tag" content="MySQL - 学习笔记">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/">
+<link rel="canonical" href="https://sunskey.top/mysql-learning04.html">
 
 
 <script id="page-configurations">
@@ -39,12 +41,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>分类: 读书 | Sunskey</title>
+  <title>count(*)很“慢”？ | Sunskey</title>
   
 
 
@@ -159,80 +161,134 @@
         <div class="content-wrap">
           
 
-          <div class="content category">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning04.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          count(*)很“慢”？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 19:35:58 / 修改时间：19:40:47" itemprop="dateCreated datePublished" datetime="2021-01-22T19:35:58+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">读书
-          <small>分类</small>
-        </h2>
-      </div>
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning04.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning04.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+        <h3 id="count-很“慢”？"><a href="#count-很“慢”？" class="headerlink" title="count(*)很“慢”？"></a>count(*)很“慢”？</h3><h4 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h4><p>1.MyISAM引擎把一个表的总行数存在磁盘上，执行count(*)的时候会直接返回这个数。</p>
+<p>2.InnoDB时，则需要一行一行的从引擎里面读出来，然后累计计数。</p>
+<p>对于count(*)这样的操作，MySQL优化器会找到最小的那棵树来遍历。再保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。</p>
+<p>show table status命令是采用采样估计来估算的，不能直接使用。</p>
+<h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>1.通过缓存保存计数。</p>
+<p>将计数保存在缓存系统中的方式，还不只是丢失更新的问题。即使Redis 正常工作，这个值还是逻辑上不精确的。</p>
+<p>2.在数据库保存计数</p>
+<p>由于事务的可见性，可保证逻辑上的数据的一致性。</p>
+<h4 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h4><p>count()函数的参数不是NULL，累计值就加1，否则不加。最后返回累计值。</p>
+<p>count(*)，count(主键)，count(1)，count(字段)的区别</p>
+<p>count(主键id)，遍历每一行把每一行的id值取出来，返回给id层，server层拿到id后，判断不为空，则按行累加。</p>
+<p>count(1),server层对于返回的每一行，放一个数字“1”进去，按行累加。</p>
+<p>count(字段)：一行一行的从记录里面读取字段</p>
+<p>1.定义为not null的话，一行行的从记录里面读出这个字段，判断不能为null，按行累加。</p>
+<p>2.定义为允许null，那么执行的时候，判断到有可能是null，还要把值取出来判断一下，不是null才累加。</p>
+<p>count(*),并不会把全部字段取出来，而是专门做了优化，不取值。</p>
+<p>按照效率排序的话：count(字段)&lt;count(主键 id)&lt;count(1)≈count(*)。</p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-10T22:55:59+08:00"
-              content="2021-01-10">
-          01-10
-        </time>
-      </div>
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># MySQL - 学习笔记</a>
+          </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/learn-note01.html" itemprop="url">
-            <span itemprop="name">《做时间的朋友读书笔记》</span>
-          </a>
-      </div>
+        
 
-    </header>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/mysql-learning03.html" rel="prev" title="SQL语句为什么变“慢”">
+      <i class="fa fa-chevron-left"></i> SQL语句为什么变“慢”
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
   </article>
-    <div class="collection-year">
-      <span class="collection-header">2020</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-12-28T14:55:36+08:00"
-              content="2020-12-28">
-          12-28
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/booklist.html" itemprop="url">
-            <span itemprop="name">2021年书单</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-    </div>
-  </div>
   
   
-  
-
   
 
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -279,6 +335,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#count-%E5%BE%88%E2%80%9C%E6%85%A2%E2%80%9D%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">count(*)很“慢”？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.1.</span> <span class="nav-text">实现方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">解决办法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%8Ccount%E7%9A%84%E7%94%A8%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">不同count的用法</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

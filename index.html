@@ -165,6 +165,325 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning04.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning04.html" class="post-title-link" itemprop="url">count(*)很“慢”？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 19:35:58 / 修改时间：19:40:47" itemprop="dateCreated datePublished" datetime="2021-01-22T19:35:58+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning04.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning04.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="count-很“慢”？"><a href="#count-很“慢”？" class="headerlink" title="count(*)很“慢”？"></a>count(*)很“慢”？</h3><h4 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h4><p>1.MyISAM引擎把一个表的总行数存在磁盘上，执行count(*)的时候会直接返回这个数。</p>
+<p>2.InnoDB时，则需要一行一行的从引擎里面读出来，然后累计计数。</p>
+<p>对于count(*)这样的操作，MySQL优化器会找到最小的那棵树来遍历。再保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。</p>
+<p>show table status命令是采用采样估计来估算的，不能直接使用。</p>
+<h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>1.通过缓存保存计数。</p>
+<p>将计数保存在缓存系统中的方式，还不只是丢失更新的问题。即使Redis 正常工作，这个值还是逻辑上不精确的。</p>
+<p>2.在数据库保存计数</p>
+<p>由于事务的可见性，可保证逻辑上的数据的一致性。</p>
+<h4 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h4><p>count()函数的参数不是NULL，累计值就加1，否则不加。最后返回累计值。</p>
+<p>count(*)，count(主键)，count(1)，count(字段)的区别</p>
+<p>count(主键id)，遍历每一行把每一行的id值取出来，返回给id层，server层拿到id后，判断不为空，则按行累加。</p>
+<p>count(1),server层对于返回的每一行，放一个数字“1”进去，按行累加。</p>
+<p>count(字段)：一行一行的从记录里面读取字段</p>
+<p>1.定义为not null的话，一行行的从记录里面读出这个字段，判断不能为null，按行累加。</p>
+<p>2.定义为允许null，那么执行的时候，判断到有可能是null，还要把值取出来判断一下，不是null才累加。</p>
+<p>count(*),并不会把全部字段取出来，而是专门做了优化，不取值。</p>
+<p>按照效率排序的话：count(字段)&lt;count(主键 id)&lt;count(1)≈count(*)。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning03.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning03.html" class="post-title-link" itemprop="url">SQL语句为什么变“慢”</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 19:22:59 / 修改时间：19:34:36" itemprop="dateCreated datePublished" datetime="2021-01-22T19:22:59+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning03.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning03.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="SQL为什么变“慢”"><a href="#SQL为什么变“慢”" class="headerlink" title="SQL为什么变“慢”"></a>SQL为什么变“慢”</h3><p>当内存数据页和磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘的数据页的内容就一直了，称为“干净页”。刷新脏页的过程为称为flush。</p>
+<h4 id="flush的4种场景"><a href="#flush的4种场景" class="headerlink" title="flush的4种场景"></a>flush的4种场景</h4><p>1.对于InnoDB 的redo log写满了。</p>
+<p>2.对应的系统内存不足。在需要新的内存页，而内存不够用的时候，就要淘汰一些数据页，空出内存给别的数据页使用。如果淘汰的时“脏页”，则先写入磁盘。</p>
+<p>3.MySQL会合理的安排时间，见缝插针的刷新“脏页”。</p>
+<p>4.MySQL重启的时候。</p>
+<p>刷新脏页虽然时常态，但都是明显影响性能的。</p>
+<p>1.一个查询要淘汰的脏页过多，会导致查询的响应时间明显变长。</p>
+<p>2.日志写满，更新性能全部堵住，写性能跌为0，这种情况对敏感的业务来说，不能接受。</p>
+<h4 id="InnoDB刷新脏页的控制策略"><a href="#InnoDB刷新脏页的控制策略" class="headerlink" title="InnoDB刷新脏页的控制策略"></a>InnoDB刷新脏页的控制策略</h4><p>1.调用fio工具，来正确设置innodb_io_capacity的这个参数</p>
+<p>Innodb的刷盘速度主要考虑两个因素：一个脏页比例，一个是redo log写盘速度。</p>
+<img src="https://i.loli.net/2021/01/22/p6tYAvMoGwkPUW2.png" style="zoom:50%;" />
+
+<p>合理设置innodb_io_capacity的值，并且多关注脏页比例，**不要让它接近75%**。</p>
+<p>脏页的比例是通过Innodb_buffer_pool_pages_dirty/Innodb_buffer_pool_pages_total得到的</p>
+<p>其中innodb_flush_neighbors 参数为1会顺带把邻居的脏页同步刷新，适用于机械硬盘的场景。5.8以后默认</p>
+<p>innodb_flush_neighbors 为0。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning02.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning02.html" class="post-title-link" itemprop="url">MySQL 索引相关知识</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 19:08:42 / 修改时间：19:22:42" itemprop="dateCreated datePublished" datetime="2021-01-22T19:08:42+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning02.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning02.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-索引相关知识"><a href="#MySQL-索引相关知识" class="headerlink" title="MySQL 索引相关知识"></a>MySQL 索引相关知识</h3><h4 id="索引的选择"><a href="#索引的选择" class="headerlink" title="索引的选择"></a>索引的选择</h4><h5 id="查询过程"><a href="#查询过程" class="headerlink" title="查询过程"></a>查询过程</h5><p>普通索引：在查找满足条件的第一个记录后，查找下一个记录你，直到碰到不满足的条件的记录。</p>
+<p>唯一索引：在查找第一个满足条件的记录后，就会停止继续检索。</p>
+<h5 id="更新过程"><a href="#更新过程" class="headerlink" title="更新过程"></a>更新过程</h5><p>唯一索引的更新不能使用change buffer。而普通索引则可以。</p>
+<p>索引的选择，两类索引在查询性能上没差别的，主要是考虑对更新的性能。推荐使用普通索引。</p>
+<h5 id="changebuffer"><a href="#changebuffer" class="headerlink" title="changebuffer"></a>changebuffer</h5><p>定义：当需要更新一个数据的时候，如果数据页在内存中就直接更新，而如果这个数据页还没有在内存中的话，在不影响数据一致性的前提下，InnoDB将会将这些更新操作缓存在change buffer中，这样就不需要从磁盘中读入数据页了。在下次查询需要访问这个数据页的时候，将数据读入内存，然后执行change buffer中与这个页有关的操作。通过这种方式就能保证这个数据逻辑的正确性。</p>
+<p>作用：减少读磁盘，语句的执行速度会得到明显的提升 ，提高内存利用率。</p>
+<p>change buffer的时使用场景：主要目的就是将记录的变更动作缓存下来，在一个数据页做merge之前，记录的越多，收益越大。对于写多读少的业务（例如：账单类、日志类）使用效果较好。但是对于写入之后马上会做查询的场景。由于更新之后马上会读取数据页，出发merge的过程，这样反而会增加change buffer的维护代价。</p>
+<p>change buffer:是buffer poll里面的内存，可以通过innodb_change_buffer_max_size去设置。</p>
+<p>changebuffer和 redo log的区别</p>
+<p>redo log主要节省的是随机磁盘的IO消耗（转化顺序写），而change buffer主要节省的是随机读磁盘的IO的消耗。</p>
+<h4 id="MySQL索引的错误选择"><a href="#MySQL索引的错误选择" class="headerlink" title="MySQL索引的错误选择"></a>MySQL索引的错误选择</h4><p>优化器选择扫描行数、临时表，是否排序等因素综合找出一个最优的解决方案，用最小的代价去执行语句。</p>
+<p>扫行行数：通过“区分度”来建立估算扫描行数，显然“基础”越大，索引的区分度越好。</p>
+<p>通过show index from table 中cardinality属性可以得到区分度。</p>
+<p>采用统计：InnoDB会默认选择N个数据页，统计这些页面上的不同值，得到一个平均值，然后乘以这个索引的页面数，就得到这个索引的基数。当变更行数超过1/M的时候，会自动触发重新做一次索引统计。</p>
+<p>在MySQL中，有两种存储索引的统计方式，可通过innodb_stats_persistent的值来选择。</p>
+<p>on:持久化存储。默认N是20，M是10。</p>
+<p>off:内存。默认N是8，M是16。</p>
+<h5 id="索引选择异常和处理"><a href="#索引选择异常和处理" class="headerlink" title="索引选择异常和处理"></a>索引选择异常和处理</h5><p>1.采用force index强行选择索引。</p>
+<p>2.修改语句，引导MySQL使用我们期望的索引。</p>
+<p>3.在有些场景下，我们可以新建一个索引，提供给优化器做选择或者删除误用的索引。</p>
+<h4 id="字符串加索引"><a href="#字符串加索引" class="headerlink" title="字符串加索引"></a>字符串加索引</h4><p>mysql&gt; alter table SUser add index index1(email);<br>mysql&gt; alter table SUser add index index2(email(6));</p>
+<p>select id,name,email from SUser where email=’zhangssxyz@xxx.com’;</p>
+<h5 id="如果使用全索引"><a href="#如果使用全索引" class="headerlink" title="如果使用全索引"></a>如果使用全索引</h5><p>1.从index1索引树找到满足索引值”zhangssxyz”的这条记录，取得ID2的值</p>
+<p>2.到主键查到主键值是ID2的行，判断email的值是否正确，将这行记录加入结果集</p>
+<p>3.取index1索引树上刚刚查到的位置的下一条记录，发现不满足email=’zhangssxyz@xxx.com’的条件，循环结束。</p>
+<h5 id="使用部分索引"><a href="#使用部分索引" class="headerlink" title="使用部分索引"></a>使用部分索引</h5><p>1.从index2 索引树找到满足索引值“zhangs”的记录，找到一个是ID!;</p>
+<p>2.到主键查询主键值ID1的行，判断email的值不是“<a href="mailto:&#122;&#104;&#x61;&#110;&#103;&#x73;&#115;&#115;&#64;&#120;&#x78;&#120;&#x2e;&#x63;&#x6f;&#109;">&#122;&#104;&#x61;&#110;&#103;&#x73;&#115;&#115;&#64;&#120;&#x78;&#120;&#x2e;&#x63;&#x6f;&#109;</a>”，丢弃。</p>
+<p>3.取index2刚刚位置的下一条记录，发现仍然是“zhangs”，取出ID2，回表判断值是否正确，加入结果集</p>
+<p>4.重复上述操作，直到在index2上取到的值不是“zhangs”时，循环结束</p>
+<p>使用好前缀索引，定义好长度，就可以做好既节约空间，又不用额外增加太多的查询成本。</p>
+<p>mysql&gt; select<br>  count(distinct left(email,4)）as L4,<br>  count(distinct left(email,5)）as L5,<br>  count(distinct left(email,6)）as L6,<br>  count(distinct left(email,7)）as L7,<br>from SUser;</p>
+<p>在L4-L7中，找出不小于L*95%的值。</p>
+<p>使用前缀索引就用不上覆盖索引的查询性能的优化了。</p>
+<h5 id="字符串索引的劣势"><a href="#字符串索引的劣势" class="headerlink" title="字符串索引的劣势"></a>字符串索引的劣势</h5><p>对于区分度不高的场景，例如身份证前6位对于一个市、县区分度并不高的解决方案。</p>
+<p>1.使用倒序存储</p>
+<p>2.使用hash字段</p>
+<p>hash字段和倒序存储的区别</p>
+<p>1.倒序存储不消耗额外的空间，不需要新增hash字段。</p>
+<p>2.自增hash字段的方式，倒序rerverse()相比hash函数的效率更高。</p>
+<p>3.从查询效率上看，使用hash字段方式的查询性能相对稳定。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/performance-tune-learn01.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -342,10 +661,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-01-17 23:08:58 / 修改时间：23:10:33" itemprop="dateCreated datePublished" datetime="2021-01-17T23:08:58+08:00">2021-01-17</time>
+              <time title="创建时间：2021-01-17 23:08:58" itemprop="dateCreated datePublished" datetime="2021-01-17T23:08:58+08:00">2021-01-17</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-01-22 19:10:18" itemprop="dateModified" datetime="2021-01-22T19:10:18+08:00">2021-01-22</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -446,7 +771,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning-01.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning01.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -460,7 +785,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/mysql-learning-01.html" class="post-title-link" itemprop="url">MySQL学习笔记01</a>
+            <a href="/mysql-learning01.html" class="post-title-link" itemprop="url">MySQL 基础架构</a>
         </h2>
 
         <div class="post-meta">
@@ -469,10 +794,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-01-15 17:27:14 / 修改时间：17:39:30" itemprop="dateCreated datePublished" datetime="2021-01-15T17:27:14+08:00">2021-01-15</time>
+              <time title="创建时间：2021-01-15 17:27:14" itemprop="dateCreated datePublished" datetime="2021-01-15T17:27:14+08:00">2021-01-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-01-22 19:42:41" itemprop="dateModified" datetime="2021-01-22T19:42:41+08:00">2021-01-22</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -492,8 +823,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/mysql-learning-01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning-01.html" itemprop="commentCount"></span>
+    <a title="valine" href="/mysql-learning01.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning01.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -1199,7 +1530,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1212,7 +1543,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

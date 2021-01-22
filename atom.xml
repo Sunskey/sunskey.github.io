@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-01-22T06:16:09.257Z</updated>
+  <updated>2021-01-22T11:40:47.066Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,81 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>count(*)很“慢”？</title>
+    <link href="https://sunskey.top/mysql-learning04.html"/>
+    <id>https://sunskey.top/mysql-learning04.html</id>
+    <published>2021-01-22T11:35:58.000Z</published>
+    <updated>2021-01-22T11:40:47.066Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;count-很“慢”？&quot;&gt;&lt;a href=&quot;#count-很“慢”？&quot; class=&quot;headerlink&quot; title=&quot;count(*)很“慢”？&quot;&gt;&lt;/a&gt;count(*)很“慢”？&lt;/h3&gt;&lt;h4 id=&quot;实现方式&quot;&gt;&lt;a href=&quot;#实现方式&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL - 学习笔记" scheme="https://sunskey.top/tags/MySQL-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>SQL语句为什么变“慢”</title>
+    <link href="https://sunskey.top/mysql-learning03.html"/>
+    <id>https://sunskey.top/mysql-learning03.html</id>
+    <published>2021-01-22T11:22:59.000Z</published>
+    <updated>2021-01-22T11:34:36.736Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;SQL为什么变“慢”&quot;&gt;&lt;a href=&quot;#SQL为什么变“慢”&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL - 学习笔记" scheme="https://sunskey.top/tags/MySQL-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 索引相关知识</title>
+    <link href="https://sunskey.top/mysql-learning02.html"/>
+    <id>https://sunskey.top/mysql-learning02.html</id>
+    <published>2021-01-22T11:08:42.000Z</published>
+    <updated>2021-01-22T11:22:42.261Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL-索引相关知识&quot;&gt;&lt;a href=&quot;#MySQL-索引相关知识&quot; class=&quot;headerlink&quot; title=&quot;MySQL 索引相关知识&quot;&gt;&lt;/a&gt;MySQL 索引相关知识&lt;/h3&gt;&lt;h4 id=&quot;索引的选择&quot;&gt;&lt;a href=&quot;#索引的选择&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL - 学习笔记" scheme="https://sunskey.top/tags/MySQL-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
   
   <entry>
     <title>Java性能调优与测试</title>
@@ -48,7 +123,7 @@
     <link href="https://sunskey.top/learn-redis01.html"/>
     <id>https://sunskey.top/learn-redis01.html</id>
     <published>2021-01-17T15:08:58.000Z</published>
-    <updated>2021-01-17T15:10:33.401Z</updated>
+    <updated>2021-01-22T11:10:18.173Z</updated>
     
     
       
@@ -66,14 +141,16 @@
     
     <category term="Redis" scheme="https://sunskey.top/tags/Redis/"/>
     
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
   </entry>
   
   <entry>
-    <title>MySQL学习笔记01</title>
-    <link href="https://sunskey.top/mysql-learning-01.html"/>
-    <id>https://sunskey.top/mysql-learning-01.html</id>
+    <title>MySQL 基础架构</title>
+    <link href="https://sunskey.top/mysql-learning01.html"/>
+    <id>https://sunskey.top/mysql-learning01.html</id>
     <published>2021-01-15T09:27:14.000Z</published>
-    <updated>2021-01-15T09:39:30.497Z</updated>
+    <updated>2021-01-22T11:42:41.288Z</updated>
     
     
       
@@ -89,7 +166,7 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    <category term="MySQL - 学习笔记" scheme="https://sunskey.top/tags/MySQL-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   

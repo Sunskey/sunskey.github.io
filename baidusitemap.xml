@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sunskey.top/performance-tune-learn01.html</loc>
+    <loc>https://sunskey.top/mysql-learning01.html</loc>
+    <lastmod>2021-01-22</lastmod>
+  </url>
+  <url>
+    <loc>https://sunskey.top/mysql-learning04.html</loc>
+    <lastmod>2021-01-22</lastmod>
+  </url>
+  <url>
+    <loc>https://sunskey.top/mysql-learning03.html</loc>
+    <lastmod>2021-01-22</lastmod>
+  </url>
+  <url>
+    <loc>https://sunskey.top/mysql-learning02.html</loc>
     <lastmod>2021-01-22</lastmod>
   </url>
   <url>
     <loc>https://sunskey.top/learn-redis01.html</loc>
-    <lastmod>2021-01-17</lastmod>
+    <lastmod>2021-01-22</lastmod>
   </url>
   <url>
-    <loc>https://sunskey.top/mysql-learning-01.html</loc>
-    <lastmod>2021-01-15</lastmod>
+    <loc>https://sunskey.top/performance-tune-learn01.html</loc>
+    <lastmod>2021-01-22</lastmod>
   </url>
   <url>
     <loc>https://sunskey.top/learn-note01.html</loc>
