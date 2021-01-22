@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://sunskey.top/%E2%80%9Cperformance-tune-learn01%E2%80%9D.html</loc>
+    <loc>https://sunskey.top/performance-tune-learn01.html</loc>
     
     <lastmod>2021-01-22</lastmod>
     
@@ -124,6 +124,13 @@
   
   <url>
     <loc>https://sunskey.top/tags/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</loc>
+    <lastmod>2021-01-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://sunskey.top/tags/Java-%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/</loc>
     <lastmod>2021-01-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
