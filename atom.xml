@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-01-22T11:47:00.193Z</updated>
+  <updated>2021-01-23T02:16:27.356Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,196 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>如何正确显示随机消息</title>
+    <link href="https://sunskey.top/mysql-learning11.html"/>
+    <id>https://sunskey.top/mysql-learning11.html</id>
+    <published>2021-01-23T02:09:03.000Z</published>
+    <updated>2021-01-23T02:16:27.356Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;如何正确显示随机消息&quot;&gt;&lt;a href=&quot;#如何正确显示随机消息&quot; class=&quot;headerlink&quot; title=&quot;如何正确显示随机消息&quot;&gt;&lt;/a&gt;如何正确显示随机消息&lt;/h3&gt;&lt;h4 id=&quot;内存临时表&quot;&gt;&lt;a href=&quot;#内存临时表&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 加锁规则</title>
+    <link href="https://sunskey.top/mysql-learning10.html"/>
+    <id>https://sunskey.top/mysql-learning10.html</id>
+    <published>2021-01-22T12:47:40.000Z</published>
+    <updated>2021-01-23T02:08:50.654Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;加锁规则&quot;&gt;&lt;a href=&quot;#加锁规则&quot; class=&quot;headerlink&quot; title=&quot;加锁规则&quot;&gt;&lt;/a&gt;加锁规则&lt;/h3&gt;&lt;p&gt;加锁规则里面，包含了两个”原则‘、两个“优化”和一个“bug”。&lt;/p&gt;
+&lt;p&gt;1.原则1：加锁基本单位是next-key</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>什么是幻读</title>
+    <link href="https://sunskey.top/mysql-learning09.html"/>
+    <id>https://sunskey.top/mysql-learning09.html</id>
+    <published>2021-01-22T12:47:34.000Z</published>
+    <updated>2021-01-23T02:08:55.384Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;什么是幻读&quot;&gt;&lt;a href=&quot;#什么是幻读&quot; class=&quot;headerlink&quot; title=&quot;什么是幻读&quot;&gt;&lt;/a&gt;什么是幻读&lt;/h3&gt;&lt;img src=&quot;https://i.loli.net/2021/01/22/VCiQI2LT6zBneGM.png&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>order by 工作原理</title>
+    <link href="https://sunskey.top/mysql-learning08.html"/>
+    <id>https://sunskey.top/mysql-learning08.html</id>
+    <published>2021-01-22T12:37:19.000Z</published>
+    <updated>2021-01-22T12:55:36.703Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;order-by工作原理&quot;&gt;&lt;a href=&quot;#order-by工作原理&quot; class=&quot;headerlink&quot; title=&quot;order by工作原理&quot;&gt;&lt;/a&gt;order by工作原理&lt;/h3&gt;&lt;h4 id=&quot;全字段排序&quot;&gt;&lt;a href=&quot;#全字段排序&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 保证数据不丢失的秘密</title>
+    <link href="https://sunskey.top/mysql-learning07.html"/>
+    <id>https://sunskey.top/mysql-learning07.html</id>
+    <published>2021-01-22T12:18:12.000Z</published>
+    <updated>2021-01-22T12:55:39.628Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;保证数据不丢失的秘密&quot;&gt;&lt;a href=&quot;#保证数据不丢失的秘密&quot; class=&quot;headerlink&quot; title=&quot;保证数据不丢失的秘密&quot;&gt;&lt;/a&gt;保证数据不丢失的秘密&lt;/h3&gt;&lt;h4 id=&quot;binlog写入机制&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 提高性能的办法</title>
+    <link href="https://sunskey.top/mysql-learning06.html"/>
+    <id>https://sunskey.top/mysql-learning06.html</id>
+    <published>2021-01-22T12:18:09.000Z</published>
+    <updated>2021-01-22T12:35:08.347Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL-提高性能的办法&quot;&gt;&lt;a href=&quot;#MySQL-提高性能的办法&quot; class=&quot;headerlink&quot; title=&quot;MySQL 提高性能的办法&quot;&gt;&lt;/a&gt;MySQL</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据表空间回收</title>
+    <link href="https://sunskey.top/mysql-learning05.html"/>
+    <id>https://sunskey.top/mysql-learning05.html</id>
+    <published>2021-01-22T11:50:10.000Z</published>
+    <updated>2021-01-22T12:11:35.540Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;数据表空间回收&quot;&gt;&lt;a href=&quot;#数据表空间回收&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+  </entry>
   
   <entry>
     <title>count(*)很“慢”？</title>
@@ -44,18 +234,18 @@
   </entry>
   
   <entry>
-    <title>SQL语句为什么变“慢”</title>
+    <title>SQL慢的原因和解决办法</title>
     <link href="https://sunskey.top/mysql-learning03.html"/>
     <id>https://sunskey.top/mysql-learning03.html</id>
     <published>2021-01-22T11:22:59.000Z</published>
-    <updated>2021-01-22T11:47:02.560Z</updated>
+    <updated>2021-01-22T12:54:09.332Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;h3 id=&quot;SQL为什么变“慢”&quot;&gt;&lt;a href=&quot;#SQL为什么变“慢”&quot; class=&quot;headerlink&quot;</summary>
+    <summary type="html">&lt;h3 id=&quot;SQL执行过慢的原因&quot;&gt;&lt;a href=&quot;#SQL执行过慢的原因&quot; class=&quot;headerlink&quot; title=&quot;SQL执行过慢的原因&quot;&gt;&lt;/a&gt;SQL执行过慢的原因&lt;/h3&gt;&lt;h4 id=&quot;1-查询长时间不返回&quot;&gt;&lt;a</summary>
         
       
     
@@ -75,7 +265,7 @@
     <link href="https://sunskey.top/mysql-learning02.html"/>
     <id>https://sunskey.top/mysql-learning02.html</id>
     <published>2021-01-22T11:08:42.000Z</published>
-    <updated>2021-01-22T11:47:06.957Z</updated>
+    <updated>2021-01-22T12:36:50.529Z</updated>
     
     
       

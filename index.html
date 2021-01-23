@@ -165,6 +165,799 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning11.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning11.html" class="post-title-link" itemprop="url">如何正确显示随机消息</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 10:09:03 / 修改时间：10:16:27" itemprop="dateCreated datePublished" datetime="2021-01-23T10:09:03+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning11.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning11.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="如何正确显示随机消息"><a href="#如何正确显示随机消息" class="headerlink" title="如何正确显示随机消息"></a>如何正确显示随机消息</h3><h4 id="内存临时表"><a href="#内存临时表" class="headerlink" title="内存临时表"></a>内存临时表</h4><p>使用oder by rand()</p>
+<p>对于InnoDB表，执行全字段排序会减少磁盘访问，因此会被优先选择。</p>
+<p>对于内存表，回表过程只是简单地根据数据行的位置，直接访问内存得到数据，根本不会导致多访问磁盘，从而选择rowid排序。</p>
+<p>select word from words order by rand() limit 3;</p>
+<h5 id="整个执行过程"><a href="#整个执行过程" class="headerlink" title="整个执行过程"></a>整个执行过程</h5><p>1.创建一个临时表。这个临时表使用的是 memory 引擎，表里有两个字段，第一个字段是 double 类型，为了后面描述方便，记为字段 R，第二个字段是 varchar(64) 类型，记为字段 W。并且，这个表没有建索引。</p>
+<p>2.从 words 表中，按主键顺序取出所有的 word 值。对于每一个 word 值，调用 rand() 函数生成一个大于 0 小于 1 的随机小数，并把这个随机小数和 word 分别存入临时表的 R 和 W 字段中，到此，扫描行数是 10000。</p>
+<p>3.现在临时表有 10000 行数据了，接下来你要在这个没有索引的内存临时表上，按照字段 R 排序。</p>
+<p>4.初始化 sort_buffer。sort_buffer 中有两个字段，一个是 double 类型，另一个是整型。</p>
+<p>5.从内存临时表中一行一行地取出 R 值和位置信息（我后面会和你解释这里为什么是“位置信息”），分别存入 sort_buffer 中的两个字段里。</p>
+<p>6.这个过程要对内存临时表做全表扫描，此时扫描行数增加 10000，变成了 20000。在 sort_buffer 中根据 R 的值进行排序。注意，这个过程没有涉及到表操作，所以不会增加扫描行数。</p>
+<p>7.排序完成后，取出前三个结果的位置信息，依次到内存临时表中取出 word 值，返回给客户端。这个过程中，访问了表的三行数据，总扫描行数变成了 20003</p>
+<img src="https://i.loli.net/2021/01/23/zer2NxcJFMV5afg.png" style="zoom:50%;" />
+
+<p>如果你创建的表没有主键，或者把一个表的主键删掉了，那么 InnoDB 会自己生成一个长度为 6 字节的 rowid 来作为主键。</p>
+<p>对于有主键的InnoDB表来说，整个rowid就是主键ID。</p>
+<p>对于没有主键的InnoDB表来说，这个rowid就是系统生成的。</p>
+<p>order by rand() 使用了内存临时表，内存临时表排序的时候使用了rowid排序算法。</p>
+<h4 id="磁盘临时表"><a href="#磁盘临时表" class="headerlink" title="磁盘临时表"></a>磁盘临时表</h4><p>tmp_table_size限制了内存表的大小，默认值是16M。如果临时表的大小超过了tmp_table_size，那么内存临时表就会转成磁盘临时表。</p>
+<p>磁盘临时表默认使用InnoDB，是由参数Internal_tmp_disk_storage_engine取控制。</p>
+<p>MySQL5.6引入：优先队列排序算法，不需要使用临时文件的算法(归并排序），而是采用了优先队列排序算法。</p>
+<img src="https://i.loli.net/2021/01/23/DFnrBLS4lY7cAWj.png" style="zoom:40%;" />
+
+<p>总之，不管使用那种类型的临时表，order_by_rand()这种写法都会让计算过程非常复杂，需要大量的扫描行数。</p>
+<h4 id="随机排序方法"><a href="#随机排序方法" class="headerlink" title="随机排序方法"></a>随机排序方法</h4><p>1.取得整个表的行数，并记为C.</p>
+<p>2.取得Y = floor(C*rand())。</p>
+<p>3.再利用你limit Y，1取得一行。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning10.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning10.html" class="post-title-link" itemprop="url">MySQL 加锁规则</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-22 20:47:40" itemprop="dateCreated datePublished" datetime="2021-01-22T20:47:40+08:00">2021-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-01-23 10:08:50" itemprop="dateModified" datetime="2021-01-23T10:08:50+08:00">2021-01-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning10.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning10.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="加锁规则"><a href="#加锁规则" class="headerlink" title="加锁规则"></a>加锁规则</h3><p>加锁规则里面，包含了两个”原则‘、两个“优化”和一个“bug”。</p>
+<p>1.原则1：加锁基本单位是next-key lock。前开后闭区间。</p>
+<p>2.原则2：查找过程中访问到的对象才会加锁。</p>
+<p>3.优化1：索引上的等值查询，给唯一索引加锁的时候，next-key lock退化为 行锁。</p>
+<p>4.优化2：索引上的等值查询，向右遍历且最后一个不满足等值条件的时候，next-key lock退化为间隙锁。</p>
+<p>5.一个bug：唯一索引上的范围查询会访问到不满足条件的第一个值为止。</p>
+<img src="https://i.loli.net/2021/01/23/6ChDo3XBTL5jyEl.png" style="zoom:50%;" />
+
+
+
+<h4 id="案例一：等值查询间隙锁"><a href="#案例一：等值查询间隙锁" class="headerlink" title="案例一：等值查询间隙锁"></a>案例一：等值查询间隙锁</h4><img src="https://i.loli.net/2021/01/23/otv9XOWDCjSdQcy.png" style="zoom:50%;" />
+
+<h4 id="案例二：非唯一索引等值锁"><a href="#案例二：非唯一索引等值锁" class="headerlink" title="案例二：非唯一索引等值锁"></a>案例二：非唯一索引等值锁</h4><img src="https://i.loli.net/2021/01/23/pAhGQdrXiFV7alt.png" style="zoom:50%;" />
+
+<ol>
+<li><p>根据原则 1，加锁单位是 next-key lock，因此会给 (0,5]加上 next-key lock。</p>
+</li>
+<li><p>要注意 c 是普通索引，因此仅访问 c=5 这一条记录是不能马上停下来的，需要向右遍历，查到 c=10 才放弃。</p>
+</li>
+<li><p>根据原则 2，访问到的都要加锁，因此要给 (5,10]加 next-key lock。但是同时这个符合优化 2：等值判断，向右遍历，最后一个值不满足 c=5 这个等值条件，因此退化成间隙锁 (5,10)。</p>
+</li>
+<li><p>根据原则 2 ，只有访问到的对象才会加锁，这个查询使用覆盖索引，并不需要访问主键索引，所以主键索引上没有加任何锁，这就是为什么 session B 的 update 语句可以执行完成。</p>
+</li>
+</ol>
+<p>lock in share mode只锁覆盖索引，但是如果是for update 就不一样。执行for update，会顺便给主键索引上满足条件的行加上锁。</p>
+<h4 id="案例三：主键索引范围锁"><a href="#案例三：主键索引范围锁" class="headerlink" title="案例三：主键索引范围锁"></a>案例三：主键索引范围锁</h4><p>mysql&gt; select * from t where id=10 for update;<br>mysql&gt; select * from t where id&gt;=10 and id&lt;11 for update;</p>
+<p>语句1，只会对语句10进行加锁</p>
+<img src="https://i.loli.net/2021/01/23/fX5AJePvWgon21M.png" style="zoom:50%;" />
+
+
+
+<p>而语句2则是行锁id =10  和 next-key（10，15】</p>
+<h4 id="案例四：非唯一索引范围锁"><a href="#案例四：非唯一索引范围锁" class="headerlink" title="案例四：非唯一索引范围锁"></a>案例四：非唯一索引范围锁</h4><img src="https://i.loli.net/2021/01/23/TfeIONuZJgvLEQb.png" style="zoom:50%;" />
+
+<p>加锁范围为(5,10] 和 (10,15] 这两个 next-key lock。</p>
+<h4 id="案例五：唯一索引范围锁bug"><a href="#案例五：唯一索引范围锁bug" class="headerlink" title="案例五：唯一索引范围锁bug"></a>案例五：唯一索引范围锁bug</h4><img src="https://i.loli.net/2021/01/23/owaiyQN7k6D8P1p.png" style="zoom:50%;" />
+
+<p>yi因为id是唯一键，所以循环判断id = 15这一行就停止了 。但是实现上，InnoDB会往前扫面第一个不满足条件的行为止，因此（16，20】这个next - key -lock也会被锁上。</p>
+<h4 id="案例六：非唯一索引上存在“等值”的例子"><a href="#案例六：非唯一索引上存在“等值”的例子" class="headerlink" title="案例六：非唯一索引上存在“等值”的例子"></a>案例六：非唯一索引上存在“等值”的例子</h4><img src="https://i.loli.net/2021/01/23/CtwdR236iqPOrcD.png" style="zoom:50%;" />
+
+<p>这时，session A 在遍历的时候，先访问第一个 c=10 的记录。</p>
+<p>同样地，根据原则 1，这里加的是 (c=5,id=5) 到 (c=10,id=10) 这个 next-key lock。</p>
+<p>然后，session A 向右查找，直到碰到 (c=15,id=15) 这一行，循环才结束。</p>
+<p>根据优化 2，这是一个等值查询，向右查找到了不满足条件的行，所以会退化成 (c=10,id=10) 到 (c=15,id=15) 的间隙锁。</p>
+<p>也就是说，这个 delete 语句在索引 c 上的加锁范围，就是下图中蓝色区域覆盖的部分。</p>
+<h4 id="案例七：limit语句加锁"><a href="#案例七：limit语句加锁" class="headerlink" title="案例七：limit语句加锁"></a>案例七：limit语句加锁</h4><img src="https://i.loli.net/2021/01/23/Jrz1ZMpx7qmuvPs.png" style="zoom:50%;" />
+
+<p>这是因为，案例七里的 delete 语句明确加了 limit 2 的限制，因此在遍历到 (c=10, id=30) 这一行之后，满足条件的语句已经有两条，循环就结束了。因此，索引 c 上的加锁范围就变成了从（c=5,id=5) 到（c=10,id=30) 这个前开后闭区间，如下图所示：</p>
+<img src="https://i.loli.net/2021/01/23/Yl6UQG3g74ENCKh.png" style="zoom:50%;" />
+
+<p><strong>在删除数据的时候尽量加limit</strong>。这样不仅可以控制删除数据的条数，让操作更安全，还可以减小加锁的范围。</p>
+<h4 id="案例八：一个死锁的例子"><a href="#案例八：一个死锁的例子" class="headerlink" title="案例八：一个死锁的例子"></a>案例八：一个死锁的例子</h4><img src="https://i.loli.net/2021/01/23/CAQ7tarNwmZKEMs.png" style="zoom:50%;" />
+
+<p>session A 启动事务后执行查询语句加 lock in share mode，在索引 c 上加了 next-key lock(5,10] 和间隙锁 (10,15)；</p>
+<p>session B 的 update 语句也要在索引 c 上加 next-key lock(5,10] ，进入锁等待；</p>
+<p>然后 session A 要再插入 (8,8,8) 这一行，被 session B 的间隙锁锁住。由于出现了死锁，InnoDB 让 session B 回滚。</p>
+<p>其实是这样的，session B 的“加 next-key lock(5,10] ”操作，实际上分成了两步，先是加 (5,10) 的间隙锁，加锁成功；然后加 c=10 的行锁，这时候才被锁住的。</p>
+<p>实际上next-key lock 来分析。具体执行的时候，要分成间隙锁和行锁两端来执行的。</p>
+<p>读已提交除在外键条件下不存在间隙锁，还有个优化，即：语句执行过程中加上的行锁，在语句执行完成后，就把“不满足条件的行”上的行锁直接释放了，不需要等到事务提交。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning09.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning09.html" class="post-title-link" itemprop="url">什么是幻读</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-22 20:47:34" itemprop="dateCreated datePublished" datetime="2021-01-22T20:47:34+08:00">2021-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-01-23 10:08:55" itemprop="dateModified" datetime="2021-01-23T10:08:55+08:00">2021-01-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning09.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning09.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="什么是幻读"><a href="#什么是幻读" class="headerlink" title="什么是幻读"></a>什么是幻读</h3><img src="https://i.loli.net/2021/01/22/VCiQI2LT6zBneGM.png" style="zoom:50%;" />
+
+<img src="https://i.loli.net/2021/01/22/hUTB4MzEsHq6mef.png" style="zoom:50%;" />
+
+<p>1.在可重复读的级别下，普通的查询时快照读，是不会看到别的事务插入的数据的。因此，幻读在“当前读“下才会出现。</p>
+<p>2.上面sessionB的修改结果，被session  A之后的select 语句用”当前读“看到，不能称为幻读。幻读仅专指”新插入的行“。</p>
+<h4 id="幻读有什么问题"><a href="#幻读有什么问题" class="headerlink" title="幻读有什么问题"></a>幻读有什么问题</h4><p>1.破环了语义上的意思。”要把所有满足条件的行锁住，不准别的事务进行读写操作“</p>
+<p>2.数据一致性的问题。</p>
+<p>即使把所有的记录都加上锁，还是阻止不了新插入的记录。</p>
+<h4 id="如何解决幻读"><a href="#如何解决幻读" class="headerlink" title="如何解决幻读"></a>如何解决幻读</h4><p>1.产生幻读的原因是，行锁只能锁住行，但是新插入这个动作，要更新记录之间的”间隙“。因此，为了解决幻读，InnoDB引入新的锁，也就是间隙锁（Gap Lock）。</p>
+<img src="https://i.loli.net/2021/01/22/VhwrjMaP3b84fDo.png" style="zoom:50%;" />
+
+<p>就这样不止给数据库中已有的6个记录加上行锁，还同时加了7个间隙锁。这样确保了无法插入新的记录。</p>
+<p>跟间隙锁存在冲突关系的，是”往这个间隙中插入一个记录“这个操作。</p>
+<p>间隙锁和行锁合成next-key lock，每个next-key lock是前开后闭区间。例如：分别是 (-∞,0]、(0,5]、(5,10]、(10,15]、(15,20]、(20, 25]、(25, +supremum]。</p>
+<p>间隙锁的引入，可能会导致同样的语句锁住更大的范围，这其实是影响了并发度的。</p>
+<p>间隙锁是在可重复读隔离级别下才会生效的。如果把隔离级别设置成读提交，就没有间隙锁。但是需要解决数据和日志不一致的问题，需要把binlog格式设置为row。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning08.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning08.html" class="post-title-link" itemprop="url">order by 工作原理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 20:37:19 / 修改时间：20:55:36" itemprop="dateCreated datePublished" datetime="2021-01-22T20:37:19+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning08.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning08.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="order-by工作原理"><a href="#order-by工作原理" class="headerlink" title="order by工作原理"></a>order by工作原理</h3><h4 id="全字段排序"><a href="#全字段排序" class="headerlink" title="全字段排序"></a>全字段排序</h4><p>MySQL会给每个线程分配一块内存用于排序，称为sort buffer。</p>
+<p>1.初始化 sort_buffer，确定放入 name、city、age 这三个字段；</p>
+<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
+<p>3.到主键 id 索引取出整行，取 name、city、age 三个字段的值，存入 sort_buffer 中；</p>
+<p>4.从索引 city 取下一个记录的主键 id；</p>
+<p>5.重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的 ID_Y；</p>
+<p>6.对 sort_buffer 中的数据按照字段 name 做快速排序；</p>
+<p>7.按照排序结果取前 1000 行返回给客户端。</p>
+<p>sort_buffer_size ，就是MySQL为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于sort_buffer_size，排序就在内存中完成。如果数据量太大，内存放不下，则不得不利用磁盘临时文件辅助排序。</p>
+<img src="https://i.loli.net/2021/01/22/XrfTwBDKqWbPmFd.png" style="zoom:50%;" />
+
+<h4 id="rowid排序"><a href="#rowid排序" class="headerlink" title="rowid排序"></a>rowid排序</h4><p>如果sort_buffer里面要存放的字段数太多，这样内存能存的行数很少，要分成很多个临时文件，排序性能会很差。可以通过修改max_length_for_sort_data的值来改变排序算法。</p>
+<p>1.初始化 sort_buffer，确定放入两个字段，即 name 和 id；</p>
+<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
+<p>3.到主键 id 索引取出整行，取 name、id 这两个字段，存入 sort_buffer 中；</p>
+<p>4.从索引 city 取下一个记录的主键 id；</p>
+<p>5.重复步骤 3、4 直到不满足 city=’杭州’条件为止，也就是图中的 ID_Y；</p>
+<p>6.对 sort_buffer 中的数据按照字段 name 进行排序；</p>
+<p>7.遍历排序结果，取前 1000 行，并按照 id 的值回到原表中取出 city、name 和 age 三个字段返回给客户端。</p>
+<img src="https://i.loli.net/2021/01/22/9LYQciKfheZ5lxE.png" style="zoom:50%;" />
+
+<h4 id="全字段排序-VS-Rowid排序"><a href="#全字段排序-VS-Rowid排序" class="headerlink" title="全字段排序 VS Rowid排序"></a>全字段排序 VS Rowid排序</h4><p>由于Rowid排序涉及到回表，如果内存足够，就优先使用内存，即全字段排序。</p>
+<p>优化手段：可以使用覆盖索引，索引上的信息足够满足查询请求，不需要再回主键索引上去取数据。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning07.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning07.html" class="post-title-link" itemprop="url">MySQL 保证数据不丢失的秘密</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 20:18:12 / 修改时间：20:55:39" itemprop="dateCreated datePublished" datetime="2021-01-22T20:18:12+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning07.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning07.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="保证数据不丢失的秘密"><a href="#保证数据不丢失的秘密" class="headerlink" title="保证数据不丢失的秘密"></a>保证数据不丢失的秘密</h3><h4 id="binlog写入机制"><a href="#binlog写入机制" class="headerlink" title="binlog写入机制"></a>binlog写入机制</h4><p>binlog写入逻辑：事务执行过程中，先把日志写到binlog cache，事务提交的时候，再把binlog cache写到binlog中。</p>
+<p>每个线程由自己的binlog cache ,但是共用同一份binlog文件。</p>
+<p>write，指的是把日志写入文件系统的page cache,并没有把数据持久化到磁盘，所以速度快。</p>
+<p>fsync，将数据持久化到磁盘的操作。</p>
+<img src="https://i.loli.net/2021/01/22/unLfoqTdmyXH1pc.png" style="zoom:50%;" />
+
+<p>write和fsync的时机，是由参数sync_binlog控制的；</p>
+<p>1.sync_binlog = 0的时候，表示每次提交事务都只write，不fsync;</p>
+<p>2.sync_binlog =1的时候，表示每次提交事务都会执行fsync;</p>
+<p>3.sync_binlog=N(N&gt;1) 的时候，表示每次提交事务都 write，但累积 N 个事务后才 fsync。</p>
+<h4 id="redo-log的写入机制"><a href="#redo-log的写入机制" class="headerlink" title="redo log的写入机制"></a>redo log的写入机制</h4><img src="https://static001.geekbang.org/resource/image/9d/d4/9d057f61d3962407f413deebc80526d4.png" alt="img" style="zoom:50%;" />
+
+<p>1.存在redo log buffer中，物理上是在MySQL进程内存中。</p>
+<p>2.写到磁盘（write）,但是没有持久化(fsync)，物理上文件系统的page cache里面。</p>
+<p>3.持久化到磁盘，对应的是hard disk。</p>
+<p>InnoDB提供了innodb_flush_log_at_trx_commit参数控制redo log的写入策略。</p>
+<p>0：表示每次事务提交时都只是把redo log留在redo log buffer中</p>
+<p>1：表示每次事务提交都将redo log持久化硬盘</p>
+<p>2：每次提交都只是把redo log写到page cache</p>
+<p>InnoDB有一个后台线程，每间隔一秒，就会把redo log buffer中的日志，调用write 写到文件系统的page cache ，然后fsync持久化磁盘。</p>
+<p>3种情况会把让没有提交事务的redo log写入到磁盘中</p>
+<p>1.后台线程每秒一次的轮询操作。</p>
+<p>2.redo log buffer占用的空间即将达到innodb_log_buffer_size一半的时候，后台线程会主动写盘。</p>
+<p>3.并行的事务提交的时候，顺带将这个事务的redo log buffer持久化到磁盘。</p>
+<p>MySQL的双一配置。指的就是sync_binlog和innodb_flush_log_at_trx_commit都设置成1。一个事务完整提交前，需要等待两次刷盘，一次是redo log（prepare ）,一次是binlog.</p>
+<p>日志逻辑序列（LSN）是单调递增的，用来对应redo log的一个个写入点。每次写入length的redo log，LSN的值就会加上length。</p>
+<p>一次组提交里面，里面的组员越多，节约磁盘IOPS的效果越好。</p>
+<p>日志记录过程</p>
+<img src="https://i.loli.net/2021/01/22/B2GzKH3tRJqySns.png" style="zoom:50%;" />
+
+
+
+<p>如果想binlog提升组提交的效果，可以通过设置binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count 来实现。</p>
+<p>1.binlog_group_commit_sync_delay参数，表示多少微秒后才调用fsync</p>
+<p>2.binlog_group_commit_sync_no_delay_count，表示多少次以后才调用fsync</p>
+<p>如果MySQL出现了性能瓶颈，而且瓶颈在IO上</p>
+<p>1.通过设置binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count参数你，减少binlog的写盘速度。</p>
+<p>2.将sync_binlog设置大于1，这样做的风险是，这个主机掉电会丢失binlog日志。</p>
+<p>3.innodb_flush_log_at_trx_commit 设置为 2。这样做的风险是，主机掉电的时候会丢数据。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning06.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning06.html" class="post-title-link" itemprop="url">MySQL 提高性能的办法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 20:18:09 / 修改时间：20:35:08" itemprop="dateCreated datePublished" datetime="2021-01-22T20:18:09+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning06.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning06.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-提高性能的办法"><a href="#MySQL-提高性能的办法" class="headerlink" title="MySQL 提高性能的办法"></a>MySQL 提高性能的办法</h3><p>短连接存在的一个风险，就是一旦数据库处理得慢一些，连接数就会暴涨。</p>
+<p>max_connection参数，用来控制一个MySQL最大连接数，超过这个值，系统就会提示“too many connections”从而导致数据库不可用。</p>
+<p>解决方案</p>
+<p>1.先处理掉那些占着链接但是不工作的线程。</p>
+<p>如果连接数过多，可以优先断开事务外空闲太久的链接；如果这样还不够，在考虑断开事务内空闲太久的链接。</p>
+<p>使用 kill connection + id的方式，使用show processlist查看结果。</p>
+<p>2.减少连接过程的消耗</p>
+<p>跳过权限验证的方法是：重启数据库，并使用-skip-grant-tables参数启动。这样连接过程和语句执行过程都会跳过权限校验阶段。(但是不建议这么做，风险极高)。</p>
+<h4 id="慢查询性能问题"><a href="#慢查询性能问题" class="headerlink" title="慢查询性能问题"></a>慢查询性能问题</h4><p>1.索引没有设计好</p>
+<p>2.SQL语句没写好</p>
+<p>3.MySQL选错了索引</p>
+<p>1.上线前，在测试环境，把慢查询日志打开，并且把long_query_time设置成0，确保每个语句都会被记录</p>
+<p>2.在测试表插入线上的数据，做一遍回归测试</p>
+<p>3.观察慢查询里每类语句的输出，特别留意Row_examined字段是否一致。</p>
+<p>call query_rewrite.flush_rewrite_rules() 这个存储过程，是让插入的新规则生效，也就是我们说的“查询重写”。</p>
+<h4 id="QPS突增问题"><a href="#QPS突增问题" class="headerlink" title="QPS突增问题"></a>QPS突增问题</h4><p>1.如果是由全新业务的bug导致的，那么就可以从数据库直接把白名单去掉。</p>
+<p>2.如果这个新功能使用的单独的数据库用户，可以直接删除用户。</p>
+<p>3.如果跟主题功能绑定在一块，使用语句重写的功能，把压力最大的SQL直接重写成“select 1”返回。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning05.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning05.html" class="post-title-link" itemprop="url">数据表空间回收</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-22 19:50:10 / 修改时间：20:11:35" itemprop="dateCreated datePublished" datetime="2021-01-22T19:50:10+08:00">2021-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning05.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning05.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="数据表空间回收"><a href="#数据表空间回收" class="headerlink" title="数据表空间回收"></a>数据表空间回收</h3><p>MySQL8.0版本前，表的结构是存在以.frm为后缀的文件里。而8.0后，允许把表结构定义放在系统数据表中。因为结构定义占用的空间很小。</p>
+<p>表数据既可以存在共享表空间里面，也可以是单独的文件。这个行为是由参数innodb_file_per_table控制。从Mysql5.6.6以后，默认为on。</p>
+<p>off：表的数据放在系统共享表空间，也就是跟数据字典放在一起；</p>
+<p>on：每个InnoDB表数据存储在一个以.idb为后缀的文件中。</p>
+<h4 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h4><p>删除一个数据页上的所有记录，整个数据页的复用跟记录的复用是不同的。</p>
+<p>使用delete 命令只是把记录或者数据页标记为“可复用”，不能回收表的空间，而没有使用的空间，看起来就像空洞，不止删除数据回暖造成空洞，插入数据也会。</p>
+<h4 id="重建表"><a href="#重建表" class="headerlink" title="重建表"></a>重建表</h4><p>新建一个与原表结构相同的新表，然后按照主键ID递增的顺序，把数据一行一行地从原表读到表B，然后用B替换A，从而起到收缩表A空间的作用，解决空洞的问题。</p>
+<p>在MySQL5.5之后，可以之前使用alter table A engine = InnoDB来重建表。</p>
+<img src="https://i.loli.net/2021/01/22/sh7lNaZ1xGMFi9k.png" style="zoom:50%;" />
+
+<p>在这个过程中，如果有新数据要写入表A的话，就回造成数据丢失。</p>
+<p>为了保证整个重建表的正常，原表不能进行更新，5.6版本后引入了Online DDL，优化了该过程。</p>
+<h4 id="Online-DDL"><a href="#Online-DDL" class="headerlink" title="Online DDL"></a>Online DDL</h4><p>1.建立一个临时文件，扫描表A主键的所有数据页。</p>
+<p>2.用数据页中表A的记录生成B+树，存储到临时文件中。</p>
+<p>3.生成的临时文件的过程中，将所有对A的操作记录再一个日志文件（row  log）中。</p>
+<p>4.临时文件生成后，将日志文件的操作应用到临时文件中，得到与表A相同的数据文件。</p>
+<p>5.用临时文件替换表A的数据文件。</p>
+<p>整个过程中，MDL的写锁会转化为MDL的读锁，从而提高效率。</p>
+<p>整个过程很消耗CPU和IO,如果想安全操作，推荐使用gh-os来做。</p>
+<h5 id="Online和inplace-的区别"><a href="#Online和inplace-的区别" class="headerlink" title="Online和inplace 的区别"></a>Online和inplace 的区别</h5><p>对于server层没有把数据移动到临时表，是一个“原地”操作，这就过程称为inplace。</p>
+<p>1.DDL过程如果是Online的，就一定是inplace的</p>
+<p>2.inplace的DDL，有可能不是Online的。8.0后添加全文索引（FULLTEXT index）和空间索引（SPATIAL index）就属于这种情况。</p>
+<h5 id="optimize-table、analyze-table和alter-table三种重建表的区别"><a href="#optimize-table、analyze-table和alter-table三种重建表的区别" class="headerlink" title="optimize table、analyze table和alter table三种重建表的区别"></a>optimize table、analyze table和alter table三种重建表的区别</h5><p>1.从MySQL 5.6版本开始，alter table t engine = InnoDB默认就是Online DDL。</p>
+<p>2.analyze table t，只是对索引信息进行重新统计，没有修改数据，加入MDL读锁。</p>
+<p>3.optimize table = analyze  + alter</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning04.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -278,7 +1071,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/mysql-learning03.html" class="post-title-link" itemprop="url">SQL语句为什么变“慢”</a>
+            <a href="/mysql-learning03.html" class="post-title-link" itemprop="url">SQL慢的原因和解决办法</a>
         </h2>
 
         <div class="post-meta">
@@ -289,7 +1082,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-01-22 19:22:59 / 修改时间：19:47:02" itemprop="dateCreated datePublished" datetime="2021-01-22T19:22:59+08:00">2021-01-22</time>
+              <time title="创建时间：2021-01-22 19:22:59 / 修改时间：20:54:09" itemprop="dateCreated datePublished" datetime="2021-01-22T19:22:59+08:00">2021-01-22</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -327,7 +1120,31 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="SQL为什么变“慢”"><a href="#SQL为什么变“慢”" class="headerlink" title="SQL为什么变“慢”"></a>SQL为什么变“慢”</h3><p>当内存数据页和磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘的数据页的内容就一直了，称为“干净页”。刷新脏页的过程为称为flush。</p>
+          <h3 id="SQL执行过慢的原因"><a href="#SQL执行过慢的原因" class="headerlink" title="SQL执行过慢的原因"></a>SQL执行过慢的原因</h3><h4 id="1-查询长时间不返回"><a href="#1-查询长时间不返回" class="headerlink" title="1.查询长时间不返回"></a>1.查询长时间不返回</h4><ul>
+<li>等待MDL锁</li>
+</ul>
+<p>mysql&gt; select * from t where id=1;</p>
+<p>一般是表t被锁住了。可以利用show processlist看看语句处于什么状态。</p>
+<p>如果是Waiting for table metadata lock的示意图，则表示有一个线程正在表t上请求或者持有MDL写锁。</p>
+<p>通过查询sys.schema_table_lock_waits这张表，我们可以直接找到阻塞进程的id，然后把这个链接kill掉。  </p>
+<ul>
+<li>等flush</li>
+</ul>
+<p>有一个线程正要对表t做flush操作，MySQL里面对表做flush操作的用法。</p>
+<p>flush tables t with read lock;</p>
+<p>flush tables with read lock;</p>
+<p>这个两个flush语句，如果制定表 t 的话，代表的只关闭表t，如果没有指定具体的表名，则表示关闭MySQL里所有打开的表。</p>
+<p>所以出现Waiting for table flush 状态的可能情况是：有一个命令被别的语句堵住，然后它有堵住了我们select的语句。</p>
+<p><img src="https://i.loli.net/2021/01/22/2qgHDfrzZEtPGjC.png"></p>
+<ul>
+<li>等行锁</li>
+</ul>
+<p>如果一个事务在这行记录上面上持有一个写锁，那么我们的select 语句就会被堵住。</p>
+<p><img src="https://i.loli.net/2021/01/22/6HhCZGowEaSjlqe.png"></p>
+<p>可以通过sys.innodb_lock_waits表查到。</p>
+<h4 id="2-查询慢"><a href="#2-查询慢" class="headerlink" title="2.查询慢"></a>2.查询慢</h4><p>1.没有索引</p>
+<p>2.为了一致性读，undo log日志过长导致的，判断是不是有长事务。</p>
+<h3 id="SQL为什么突然变“慢”"><a href="#SQL为什么突然变“慢”" class="headerlink" title="SQL为什么突然变“慢”"></a>SQL为什么突然变“慢”</h3><p>当内存数据页和磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘的数据页的内容就一直了，称为“干净页”。刷新脏页的过程为称为flush。</p>
 <h4 id="flush的4种场景"><a href="#flush的4种场景" class="headerlink" title="flush的4种场景"></a>flush的4种场景</h4><p>1.对于InnoDB 的redo log写满了。</p>
 <p>2.对应的系统内存不足。在需要新的内存页，而内存不够用的时候，就要淘汰一些数据页，空出内存给别的数据页使用。如果淘汰的时“脏页”，则先写入磁盘。</p>
 <p>3.MySQL会合理的安排时间，见缝插针的刷新“脏页”。</p>
@@ -387,7 +1204,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-01-22 19:08:42 / 修改时间：19:47:06" itemprop="dateCreated datePublished" datetime="2021-01-22T19:08:42+08:00">2021-01-22</time>
+              <time title="创建时间：2021-01-22 19:08:42 / 修改时间：20:36:50" itemprop="dateCreated datePublished" datetime="2021-01-22T19:08:42+08:00">2021-01-22</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -451,7 +1268,7 @@
 <p>2.到主键查到主键值是ID2的行，判断email的值是否正确，将这行记录加入结果集</p>
 <p>3.取index1索引树上刚刚查到的位置的下一条记录，发现不满足email=’zhangssxyz@xxx.com’的条件，循环结束。</p>
 <h5 id="使用部分索引"><a href="#使用部分索引" class="headerlink" title="使用部分索引"></a>使用部分索引</h5><p>1.从index2 索引树找到满足索引值“zhangs”的记录，找到一个是ID!;</p>
-<p>2.到主键查询主键值ID1的行，判断email的值不是“<a href="mailto:&#x7a;&#x68;&#97;&#110;&#103;&#115;&#x73;&#115;&#64;&#120;&#120;&#x78;&#x2e;&#x63;&#111;&#x6d;">&#x7a;&#x68;&#97;&#110;&#103;&#115;&#x73;&#115;&#64;&#120;&#120;&#x78;&#x2e;&#x63;&#111;&#x6d;</a>”，丢弃。</p>
+<p>2.到主键查询主键值ID1的行，判断email的值不是“<a href="mailto:&#122;&#x68;&#97;&#x6e;&#x67;&#x73;&#115;&#115;&#64;&#120;&#x78;&#120;&#x2e;&#x63;&#x6f;&#109;">&#122;&#x68;&#97;&#x6e;&#x67;&#x73;&#115;&#115;&#64;&#120;&#x78;&#120;&#x2e;&#x63;&#x6f;&#109;</a>”，丢弃。</p>
 <p>3.取index2刚刚位置的下一条记录，发现仍然是“zhangs”，取出ID2，回表判断值是否正确，加入结果集</p>
 <p>4.重复上述操作，直到在index2上取到的值不是“zhangs”时，循环结束</p>
 <p>使用好前缀索引，定义好长度，就可以做好既节约空间，又不用额外增加太多的查询成本。</p>
@@ -465,6 +1282,9 @@
 <p>1.倒序存储不消耗额外的空间，不需要新增hash字段。</p>
 <p>2.自增hash字段的方式，倒序rerverse()相比hash函数的效率更高。</p>
 <p>3.从查询效率上看，使用hash字段方式的查询性能相对稳定。</p>
+<h4 id="索引的失效"><a href="#索引的失效" class="headerlink" title="索引的失效"></a>索引的失效</h4><p>1.对索引字段做函数操作，可能会破环索引值的有序性，因此优化器就决定放弃走树搜索功能。</p>
+<p>2.隐式的类型转换</p>
+<p>3.隐式的字符编码转化</p>
 
       
     </div>
@@ -480,990 +1300,11 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/performance-tune-learn01.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/performance-tune-learn01.html" class="post-title-link" itemprop="url">Java性能调优与测试</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 13:24:58 / 修改时间：14:16:09" itemprop="dateCreated datePublished" datetime="2021-01-22T13:24:58+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/performance-tune-learn01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/performance-tune-learn01.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="后台服务出现明显“变慢”"><a href="#后台服务出现明显“变慢”" class="headerlink" title="后台服务出现明显“变慢”"></a>后台服务出现明显“变慢”</h4><h5 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h5><p>1.检查应用本身的错误日志。</p>
-<p>2.可以检查系统级别的资源占用情况，例如CPU、内存是否被其他进程大量占用。</p>
-<p>3.监控Java 服务自身，例如GC 日志里面是否观察到FULL GC等恶劣情况，或者其他进程大量占用，并且这种占用是否不符合系统的正常运行情况。</p>
-<p>4.如果不能定位具体问题，对应用进行Profing也是个办法，但会影响系统的响应速度。</p>
-<p>5.定位错误后，采取相应的不久措施。</p>
-<h5 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h5><p>1.自上而下。从应用的顶层，逐步深入到具体的不同模块。</p>
-<p>2.自下而上。从类似CPU这种硬件底层，判断Cache-Miss之类的问题和调优机会，出发点是指令级别优化。</p>
-<p>自上而下(单机应用)</p>
-<p>系统性能分析中，<strong>CPU、内存和IO</strong>是主要关注项。</p>
-<p>CPU排查</p>
-<p>查看负载有没有明显的变化，利用top和jstack 找出最耗费CPU的线程。利用vmstat，查看上下文切换的数量，</p>
-<p>如果每秒上下文切换很高，并且比系统中断高很多，就表明有可能是因为不合理的多线程调度导致的。</p>
-<p>内存排查</p>
-<p>利用free 之类查看内存使用，进一步判断swap使用情况，top命令输出中Virt作为虚拟内存使用量，就是物理内存（Res）和swap 求和。</p>
-<p>IO排查</p>
-<p>利用iostat等命令判断磁盘的健康情况。</p>
-<p><img src="https://i.loli.net/2021/01/22/rGQo2IV57uCEq9l.png"></p>
-<p>JVM 层面的性能分析</p>
-<p>1.利用JMC、JConsole等工具进行运行时监控。</p>
-<p>2.利用各种工具，在运行时进行堆转存储分析，获取各种角度的统计数据。</p>
-<p>3.GC 日志等手段，诊断 Full GC 、Minor GC、或者引用堆积。</p>
-<p>4.应用Profiling，来实现从Hotspot JVM内部收集底层信息，通常会有2%左右的损耗。</p>
-<h4 id="Lambda让程序“慢30倍”？"><a href="#Lambda让程序“慢30倍”？" class="headerlink" title="Lambda让程序“慢30倍”？"></a>Lambda让程序“慢30倍”？</h4><p>一般来说，可以认为Lambda/Stream 提供了与传统方式接近对等的性能。主要的开销：初始化的开销。</p>
-<p>Lambda并不是语法糖，而是一种新的工作机制。在首次调用时，JVM需要为其构建。如果 Java 应用启动过程中引入很多Lambda语句，会导致启动过程变慢。</p>
-<p>通过引入基准测试，可以定义性能对比的明确条件、具体的指标，进而保证得到<strong>定量的、可重复的</strong>对比数据，这是工程中的实际需要。 </p>
-<h5 id="微基准测试"><a href="#微基准测试" class="headerlink" title="微基准测试"></a>微基准测试</h5><p>当需要对一个大型软件的某小部分的性能评估时，就可以考虑微基准测试。</p>
-<p>微基准测试通常是API级别的验证，一般是偏基础、底层平台开发者的需求。（通常使用Benchmark）。</p>
-<h5 id="微基准框架"><a href="#微基准框架" class="headerlink" title="微基准框架"></a>微基准框架</h5><p>目前最为广泛的框架之一就是 JMH。如果做 Java API级别的性能对比，JMH往往是首选。</p>
-<h5 id="微基准框架测试过程的闭坑"><a href="#微基准框架测试过程的闭坑" class="headerlink" title="微基准框架测试过程的闭坑"></a>微基准框架测试过程的闭坑</h5><p>1.保证代码经过了足够并且合适的预热。JVM会对代码进行优化，JIT会一定条件下将代码编译本地代码。</p>
-<p>2.防止 JVM 进行无效代码消除，尽量保证方法有返回值，而不是void方法。</p>
-<p>3.防止发生常量折叠。JVM 如果发现计算过程依赖常量，就可能会直接计算结果。JMH提供了State机制来解决这个问题。</p>
-<p>4.避免GC 对程序的影响，可以采用 Serial GC 或者 JDK 11引入的Epsilon GC，从而排除相关的影响。</p>
-<h4 id="JVM优化代码"><a href="#JVM优化代码" class="headerlink" title="JVM优化代码"></a>JVM优化代码</h4><p>JVM 在对代码执行的优化可分为运行时优化(runtime)和即时编译器(JIT)优化。</p>
-<h5 id="运行时优化"><a href="#运行时优化" class="headerlink" title="运行时优化"></a>运行时优化</h5><p>主要是解释执行和动态编译通用的一些机制，比如锁机制、内存分配机制(如TLAB)等。还有一些专门用于优化解释执行效率的，比如说模版解释器、内联缓存等。</p>
-<h5 id="即时编译器优化"><a href="#即时编译器优化" class="headerlink" title="即时编译器优化"></a>即时编译器优化</h5><p>指将热点的代码以方法为单位转换成机器码，直接运行在底层硬件之上。比如静态编译器可以使用方法内联、逃逸分析以及基于profile的投机性优化。</p>
-<h5 id="Java优化的落地"><a href="#Java优化的落地" class="headerlink" title="Java优化的落地"></a>Java优化的落地</h5><img src="https://i.loli.net/2021/01/22/QWa2uXfHVqlw5YM.png" style="zoom:50%;" />
-
-<p>编译期：编译器或者相关API等奖源码转换为字节码的过程，可以直接利用反编译工具，查看细节。</p>
-<p>JVM运行时的优化：通常是编译器和解释器共同作用的结果。 </p>
-<img src="https://i.loli.net/2021/01/22/Rz1P83MLwnfyBli.png" style="zoom:67%;" />
-
-<p>解释器和编译器会进行一些通用的优化。例如锁优化和Intrinsic 机制。</p>
-<p>即时编译器：通过对方法调用的计数统计，甄别出热点代码，编译为本地点吗。另一个优化场景，则是针对热点循环代码，利用栈上替换技术。JIT可以看作基于两个计数器实现，方法计数器和回边计数器提供给JVM 统计数据，以定位到热点代码。</p>
-<h5 id="勘查优化"><a href="#勘查优化" class="headerlink" title="勘查优化"></a>勘查优化</h5><ul>
-<li>编译器查看</li>
-</ul>
-<p>-XX:+PrintCompilation 打印编译的细节</p>
-<p>XX:UnlockDiagnosticVMOptions -XX:+LogCompilation -XX:LogFile=  输出更多的编译细节</p>
-<p>-XX:+PrintInlining   打印内联的发生</p>
-<ul>
-<li>代码缓存</li>
-</ul>
-<p>可以利用 JMC、JConsole 等查看具体的统计信息。</p>
-<ul>
-<li>调整热点代码门限值</li>
-</ul>
-<p>利用CompileThreshold 调整JIT的默认门限，利用UseCounterDecay关闭计数器衰减。</p>
-<ul>
-<li>调整Code Cache 大小</li>
-</ul>
-<p>利用XX:ReservedCodeCacheSize调整Code Cache的大小，可以调整初始化大小-XX:InitialCodeCacheSize</p>
-<ul>
-<li>调整编译器线程数，或者选择适当的编译器模式</li>
-</ul>
-<p>client模式只会有一个编译线程。而server模式是默认两个，C1和C2，会根据CPU内核数目计算C1 和 C2 的数值。</p>
-<p>增强的多处理器中，增大编译线程数，可能会充分利用CPU资源，但是当系统繁忙时，反而会导致线程争抢过多资源。</p>
-<ul>
-<li>其他的优化</li>
-</ul>
-<p>减少进入安全点。</p>
-<p>在 JIT 过程中，逆优化等场景需要插入安全点。</p>
-<p>常规的锁优化解决。利用-XX:-UseBiasedLocking 关闭偏向锁。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/learn-redis01.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/learn-redis01.html" class="post-title-link" itemprop="url">Redis学习笔记01</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-01-17 23:08:58" itemprop="dateCreated datePublished" datetime="2021-01-17T23:08:58+08:00">2021-01-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-22 19:10:18" itemprop="dateModified" datetime="2021-01-22T19:10:18+08:00">2021-01-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/learn-redis01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/learn-redis01.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="Redis-key的淘汰策略"><a href="#Redis-key的淘汰策略" class="headerlink" title="Redis key的淘汰策略"></a>Redis key的淘汰策略</h3><h4 id="过期策略"><a href="#过期策略" class="headerlink" title="过期策略"></a>过期策略</h4><h5 id="定时删除"><a href="#定时删除" class="headerlink" title="定时删除"></a>定时删除</h5><p>在设置某个key 的过期时间的同时，创建一个定时器，让定时器在该过期时间到来时，立即执行对其进行删除的操作。</p>
-<h5 id="定期删除"><a href="#定期删除" class="headerlink" title="定期删除"></a>定期删除</h5><p>每隔一段时间，我们就对一些key进行检查，删除里面过期的key。</p>
-<h5 id="惰性删除"><a href="#惰性删除" class="headerlink" title="惰性删除"></a>惰性删除</h5><p>在客户端访问这个key的时候，redis对key的过期时间进行检查，如果过期了就立即删除，不会返回东西。会导致很多过期的key仍然存在内存中。</p>
-<p>Redis就是使用<strong>惰性删除</strong>和<strong>定期删除</strong>两种策略配合使用。</p>
-<h5 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h5><p><strong>惰性删除</strong>：Redis的惰性删除策略由 db.c/expireIfNeeded 函数实现.</p>
-<p><strong>定期删除</strong>：由redis.c/activeExpireCycle 函数实现，函数以一定的频率运行，每次运行时，都从一定数量的数据库中取出一定数量的随机键进行检查，并删除其中的过期键(默认没100ms一次)。</p>
-<h4 id="内存的淘汰策略"><a href="#内存的淘汰策略" class="headerlink" title="内存的淘汰策略"></a>内存的淘汰策略</h4><p>默认无限制，通常设置为物理内存的3/4。</p>
-<p>当现有内存大于maxmemory时，便会触发redis主动淘汰内存方式，通过设置maxmemory-policy，有如下几种淘汰方式。</p>
-<ul>
-<li>volatile-lru：利用LRU算法移除设置过过期时间的key</li>
-<li>allkeys-lru: 利用LRU算法移除任何key。<strong>通常使用该方式</strong>。</li>
-<li>volatile-random : 移除设置过过期时间的随机key。</li>
-<li>allkeys-random: 无差别的随机移除。</li>
-<li>volatile-ttl：移除即将过期的key</li>
-<li>noeviction: 不移除任何key，只是返回一个写错误，<strong>默认选项</strong>，一般不会选用。</li>
-</ul>
-<h3 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h3><p>为了避免内存中的数据丢失，Redis提供了对持久化的支持，可以选择不同的方式保存到磁盘中。</p>
-<h4 id="RDB-Redis-Database"><a href="#RDB-Redis-Database" class="headerlink" title="RDB(Redis Database)"></a><strong>RDB</strong>(Redis Database)</h4><p>在指定的时间间隔内将内存中的数据集快照写入磁盘，也就是Snapshot快照，恢复时将快照文件直接读入内存。</p>
-<h5 id="Snapshot的两种模式"><a href="#Snapshot的两种模式" class="headerlink" title="Snapshot的两种模式"></a>Snapshot的两种模式</h5><p>1.SAVE: save只管保存，其他的不管，全部阻塞。</p>
-<p>2.BGSAVE: Redis会在异步后台(fork子进程)进行快照操作，主进程仍然可以响应客户端的请求，保存完成后通知主进程，可以通过lastsave命令获取最后一次成功执行快照的时间。</p>
-<h5 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h5><ul>
-<li>适合大规模的数据恢复</li>
-<li>对数据完整性和一致性要求不高</li>
-<li>与AOF模式相比，通过RDB文件恢复数据比较快</li>
-<li>通过fork进程的方式备份，对Redis服务器的性能影响较小。</li>
-</ul>
-<h5 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h5><ul>
-<li>每隔一段时间备份，会丢失最后一次快照后的数据</li>
-<li>Fork的时候，内存消耗大，会占用2倍的内存</li>
-<li>使用save时会造成Redis服务器阻塞，导致不可用。</li>
-<li>使用bgsave fork子进程时，如果数据量太大，forks的过程也会发生阻塞另外比较费内存。</li>
-</ul>
-<h4 id="AOF（Append-Only-File）"><a href="#AOF（Append-Only-File）" class="headerlink" title="AOF（Append-Only-File）"></a><strong>AOF</strong>（Append-Only-File）</h4><p>以日志的形式来记录每个写操作，将Redis执行过的所有写指令。只许追加但不可以改写文件。redis载入AOF文件的时候，会创建一个虚拟的client，把AOF中每一条命令都执行一遍。在RDB和AOF备份文件都有的情况下，redis会优先执行AOF中的文件。</p>
-<h5 id="AOF备份的三种策略"><a href="#AOF备份的三种策略" class="headerlink" title="AOF备份的三种策略"></a>AOF备份的三种策略</h5><ul>
-<li>always:将缓存区的内容总是及时写到AOF文件中。</li>
-<li>everysec: 将缓存区的内容每隔一秒写入AOF文件中(默认策略)。</li>
-<li>no: 写入AOF文件中的操作由操作系统决定，一般系统会等到缓存区被填满，才会同步数据到磁盘。</li>
-</ul>
-<h5 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h5><p>为了解决AOF文件膨胀的问题，Redis提供AOF重写功能：Redis服务器可以创建一个新的AOF文件来替换旧文件，Redis保证新旧两个文件所保存的数据库状态一样。</p>
-<p>AOF_REWRITE这个函数会保证服务器的高性能，会Fork子进程进而执行AOF重写程序，同时，为了保障主进程和AOF文件数据不一致的问题。Redis增加了 一个AOF缓存区，等子进程完成后 ，会将AOF缓存区中的内容写入到新的AOF文件中。</p>
-<p>默认重写出发机制时上次rewrite后大小的一倍并且文件大于64MB。</p>
-<h5 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h5><p>1.AOF只是追加文件，对服务器的影响小。</p>
-<p>2.可以采用不同的策略，在数据的完整性和性能之间做出平衡性。</p>
-<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><p>1.一般AOF文件要大于RDB文件恢复数据的速度比RDB慢</p>
-<p>2.aof运行效率慢于rdb，同步策略效率较好，不同步效率与rdb相同。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning01.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning01.html" class="post-title-link" itemprop="url">MySQL 基础架构</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-01-15 17:27:14" itemprop="dateCreated datePublished" datetime="2021-01-15T17:27:14+08:00">2021-01-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-22 19:47:09" itemprop="dateModified" datetime="2021-01-22T19:47:09+08:00">2021-01-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning01.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="mysql基础架构"><a href="#mysql基础架构" class="headerlink" title="mysql基础架构"></a>mysql基础架构</h3><img src="https://i.loli.net/2021/01/15/96nZGfYu8AJeyMk.png" style="zoom:50%;" />
-
-<p>链接器：连接器负责跟客户端建立连接、获取权限、维持和管理连接。</p>
-<p>长链接积累下来会导致内存占用太大，被系统强行杀掉，从而导致MySQL重启。</p>
-<p>解决方案：</p>
-<p>1.定期断开长链接。</p>
-<p>2.利用5.7版本以上mysql_reset_connection来重新初始化资源。这个过程不需要重连和重新做权限验证，但是会将连接恢复到刚刚创建完时的状态。</p>
-<p>查询缓存：之前的sql会以key-value 的形式存到内存中，根据语句直接返回结果。</p>
-<p>不建议使用，对表的更新会清空所有缓存。5.8版本中彻底清除了缓存功能。</p>
-<p>分析器：进行sql语句的词法分析和语法分析。</p>
-<p>优化器：执行计划生成， 确定索引。</p>
-<p>执行器：判断有无权限，根据引擎提供的接口，具体去操控存储引擎。</p>
-<h3 id="日志redo-log和binlog"><a href="#日志redo-log和binlog" class="headerlink" title="日志redo log和binlog"></a>日志redo log和binlog</h3><p>redo log:采用的是WAL(Write-Ahead Logging)技术，InnoDB会先把记录写入到redo log里面，并更新内存，I</p>
-<p>nnoDB会在适当的时候更新到磁盘里面。InnoDB 的 redo log 是固定大小的，从头开始写，写到末尾就又回到开头循环写，如下面这个图所示。</p>
-<img src="https://i.loli.net/2021/01/15/khAlLBG49Uzb1Ss.png" style="zoom:50%;" />
-
-<p>当write pos追check point是，就代表着要更新进磁盘，然后把checkout point 往前推进。有了redo log，即使是发生崩溃或者重启，数据也不会丢失，这个能力为称为crash-safe。InnoDB 引擎特有的日志。</p>
-<p>Binlog:Server层特有的操作日志，称为bingo（归档日志）。binlog没有crash-safe 能力。</p>
-<p>两种日志的区别：</p>
-<p>1.bin log是server层的日志，而redo log是属于InnoDB特有的。</p>
-<p>2.redo是物理日志，记录的做的什么修改。而binlog是逻辑日志，记录语句的原始逻辑。</p>
-<p>3.redo log是循环写，而bin log是追加写，不会覆盖。</p>
-<p>update 流程顺序</p>
-<img src="https://i.loli.net/2021/01/15/NRSnYqxbfC9V1Gv.png" style="zoom:50%;" />
-
-
-
-<p>两阶段提交：为了让redo log和bin log日志具有一致性。</p>
-<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p>事务就是要保证一组数据库操作，要么全部成功，要么全部失败。具有ACID特性</p>
-<p>A：原子性</p>
-<p>C：一致性</p>
-<p>I：隔离性</p>
-<p>D: 持久性</p>
-<p>事务隔离级别</p>
-<p>1.读未提交：指一个事务能读到另一个事务还未提交的数据。</p>
-<p>2.读己提交：一个事务提交后，它做的变更在能被其他事务看见。</p>
-<p>3.可重复读：一个事务在执行过程中，总跟启动时看到的数据是一致的。</p>
-<p>4.串行话：对同一条记录会加锁，当出现锁冲突的时候，必须等待前一个事务执行完成。</p>
-<p>事务的启动方式：</p>
-<p>1.显示启动，begin或者start tranction。配套提交commit，回滚语句rollback。</p>
-<p>2.set autocommit = 0 ,执行语句的时候自动开启，直到主动commit或者rollback。</p>
-<p>执行 commit work and chain，则是提交事务并自动启动下一个事务。</p>
-<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>索引的作用：索引就是为了提交数据的查询效率，就像是书的目录。</p>
-<p>索引的结构：</p>
-<p>哈希表：只用于等值查询的场景。</p>
-<p>有序数组：适用于等值查询和范围查询的场景，插入和删除成本过高，适用于静态存储。</p>
-<p>N叉树：比较均衡，插入和查询的效率为logN。</p>
-<p>主键索引：存储整行数据。在InnoDB中，也为称为聚簇索引。</p>
-<p>非主键索引：存储主键索引的值。在InnoDB中，也为称为非聚簇索引。</p>
-<p>覆盖索引：覆盖索引可以减少树的搜索次数，显著提升查询性能。</p>
-<h3 id="MySQL锁"><a href="#MySQL锁" class="headerlink" title="MySQL锁"></a>MySQL锁</h3><p>全局锁：对整个数据库实例加锁。提供了全局读锁的方法，命令是Flush tables with read lock。</p>
-<p>加锁后，整个数据处于只读操作，任何线程的修改、事务等命令将被阻塞。</p>
-<p>使用场景：全库逻辑备份。</p>
-<p>为什么不使用set global readonly=true的方式</p>
-<p>1.readonly有时被用来执行判断逻辑，例如：主从库。</p>
-<p>2.readonly不会主动释放，会让整个库一直处于只读状态，风险较高。</p>
-<p>表级锁：表锁和元数据锁MDL（meta data lock）</p>
-<p>1.表锁的语法：lock tables … read/write。在链接断开的时候自动释放，也会限制别的线程和本线程的操作对象。</p>
-<p>2.MDL 不需要显示的使用，在访问一个表的时候自动加上。MDL的作用是保证读写的正确性。MDL是MySQL 5.5时引入，当对一个表进行增删改查的时候，会加MDL读锁。当对表的结构做变更的时候，加MDL写锁。</p>
-<p>读锁之间不互斥，读写锁，写锁之间互斥。</p>
-<p>如何安全的给小表加字段</p>
-<p>1.kill掉长事务，事务不提交，就会一直占着MDL锁。</p>
-<p>2.在alter table语句中设置等待时间</p>
-<p>对于全部是InnnoDB引擎的表，备份选择建议使用single-transaction参数。</p>
-<p>行锁：针对数据表中行记录的锁。</p>
-<p>InnoDB事务中，行锁是在需要的时候才加上的，但并不是不需要了就立即释放，而是要等到事务结束时才释放。</p>
-<p>死锁和死锁检测</p>
-<p>当并发系统中不同线程出现循环等待资源，涉及的线程都在等待别的线程释放资源，就会导致这几个线程都进入无限等待的情况，称为死锁。</p>
-<p>死锁实例</p>
-<img src="https://i.loli.net/2020/12/03/VGsXBvhdHlPwerQ.png" style="zoom:50%;" />
-
-<p>事务A和事务B会相互等待。</p>
-<p>死锁解决方案</p>
-<p>1.直接进入等待超时，可以设置innodb_lock_wait_timeout 来等待。</p>
-<p>2.发起死锁检测，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数innodb_deadlock_detect 设置为 on。死锁检测会耗费大量的cpu资源，每次都需要判断自己的加入是否导致了死锁。</p>
-<p>死锁检测的方法</p>
-<p>1.确保程序中一定不会出现死锁。</p>
-<p>2.控制并发度。</p>
-<p>begin和start transaction 命令并不是一个事务的起点，在执行到它们第一个操作InnoDB表的语句，事务才真正启动。如果想立马开启事务，可以使用start transaction with consistent snapshot。</p>
-<p>MVCC的实现原理</p>
-<p>每次数据更新的时候，会生成一个新的数据版本，并且把transaction id 赋值给这个数据版本的事务ID，记为row_trx_id。</p>
-<img src="https://i.loli.net/2021/01/15/6I4KdnDWZVa9jeR.png" style="zoom:50%;" />
-
-<p>对于当前事务的启动瞬间来说，一个数据的row trx_id，有以下几种可能。</p>
-<p>1.如果落在了绿色部分，表示这个版本是已经提交的事务或者是当前事务自己生成的，这个数据是可见的。</p>
-<p>2.如果落在了红色部分，则表示这个版本是将来启动的事务生成的，是肯定不可见的。</p>
-<p>3.如果落在黄色部分，包括两种情况：</p>
-<p> a.若 row trx_id 在数组中，表示这个版本是由未提交的事务生成的，不可见；</p>
-<p> b.若row trx_id 不再数组中，表示这个版本是已经提交了的事务生成的，可见；</p>
-<p>InnoDB利用了“所有数据都有多个版本”的这个特性，实现了“秒级创建快照”能力。</p>
-<p>一个数据版本，对于一个事务视图，除了自己的更新总是可见以外，有三种情况：</p>
-<p>1.版本未提交，不可见；</p>
-<p>2.版本已提交，但是是在视图创建后提交的，不可见；</p>
-<p>3.版本已提交，而且是在视图创建前提交的，可见。</p>
-<p>更新数据都是先读后写的，而这个读，只能是当前版本的值，成为当前读。</p>
-<p>除了 update 语句外，select 语句如果加锁，也是当前读。</p>
-<p>加入读锁（S锁，共享锁）：select k from t where id=1 lock in share mode;</p>
-<p>加入写锁（X锁，拍他锁）：select k from t where id=1 for update;</p>
-<p>事务的可重复读怎么实现的？</p>
-<p>可重复读的核心就是一致性读；而事务更新数据的时候，只能用当前读。如果当前的记录的行锁被其他事务占用的话，就需要进入锁等待。</p>
-<p>读已提交和可重复读的逻辑类似，主要的区别是：</p>
-<p>1.可重复读的隔离级别下，只需要在事务开的时候创建一致性视图，之后事务里的其他查询都公用这个一致性视图。</p>
-<p>2.在读提交隔离级别下，每一个语句执行前都会重新计算出一个新的视图。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/learn-note01.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/learn-note01.html" class="post-title-link" itemprop="url">《做时间的朋友读书笔记》</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-10 22:55:59 / 修改时间：23:09:19" itemprop="dateCreated datePublished" datetime="2021-01-10T22:55:59+08:00">2021-01-10</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AF%BB%E4%B9%A6/" itemprop="url" rel="index"><span itemprop="name">读书</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/learn-note01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/learn-note01.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>作者：<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E6%9D%8E%E7%AC%91%E6%9D%A5">李笑来</a></p>
-<p>著作：《把时间当朋友》、《21天TOEFL核心词汇21天突破》、《财富自由之路》、《韭菜的自我修养》</p>
-<p>新东方高级教师、创建比特基金专注互联网、比特币的投资。</p>
-</blockquote>
-<h4 id="何为心智"><a href="#何为心智" class="headerlink" title="何为心智"></a>何为心智</h4><p>时间是不可以管理的，时间按不按人的意志一步一步的按照固定的频率流逝，唯独可以管理的是我们自己。</p>
-<p>一个人的心智就是其过往获得的一切知识以及经验总和（包括基于这些知识和经验造就的思考方法、思考模式）。</p>
-<h4 id="想要速成的原因"><a href="#想要速成的原因" class="headerlink" title="想要速成的原因"></a>想要速成的原因</h4><p>1.自己的欲望无限</p>
-<p>2.要完成的事情太多 </p>
-<p>3.自我满意度不断的下降</p>
-<h4 id="与时间做朋友"><a href="#与时间做朋友" class="headerlink" title="与时间做朋友"></a>与时间做朋友</h4><p>每一时刻的现状都是过去某一时刻或者某些时刻的结果，而每一个时刻的现状都是未来某一或者某些时刻的原因。</p>
-<p><strong>用正确的方法做正确的事。</strong></p>
-<p>侯世达法则：完成一个任务实际花费的时间总会超过计划花费的时间，就算制定计划的时候考虑到本法则，也不能避免这种情况的发生。</p>
-<p>为什么人不及时行动</p>
-<p>内因：害怕做不好，害怕失败。</p>
-<p>外因：过分在意外人的评价。</p>
-<p>关注步骤：内容（what）、原因（why）、方法（How）</p>
-<h4 id="何为成功"><a href="#何为成功" class="headerlink" title="何为成功"></a>何为成功</h4><p>就是获得预期的结果，达到目的。</p>
-<h4 id="学习"><a href="#学习" class="headerlink" title="学习"></a>学习</h4><p>学习是投资回报最高的行为。</p>
-<h4 id="获取知识的主要途径"><a href="#获取知识的主要途径" class="headerlink" title="获取知识的主要途径"></a><strong>获取知识的主要途径</strong></h4><p>1.体验、2.试错、3.观察、4.阅读、5.思考</p>
-<h4 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h4><p>独立的思考、只不过是从别人那里知道一个结论的时候，自己动脑重新推演一遍，看看得出结论的过程有没有漏洞和不合理的地方，衡量一下结论到底有没有道理。</p>
-<p>安慰剂效应：1955年，亨利·诺尔斯·比彻在《行之有效的安慰剂》一文中分析了1082个患者的15个临床试验，得出结论：平均35.2%±2.2%的治疗效果来自慰安剂。</p>
-<p>自证预言：如果人们相信某件事情会发生，那么这件事情最终真的会发生。</p>
-<h5 id="对立论证"><a href="#对立论证" class="headerlink" title="对立论证"></a>对立论证</h5><p>人们可能基于一模一样的原因做出截然相反的决定。</p>
-<p>钱钟书先生有一段很有趣的描述：“一个人的缺点正像猴子的尾巴，猴子蹲在地面的时候，尾巴是看不见的，知直到他向树上爬，就把后部供大家瞻仰，可是这红臀尾巴本来就有，并非地位爬高了 的新的标志”。</p>
-<p>不做事的话，永远不会暴露缺点。</p>
-<h5 id="成功的人为啥往往会夸大其词原因"><a href="#成功的人为啥往往会夸大其词原因" class="headerlink" title="成功的人为啥往往会夸大其词原因"></a>成功的人为啥往往会夸大其词原因</h5><p>1.获得满足感。</p>
-<p>2.保护自己的利益。</p>
-<p>3.来自的观众的支持。</p>
-<p>自利性偏差：把成功归于自己身上，把失败归咎于别人。</p>
-<p>即便是一只坏掉的表，一天之中起码还能对两次呢。</p>
-<h4 id="交流"><a href="#交流" class="headerlink" title="交流"></a>交流</h4><p>交流的有效往往源自听着而非说者，失败的交流往往源自听者的疏忽。</p>
-<p>有效倾听的步骤</p>
-<p>1.克制过早的质疑</p>
-<p>2.“回顾”记着那些重要点</p>
-<p>3.“预期”预判说者接下来的说辞，可以自动集中听者的注意力。</p>
-<h5 id="说与不说"><a href="#说与不说" class="headerlink" title="说与不说"></a>说与不说</h5><p>通过努力、通过积累成为能说更多话的人。</p>
-<p>苏洵：“知无不言，言无不尽，百人誉之不加密，百人毁之不加疏”</p>
-<p>《论语》:”可言而不言，失人，不可言而言，失言”</p>
-<h5 id="交流守则"><a href="#交流守则" class="headerlink" title="交流守则"></a>交流守则</h5><p>1.双方不仅要相互竞争，更要相互合作（秀才遇到兵，可是兵有武器）</p>
-<p>2.真理是独立存在的，不会依附个体或者集体</p>
-<p>3.真理不变，也不会因任何人而变；不变变化的只有人们对真理的理解。</p>
-<h5 id="沟通的本质"><a href="#沟通的本质" class="headerlink" title="沟通的本质"></a>沟通的本质</h5><p>沟通本质上来讲是编码和解码的过程，为了保证沟通顺利，往往需要添加一个验证机制。</p>
-<h4 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h4><p>往往不是有兴趣才能做好了，而是做好了才有兴趣。</p>
-<p>所有成功的学习，都只依靠两件事策略和坚持，而坚持本身就是最重要的策略。</p>
-<p>”’遗忘痛苦”是大脑的自我保护功能，但是这种“善意”的功能也同样有副作用。</p>
-<h4 id="运气"><a href="#运气" class="headerlink" title="运气"></a>运气</h4><p>一个人觉得“幸运”，是因为他的欲望得到了满足；而一个人觉得“不幸”，是因为他的欲望遭遇了落空。</p>
-<p>相信运气其实是缺乏自制力的表现。</p>
-<p>苏轼：“卒然临之而不惊，无故加之而不怒”。</p>
-<p>所谓幸运就是当你准备好的时候机会就来了，前提是准备好。</p>
-<h4 id="人脉"><a href="#人脉" class="headerlink" title="人脉"></a>人脉</h4><p>所谓的人脉只不过是某种意义上的“利益交换”。</p>
-<p>集中精力改变那些自己能够改变的事情，暂时忽略那些自己不能改变的事情。专心打造自己，让自己成为一个优秀的人、一个有用的人、一个独立的人。</p>
-<h4 id="感觉"><a href="#感觉" class="headerlink" title="感觉"></a>感觉</h4><p>相对而言，”自卑”、“自信”、“自负”都是感觉的产物，感觉本身就是不精准的，是相对的。</p>
-<h4 id="灵感"><a href="#灵感" class="headerlink" title="灵感"></a>灵感</h4><p>有目的的积累，灵感来自积累。</p>
-<p>李敖：“妓女不需要靠性欲来接客，作家不应该靠灵感来写作”</p>
-<h4 id="效率"><a href="#效率" class="headerlink" title="效率"></a>效率</h4><p>任何人都不可能100%地有效率，至少不可能总是100%地有效率。</p>
-<p>不妨利用黄金分割法。娱乐和学习的比例为0.618。</p>
-<h4 id="积累"><a href="#积累" class="headerlink" title="积累"></a>积累</h4><p>要相信积累的力量，如果感觉积累已经来不及了，那就接受现实吧！想想可以改变什么、什么不可以改变、找可以改变的地方。</p>
-<p>俞敏洪：能够爬上金字塔顶端的动物。雄鹰和蜗牛。蜗牛爬上顶端可能需要一辈子的努力，但是他所达到的高度和看到的世界一样，我们大部分人都不是雄鹰，但是可以不断地攀登自己生命的高峰，终有一天，我们可以在无限风光的险峰俯视和欣赏这个世界。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/history01.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/history01.html" class="post-title-link" itemprop="url">战国时期的第一个霸主-魏国</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-12-30 16:22:06" itemprop="dateCreated datePublished" datetime="2020-12-30T16:22:06+08:00">2020-12-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-31 17:19:17" itemprop="dateModified" datetime="2020-12-31T17:19:17+08:00">2020-12-31</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8E%86%E5%8F%B2/" itemprop="url" rel="index"><span itemprop="name">历史</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/history01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/history01.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="1-李悝变法"><a href="#1-李悝变法" class="headerlink" title="1.李悝变法"></a>1.李悝变法</h3><h4 id="李悝变法的主要内容"><a href="#李悝变法的主要内容" class="headerlink" title="李悝变法的主要内容"></a>李悝变法的主要内容</h4><p>李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。</p>
-<p>变法的内容主要包含以下4个部分。</p>
-<ul>
-<li>废除世袭制度，根据才能选择官吏，招纳贤才。</li>
-<li>废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。</li>
-<li>建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。</li>
-<li>改革军事制度，建立“魏武卒”，免除其家的赋田税。</li>
-</ul>
-<h4 id="李悝变法的意义"><a href="#李悝变法的意义" class="headerlink" title="李悝变法的意义"></a>李悝变法的意义</h4><p>1.剥削了旧贵族的势力，使得普通老百姓也能够通过才能去晋升。</p>
-<p>2.使用包产到户的政策，极大的提高了农民的积极性。同时，根据合理的税收政策和估算，计算出国家的国力，为国家稳定的发展提供了一定的根基。</p>
-<p>3.以法治国，使得各种行为和准则都有了指导的方针。《法经》分为《盗法》、《贼法》、《囚法》、《捕法》、《杂法》、《具法》6篇，后续的秦朝的法律也在此基础上建立而成。具有划时代的意义。</p>
-<p>4.极大提高了士兵们的积极性，建立了一只强大的军队。</p>
-<h3 id="2-魏国强大的根本"><a href="#2-魏国强大的根本" class="headerlink" title="2.魏国强大的根本"></a>2.魏国强大的根本</h3><ul>
-<li>政治优势</li>
-</ul>
-<p>1.人才济济。魏文侯很会识人，他手下的班子吴起、李悝、任座、魏成、乐羊、西门豹等。</p>
-<p>2.打通了人才经络，废除了旧的世袭制度，开始根据能力选拔官员。</p>
-<p>3.打通了土地经络，极大的提高了农民的积极性，帮助魏文侯摸清了国家的实力。</p>
-<p>4.出台《法经》，使整个国家运行在法制之下。</p>
-<p>5.打通军事经络，建立“魏武卒”，奖励优秀者。</p>
-<ul>
-<li>军事优势</li>
-</ul>
-<p>第一个实行军事改革的国家，拥有强大的“魏武卒”，同时拥有战国时期初年第一站神吴起，在吴起的带领下，进行了72场战斗，取得了64胜，8平的优秀战绩。</p>
-<ul>
-<li>经济优势</li>
-</ul>
-<p>魏国的国土拥有丰富的资源：小米和盐。小米一方面能够提供丰富的营养价值，另一方面，拥有优秀的保质期。最长的存储时间可以达到9年，是大米的两倍。其次，魏国的洼盐补充了人们对盐的需求，盐也可以作为腌料，用来储存猪肉等食品。</p>
-<ul>
-<li>地理优势</li>
-</ul>
-<p>魏国的国土总共分为四块，河内、河东、河西、河间之地。</p>
-<p><img src="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png"></p>
-<p>河东（今山西运城）：丰富的盐和铁矿资源，东连上党，西面黄河，北隔晋阳，南面直通中原，进可攻，退可守。魏国的政治和文化中心。</p>
-<p>河西（今陕西延安）：虽然穷，但是享受黄河之限。</p>
-<p>河内（今焦作、新乡、安阳等地）：人民的文明程度比较高，地址险恶，与其他其他国家的土壤详接，退无可守，属于四站之地。</p>
-<p>河间：拥有两道在后面一千年内都被称为华夏最重要的地理通道：豫西和豫北通道。豫北通道是东西跨越太行山脉的最省力途径。豫西通道则是黄河以南连接东西的最主要的交通线。而豫西通道中有着战略地位极其重要的“函谷关”。“一夫当关万夫莫敌”说的就是函谷关，易守难攻，同时可借助黄河之力，运送物资。</p>
-<p>河内的扩展成本极低：</p>
-<ul>
-<li>土地肥沃，粮食产量高。</li>
-<li>地址平坦，便于部队投放。</li>
-<li>周边国家力量不强，用兵的损失小，收益大。</li>
-<li>中华名族的发祥地，政治上的意义比较高。</li>
-</ul>
-<h3 id="3-桂陵之战、马陵之战"><a href="#3-桂陵之战、马陵之战" class="headerlink" title="3.桂陵之战、马陵之战"></a>3.桂陵之战、马陵之战</h3><ul>
-<li>桂陵之战</li>
-</ul>
-<p>得到韩昭侯、秦孝公、齐威王的不帮架的承诺后，兴兵伐赵，直逼邯郸，齐国派出孙膑营救赵国，历史上著名的”围魏救赵“。 孙膑把庞涓引到齐国的土地后，利用“不知战之地，不知战之时”的主场优势，大败魏军。打破了魏国不可战胜的神话。</p>
-<ul>
-<li>马陵之战</li>
-</ul>
-<p>桂陵之后的十三年，魏国伐韩，想一举灭掉韩国，齐国本着“中原均势”的政治战略，派出孙膑解救韩国，还是一样的配方，一样的味道，指至魏国国都大梁，魏惠王举全国之力，转而进攻齐国，孙膑再次引诱庞涓，采用“减灶法”，让庞涓以为齐国人都怂了，逃跑了。引庞涓来到马陵（山东濮县），利用地理优势，再次大败魏军。从此，魏国一蹶不振，国力大大衰减。</p>
-<p>《孙子兵法》：“主不可怒而兴师，将不可愠而致战”。</p>
-<p>马陵之战是秦国与中原大地的重大的历史转折点。</p>
-<h3 id="4-衰落的原因"><a href="#4-衰落的原因" class="headerlink" title="4.衰落的原因"></a>4.衰落的原因</h3><p>战略的错误：错误的选择战场，一直把中原之地作为首要目标。如果选择攻打秦国，坐拥函谷关和黄河之险，养精蓄锐，自东向西的一步一步的攻打其他国家，那么最后历史的走向很有可能不同。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/booklist.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/booklist.html" class="post-title-link" itemprop="url">2021年书单</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-12-28 14:55:36" itemprop="dateCreated datePublished" datetime="2020-12-28T14:55:36+08:00">2020-12-28</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-10 22:57:07" itemprop="dateModified" datetime="2021-01-10T22:57:07+08:00">2021-01-10</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AF%BB%E4%B9%A6/" itemprop="url" rel="index"><span itemprop="name">读书</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/booklist.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/booklist.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="技术方面"><a href="#技术方面" class="headerlink" title="技术方面"></a>技术方面</h4><p>《Netty实战》</p>
-<p>《高性能MySQL》</p>
-<p>《Redis设计与实现》</p>
-<p>《Java并发编程实战》</p>
-<p>《Java并发编程艺术》</p>
-<p>《Spring源码深度解析》</p>
-<p>《重构 改善既有代码的设计》</p>
-<p>《从Paxos到Zookeeper分布式一致性原理与实践》</p>
-<h4 id="经济方面"><a href="#经济方面" class="headerlink" title="经济方面"></a>经济方面</h4><p>《原则》</p>
-<p>《价值》</p>
-<p>《穿过迷雾》</p>
-<p>《巴菲特之道》</p>
-<p>《贫穷的本质》</p>
-<p>《穷查理宝典》</p>
-<p>《聪明的投资者》</p>
-<p>《投资中最简单的事》</p>
-<p>《手把手教你读财报》</p>
-<p>《文明、现代化、价值投资与中国》</p>
-<h4 id="历史方面"><a href="#历史方面" class="headerlink" title="历史方面"></a>历史方面</h4><p>《万历十五年》</p>
-<p>《人类简史》</p>
-<p>《明朝哪些事儿》</p>
-<p>《天朝的崩溃》</p>
-<h4 id="生活方面"><a href="#生活方面" class="headerlink" title="生活方面"></a>生活方面</h4><p>《文心》</p>
-<p>《智能时代》</p>
-<p>《被讨厌的勇气》</p>
-<p>《学会提问》</p>
-<p>《无声告白》</p>
-<p>《非暴力沟通》</p>
-<p>《金字塔原理》</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html" class="post-title-link" itemprop="url">线程安全学习笔记(一)</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-25 13:56:53 / 修改时间：19:31:52" itemprop="dateCreated datePublished" datetime="2020-12-25T13:56:53+08:00">2020-12-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h3><p>线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。</p>
-<h4 id="线程安全基本特性"><a href="#线程安全基本特性" class="headerlink" title="线程安全基本特性"></a>线程安全基本特性</h4><ul>
-<li>原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。</li>
-<li>可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。</li>
-<li>有序性，保证线程内串行语义，避免指令重排。</li>
-</ul>
-<p>所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的线程 。公平性是减少线程“饥饿”。</p>
-<p>如果说ReentranLock是synchronized的替代选择，Condition则是将wait、notify、nofityAll等操作转为为相关的对象，将复杂而晦涩的同步操作转变为直观可控的对象行为。</p>
-<p>Condition通过signal/wait的组合，完成了条件判断和通知等待线程。</p>
-<h4 id="Sync和Lock的区别"><a href="#Sync和Lock的区别" class="headerlink" title="Sync和Lock的区别"></a>Sync和Lock的区别</h4><p>1.用法比较</p>
-<p>Lock使用起来比较灵活，但是必须有释放锁的配合动作。</p>
-<p>Lock必须手动获取和释放锁，而synchronized不需要手动释放。</p>
-<p>Lock只适用于代码块锁，而synchronized可用于修饰方法、代码块等。</p>
-<p>2.特性比较</p>
-<p>能被中断的特性：与synchronized不同，获取锁的线程能够响应中断，当获取到锁的线程被中断时，中断异常将会被抛出，同时锁会被释放。</p>
-<p>3.注意事项</p>
-<p>一定要在finally中，释放锁，ReentranLock提供的newCondition的方法，以便用户在用一锁的情况下可以根据不同的情况执行等待或者唤醒的动作。</p>
-<h4 id="Synchronized实现"><a href="#Synchronized实现" class="headerlink" title="Synchronized实现"></a>Synchronized实现</h4><p>sync代码块是由monitorenter/monitorexit 指令实现的，Monitor对象是同步的基本实现。</p>
-<p>Java提供了三种被不同的Monitor实现，三种不同的锁：偏向锁、轻量级锁和重量级锁。</p>
-<p>所谓锁的升级、降级、就是JVM优化synchronized 运行的机制，当JVM检测到不同的竞争状况时，会自动切换到合适的锁实现。</p>
-<p>当没有竞争时，默认会使用偏向锁。JVM会利用CAS操作，在对象头上的Mark Word 部分设置线程ID，如果有另外的线程试图锁定某个这个已经被偏斜的对象，JVM就需要撤销偏向锁，并切换到轻量锁的实现。轻量级锁通过CAS操作Mark Word来试图获取锁，如果重试成功，就使用普通的轻量级锁，否则，进一步升级为重量级锁。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 
 
@@ -1530,7 +1371,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">17</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

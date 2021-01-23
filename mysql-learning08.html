@@ -20,22 +20,24 @@
     var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="1.李悝变法李悝变法的主要内容李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。 变法的内容主要包含以下4个部分。  废除世袭制度，根据才能选择官吏，招纳贤才。 废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。 建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。 改革军事制度，建立“魏武">
+  <meta name="description" content="order by工作原理全字段排序MySQL会给每个线程分配一块内存用于排序，称为sort buffer。 1.初始化 sort_buffer，确定放入 name、city、age 这三个字段； 2.从索引 city 找到第一个满足 city&#x3D;’杭州’条件的主键 id，也就是图中的 ID_X； 3.到主键 id 索引取出整行，取 name、city、age 三个字段的值，存入 sort_buffe">
 <meta property="og:type" content="article">
-<meta property="og:title" content="战国时期的第一个霸主-魏国">
-<meta property="og:url" content="https://sunskey.top/history01.html">
+<meta property="og:title" content="order by 工作原理">
+<meta property="og:url" content="https://sunskey.top/mysql-learning08.html">
 <meta property="og:site_name" content="Sunskey">
-<meta property="og:description" content="1.李悝变法李悝变法的主要内容李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。 变法的内容主要包含以下4个部分。  废除世袭制度，根据才能选择官吏，招纳贤才。 废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。 建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。 改革军事制度，建立“魏武">
+<meta property="og:description" content="order by工作原理全字段排序MySQL会给每个线程分配一块内存用于排序，称为sort buffer。 1.初始化 sort_buffer，确定放入 name、city、age 这三个字段； 2.从索引 city 找到第一个满足 city&#x3D;’杭州’条件的主键 id，也就是图中的 ID_X； 3.到主键 id 索引取出整行，取 name、city、age 三个字段的值，存入 sort_buffe">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png">
-<meta property="article:published_time" content="2020-12-30T08:22:06.000Z">
-<meta property="article:modified_time" content="2020-12-31T09:19:17.522Z">
+<meta property="og:image" content="https://i.loli.net/2021/01/22/XrfTwBDKqWbPmFd.png">
+<meta property="og:image" content="https://i.loli.net/2021/01/22/9LYQciKfheZ5lxE.png">
+<meta property="article:published_time" content="2021-01-22T12:37:19.000Z">
+<meta property="article:modified_time" content="2021-01-22T12:55:36.703Z">
 <meta property="article:author" content="Sunskey">
-<meta property="article:tag" content="历史">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png">
+<meta name="twitter:image" content="https://i.loli.net/2021/01/22/XrfTwBDKqWbPmFd.png">
 
-<link rel="canonical" href="https://sunskey.top/history01.html">
+<link rel="canonical" href="https://sunskey.top/mysql-learning08.html">
 
 
 <script id="page-configurations">
@@ -48,7 +50,7 @@
   };
 </script>
 
-  <title>战国时期的第一个霸主-魏国 | Sunskey</title>
+  <title>order by 工作原理 | Sunskey</title>
   
 
 
@@ -170,7 +172,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/history01.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning08.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -183,7 +185,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          战国时期的第一个霸主-魏国
+          order by 工作原理
         </h1>
 
         <div class="post-meta">
@@ -192,23 +194,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-12-30 16:22:06" itemprop="dateCreated datePublished" datetime="2020-12-30T16:22:06+08:00">2020-12-30</time>
+              <time title="创建时间：2021-01-22 20:37:19 / 修改时间：20:55:36" itemprop="dateCreated datePublished" datetime="2021-01-22T20:37:19+08:00">2021-01-22</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-31 17:19:17" itemprop="dateModified" datetime="2020-12-31T17:19:17+08:00">2020-12-31</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8E%86%E5%8F%B2/" itemprop="url" rel="index"><span itemprop="name">历史</span></a>
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
                 </span>
             </span>
 
@@ -228,8 +224,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/history01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/history01.html" itemprop="commentCount"></span>
+    <a title="valine" href="/mysql-learning08.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning08.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -245,61 +241,29 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="1-李悝变法"><a href="#1-李悝变法" class="headerlink" title="1.李悝变法"></a>1.李悝变法</h3><h4 id="李悝变法的主要内容"><a href="#李悝变法的主要内容" class="headerlink" title="李悝变法的主要内容"></a>李悝变法的主要内容</h4><p>李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。</p>
-<p>变法的内容主要包含以下4个部分。</p>
-<ul>
-<li>废除世袭制度，根据才能选择官吏，招纳贤才。</li>
-<li>废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。</li>
-<li>建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。</li>
-<li>改革军事制度，建立“魏武卒”，免除其家的赋田税。</li>
-</ul>
-<h4 id="李悝变法的意义"><a href="#李悝变法的意义" class="headerlink" title="李悝变法的意义"></a>李悝变法的意义</h4><p>1.剥削了旧贵族的势力，使得普通老百姓也能够通过才能去晋升。</p>
-<p>2.使用包产到户的政策，极大的提高了农民的积极性。同时，根据合理的税收政策和估算，计算出国家的国力，为国家稳定的发展提供了一定的根基。</p>
-<p>3.以法治国，使得各种行为和准则都有了指导的方针。《法经》分为《盗法》、《贼法》、《囚法》、《捕法》、《杂法》、《具法》6篇，后续的秦朝的法律也在此基础上建立而成。具有划时代的意义。</p>
-<p>4.极大提高了士兵们的积极性，建立了一只强大的军队。</p>
-<h3 id="2-魏国强大的根本"><a href="#2-魏国强大的根本" class="headerlink" title="2.魏国强大的根本"></a>2.魏国强大的根本</h3><ul>
-<li>政治优势</li>
-</ul>
-<p>1.人才济济。魏文侯很会识人，他手下的班子吴起、李悝、任座、魏成、乐羊、西门豹等。</p>
-<p>2.打通了人才经络，废除了旧的世袭制度，开始根据能力选拔官员。</p>
-<p>3.打通了土地经络，极大的提高了农民的积极性，帮助魏文侯摸清了国家的实力。</p>
-<p>4.出台《法经》，使整个国家运行在法制之下。</p>
-<p>5.打通军事经络，建立“魏武卒”，奖励优秀者。</p>
-<ul>
-<li>军事优势</li>
-</ul>
-<p>第一个实行军事改革的国家，拥有强大的“魏武卒”，同时拥有战国时期初年第一站神吴起，在吴起的带领下，进行了72场战斗，取得了64胜，8平的优秀战绩。</p>
-<ul>
-<li>经济优势</li>
-</ul>
-<p>魏国的国土拥有丰富的资源：小米和盐。小米一方面能够提供丰富的营养价值，另一方面，拥有优秀的保质期。最长的存储时间可以达到9年，是大米的两倍。其次，魏国的洼盐补充了人们对盐的需求，盐也可以作为腌料，用来储存猪肉等食品。</p>
-<ul>
-<li>地理优势</li>
-</ul>
-<p>魏国的国土总共分为四块，河内、河东、河西、河间之地。</p>
-<p><img src="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png"></p>
-<p>河东（今山西运城）：丰富的盐和铁矿资源，东连上党，西面黄河，北隔晋阳，南面直通中原，进可攻，退可守。魏国的政治和文化中心。</p>
-<p>河西（今陕西延安）：虽然穷，但是享受黄河之限。</p>
-<p>河内（今焦作、新乡、安阳等地）：人民的文明程度比较高，地址险恶，与其他其他国家的土壤详接，退无可守，属于四站之地。</p>
-<p>河间：拥有两道在后面一千年内都被称为华夏最重要的地理通道：豫西和豫北通道。豫北通道是东西跨越太行山脉的最省力途径。豫西通道则是黄河以南连接东西的最主要的交通线。而豫西通道中有着战略地位极其重要的“函谷关”。“一夫当关万夫莫敌”说的就是函谷关，易守难攻，同时可借助黄河之力，运送物资。</p>
-<p>河内的扩展成本极低：</p>
-<ul>
-<li>土地肥沃，粮食产量高。</li>
-<li>地址平坦，便于部队投放。</li>
-<li>周边国家力量不强，用兵的损失小，收益大。</li>
-<li>中华名族的发祥地，政治上的意义比较高。</li>
-</ul>
-<h3 id="3-桂陵之战、马陵之战"><a href="#3-桂陵之战、马陵之战" class="headerlink" title="3.桂陵之战、马陵之战"></a>3.桂陵之战、马陵之战</h3><ul>
-<li>桂陵之战</li>
-</ul>
-<p>得到韩昭侯、秦孝公、齐威王的不帮架的承诺后，兴兵伐赵，直逼邯郸，齐国派出孙膑营救赵国，历史上著名的”围魏救赵“。 孙膑把庞涓引到齐国的土地后，利用“不知战之地，不知战之时”的主场优势，大败魏军。打破了魏国不可战胜的神话。</p>
-<ul>
-<li>马陵之战</li>
-</ul>
-<p>桂陵之后的十三年，魏国伐韩，想一举灭掉韩国，齐国本着“中原均势”的政治战略，派出孙膑解救韩国，还是一样的配方，一样的味道，指至魏国国都大梁，魏惠王举全国之力，转而进攻齐国，孙膑再次引诱庞涓，采用“减灶法”，让庞涓以为齐国人都怂了，逃跑了。引庞涓来到马陵（山东濮县），利用地理优势，再次大败魏军。从此，魏国一蹶不振，国力大大衰减。</p>
-<p>《孙子兵法》：“主不可怒而兴师，将不可愠而致战”。</p>
-<p>马陵之战是秦国与中原大地的重大的历史转折点。</p>
-<h3 id="4-衰落的原因"><a href="#4-衰落的原因" class="headerlink" title="4.衰落的原因"></a>4.衰落的原因</h3><p>战略的错误：错误的选择战场，一直把中原之地作为首要目标。如果选择攻打秦国，坐拥函谷关和黄河之险，养精蓄锐，自东向西的一步一步的攻打其他国家，那么最后历史的走向很有可能不同。</p>
+        <h3 id="order-by工作原理"><a href="#order-by工作原理" class="headerlink" title="order by工作原理"></a>order by工作原理</h3><h4 id="全字段排序"><a href="#全字段排序" class="headerlink" title="全字段排序"></a>全字段排序</h4><p>MySQL会给每个线程分配一块内存用于排序，称为sort buffer。</p>
+<p>1.初始化 sort_buffer，确定放入 name、city、age 这三个字段；</p>
+<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
+<p>3.到主键 id 索引取出整行，取 name、city、age 三个字段的值，存入 sort_buffer 中；</p>
+<p>4.从索引 city 取下一个记录的主键 id；</p>
+<p>5.重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的 ID_Y；</p>
+<p>6.对 sort_buffer 中的数据按照字段 name 做快速排序；</p>
+<p>7.按照排序结果取前 1000 行返回给客户端。</p>
+<p>sort_buffer_size ，就是MySQL为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于sort_buffer_size，排序就在内存中完成。如果数据量太大，内存放不下，则不得不利用磁盘临时文件辅助排序。</p>
+<img src="https://i.loli.net/2021/01/22/XrfTwBDKqWbPmFd.png" style="zoom:50%;" />
+
+<h4 id="rowid排序"><a href="#rowid排序" class="headerlink" title="rowid排序"></a>rowid排序</h4><p>如果sort_buffer里面要存放的字段数太多，这样内存能存的行数很少，要分成很多个临时文件，排序性能会很差。可以通过修改max_length_for_sort_data的值来改变排序算法。</p>
+<p>1.初始化 sort_buffer，确定放入两个字段，即 name 和 id；</p>
+<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
+<p>3.到主键 id 索引取出整行，取 name、id 这两个字段，存入 sort_buffer 中；</p>
+<p>4.从索引 city 取下一个记录的主键 id；</p>
+<p>5.重复步骤 3、4 直到不满足 city=’杭州’条件为止，也就是图中的 ID_Y；</p>
+<p>6.对 sort_buffer 中的数据按照字段 name 进行排序；</p>
+<p>7.遍历排序结果，取前 1000 行，并按照 id 的值回到原表中取出 city、name 和 age 三个字段返回给客户端。</p>
+<img src="https://i.loli.net/2021/01/22/9LYQciKfheZ5lxE.png" style="zoom:50%;" />
+
+<h4 id="全字段排序-VS-Rowid排序"><a href="#全字段排序-VS-Rowid排序" class="headerlink" title="全字段排序 VS Rowid排序"></a>全字段排序 VS Rowid排序</h4><p>由于Rowid排序涉及到回表，如果内存足够，就优先使用内存，即全字段排序。</p>
+<p>优化手段：可以使用覆盖索引，索引上的信息足够满足查询请求，不需要再回主键索引上去取数据。</p>
 
     </div>
 
@@ -309,7 +273,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E5%8E%86%E5%8F%B2/" rel="tag"># 历史</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
           </div>
 
         
@@ -318,12 +283,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/booklist.html" rel="prev" title="2021年书单">
-      <i class="fa fa-chevron-left"></i> 2021年书单
+    <a href="/mysql-learning07.html" rel="prev" title="MySQL 保证数据不丢失的秘密">
+      <i class="fa fa-chevron-left"></i> MySQL 保证数据不丢失的秘密
     </a></div>
       <div class="post-nav-item">
-    <a href="/learn-note01.html" rel="next" title="《做时间的朋友读书笔记》">
-      《做时间的朋友读书笔记》 <i class="fa fa-chevron-right"></i>
+    <a href="/mysql-learning09.html" rel="next" title="什么是幻读">
+      什么是幻读 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -384,7 +349,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9D%8E%E6%82%9D%E5%8F%98%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">1.李悝变法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%8E%E6%82%9D%E5%8F%98%E6%B3%95%E7%9A%84%E4%B8%BB%E8%A6%81%E5%86%85%E5%AE%B9"><span class="nav-number">1.1.</span> <span class="nav-text">李悝变法的主要内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%8E%E6%82%9D%E5%8F%98%E6%B3%95%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">李悝变法的意义</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%AD%8F%E5%9B%BD%E5%BC%BA%E5%A4%A7%E7%9A%84%E6%A0%B9%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">2.魏国强大的根本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%A1%82%E9%99%B5%E4%B9%8B%E6%88%98%E3%80%81%E9%A9%AC%E9%99%B5%E4%B9%8B%E6%88%98"><span class="nav-number">3.</span> <span class="nav-text">3.桂陵之战、马陵之战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%A1%B0%E8%90%BD%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">4.</span> <span class="nav-text">4.衰落的原因</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#order-by%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">order by工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%A8%E5%AD%97%E6%AE%B5%E6%8E%92%E5%BA%8F"><span class="nav-number">1.1.</span> <span class="nav-text">全字段排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rowid%E6%8E%92%E5%BA%8F"><span class="nav-number">1.2.</span> <span class="nav-text">rowid排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%A8%E5%AD%97%E6%AE%B5%E6%8E%92%E5%BA%8F-VS-Rowid%E6%8E%92%E5%BA%8F"><span class="nav-number">1.3.</span> <span class="nav-text">全字段排序 VS Rowid排序</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

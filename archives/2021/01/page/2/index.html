@@ -20,21 +20,18 @@
     var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="线程安全线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。 线程安全基本特性 原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。 可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。 有序性，保证线程内串行语义，避免指令重排。  所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的">
-<meta property="og:type" content="article">
-<meta property="og:title" content="线程安全学习笔记(一)">
-<meta property="og:url" content="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
+  <meta name="description" content="做时间的朋友">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sunskey">
+<meta property="og:url" content="https://sunskey.top/archives/2021/01/page/2/index.html">
 <meta property="og:site_name" content="Sunskey">
-<meta property="og:description" content="线程安全线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。 线程安全基本特性 原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。 可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。 有序性，保证线程内串行语义，避免指令重排。  所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的">
+<meta property="og:description" content="做时间的朋友">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-12-25T05:56:53.000Z">
-<meta property="article:modified_time" content="2020-12-25T11:31:52.493Z">
 <meta property="article:author" content="Sunskey">
-<meta property="article:tag" content="Java">
-<meta property="article:tag" content="线程安全">
+<meta property="article:tag" content="java, hexo, blog, next">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
+<link rel="canonical" href="https://sunskey.top/archives/2021/01/page/2/">
 
 
 <script id="page-configurations">
@@ -42,12 +39,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : true,
+    isPost : false,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>线程安全学习笔记(一) | Sunskey</title>
+  <title>归档 | Sunskey</title>
   
 
 
@@ -162,139 +159,119 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content archive">
             
 
-    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          线程安全学习笔记(一)
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-25 13:56:53 / 修改时间：19:31:52" itemprop="dateCreated datePublished" datetime="2020-12-25T13:56:53+08:00">2020-12-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
   
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+  <div class="post-block">
+    <div class="posts-collapse">
+      <div class="collection-title">
+        <span class="collection-header">嗯..! 目前共计 17 篇日志。 继续努力。</span>
+      </div>
 
       
-        <h3 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h3><p>线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。</p>
-<h4 id="线程安全基本特性"><a href="#线程安全基本特性" class="headerlink" title="线程安全基本特性"></a>线程安全基本特性</h4><ul>
-<li>原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。</li>
-<li>可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。</li>
-<li>有序性，保证线程内串行语义，避免指令重排。</li>
-</ul>
-<p>所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的线程 。公平性是减少线程“饥饿”。</p>
-<p>如果说ReentranLock是synchronized的替代选择，Condition则是将wait、notify、nofityAll等操作转为为相关的对象，将复杂而晦涩的同步操作转变为直观可控的对象行为。</p>
-<p>Condition通过signal/wait的组合，完成了条件判断和通知等待线程。</p>
-<h4 id="Sync和Lock的区别"><a href="#Sync和Lock的区别" class="headerlink" title="Sync和Lock的区别"></a>Sync和Lock的区别</h4><p>1.用法比较</p>
-<p>Lock使用起来比较灵活，但是必须有释放锁的配合动作。</p>
-<p>Lock必须手动获取和释放锁，而synchronized不需要手动释放。</p>
-<p>Lock只适用于代码块锁，而synchronized可用于修饰方法、代码块等。</p>
-<p>2.特性比较</p>
-<p>能被中断的特性：与synchronized不同，获取锁的线程能够响应中断，当获取到锁的线程被中断时，中断异常将会被抛出，同时锁会被释放。</p>
-<p>3.注意事项</p>
-<p>一定要在finally中，释放锁，ReentranLock提供的newCondition的方法，以便用户在用一锁的情况下可以根据不同的情况执行等待或者唤醒的动作。</p>
-<h4 id="Synchronized实现"><a href="#Synchronized实现" class="headerlink" title="Synchronized实现"></a>Synchronized实现</h4><p>sync代码块是由monitorenter/monitorexit 指令实现的，Monitor对象是同步的基本实现。</p>
-<p>Java提供了三种被不同的Monitor实现，三种不同的锁：偏向锁、轻量级锁和重量级锁。</p>
-<p>所谓锁的升级、降级、就是JVM优化synchronized 运行的机制，当JVM检测到不同的竞争状况时，会自动切换到合适的锁实现。</p>
-<p>当没有竞争时，默认会使用偏向锁。JVM会利用CAS操作，在对象头上的Mark Word 部分设置线程ID，如果有另外的线程试图锁定某个这个已经被偏斜的对象，JVM就需要撤销偏向锁，并切换到轻量锁的实现。轻量级锁通过CAS操作Mark Word来试图获取锁，如果重试成功，就使用普通的轻量级锁，否则，进一步升级为重量级锁。</p>
-
+    <div class="collection-year">
+      <span class="collection-header">2021</span>
     </div>
 
-    
-    
-    
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
 
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Java/" rel="tag"># Java</a>
-              <a href="/tags/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" rel="tag"># 线程安全</a>
-          </div>
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2021-01-22T13:24:58+08:00"
+              content="2021-01-22">
+          01-22
+        </time>
+      </div>
 
-        
+      <div class="post-title">
+          <a class="post-title-link" href="/performance-tune-learn01.html" itemprop="url">
+            <span itemprop="name">Java性能调优与测试</span>
+          </a>
+      </div>
 
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/booklist.html" rel="next" title="2021年书单">
-      2021年书单 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
+    </header>
   </article>
+
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2021-01-17T23:08:58+08:00"
+              content="2021-01-17">
+          01-17
+        </time>
+      </div>
+
+      <div class="post-title">
+          <a class="post-title-link" href="/learn-redis01.html" itemprop="url">
+            <span itemprop="name">Redis学习笔记01</span>
+          </a>
+      </div>
+
+    </header>
+  </article>
+
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2021-01-15T17:27:14+08:00"
+              content="2021-01-15">
+          01-15
+        </time>
+      </div>
+
+      <div class="post-title">
+          <a class="post-title-link" href="/mysql-learning01.html" itemprop="url">
+            <span itemprop="name">MySQL 基础架构</span>
+          </a>
+      </div>
+
+    </header>
+  </article>
+
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2021-01-10T22:55:59+08:00"
+              content="2021-01-10">
+          01-10
+        </time>
+      </div>
+
+      <div class="post-title">
+          <a class="post-title-link" href="/learn-note01.html" itemprop="url">
+            <span itemprop="name">《做时间的朋友读书笔记》</span>
+          </a>
+      </div>
+
+    </header>
+  </article>
+
+
+    </div>
+  </div>
   
   
   
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/archives/2021/01/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/archives/2021/01/">1</a><span class="page-number current">2</span>
+  </nav>
 
 
 
           </div>
           
-    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -341,7 +318,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="nav-number">1.</span> <span class="nav-text">线程安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%9F%BA%E6%9C%AC%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">线程安全基本特性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Sync%E5%92%8CLock%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.2.</span> <span class="nav-text">Sync和Lock的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Synchronized%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">Synchronized实现</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

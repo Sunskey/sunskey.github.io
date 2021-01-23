@@ -20,22 +20,24 @@
     var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="1.李悝变法李悝变法的主要内容李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。 变法的内容主要包含以下4个部分。  废除世袭制度，根据才能选择官吏，招纳贤才。 废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。 建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。 改革军事制度，建立“魏武">
+  <meta name="description" content="如何正确显示随机消息内存临时表使用oder by rand() 对于InnoDB表，执行全字段排序会减少磁盘访问，因此会被优先选择。 对于内存表，回表过程只是简单地根据数据行的位置，直接访问内存得到数据，根本不会导致多访问磁盘，从而选择rowid排序。 select word from words order by rand() limit 3; 整个执行过程1.创建一个临时表。这个临时表使用的是">
 <meta property="og:type" content="article">
-<meta property="og:title" content="战国时期的第一个霸主-魏国">
-<meta property="og:url" content="https://sunskey.top/history01.html">
+<meta property="og:title" content="如何正确显示随机消息">
+<meta property="og:url" content="https://sunskey.top/mysql-learning11.html">
 <meta property="og:site_name" content="Sunskey">
-<meta property="og:description" content="1.李悝变法李悝变法的主要内容李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。 变法的内容主要包含以下4个部分。  废除世袭制度，根据才能选择官吏，招纳贤才。 废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。 建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。 改革军事制度，建立“魏武">
+<meta property="og:description" content="如何正确显示随机消息内存临时表使用oder by rand() 对于InnoDB表，执行全字段排序会减少磁盘访问，因此会被优先选择。 对于内存表，回表过程只是简单地根据数据行的位置，直接访问内存得到数据，根本不会导致多访问磁盘，从而选择rowid排序。 select word from words order by rand() limit 3; 整个执行过程1.创建一个临时表。这个临时表使用的是">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png">
-<meta property="article:published_time" content="2020-12-30T08:22:06.000Z">
-<meta property="article:modified_time" content="2020-12-31T09:19:17.522Z">
+<meta property="og:image" content="https://i.loli.net/2021/01/23/zer2NxcJFMV5afg.png">
+<meta property="og:image" content="https://i.loli.net/2021/01/23/DFnrBLS4lY7cAWj.png">
+<meta property="article:published_time" content="2021-01-23T02:09:03.000Z">
+<meta property="article:modified_time" content="2021-01-23T02:16:27.356Z">
 <meta property="article:author" content="Sunskey">
-<meta property="article:tag" content="历史">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png">
+<meta name="twitter:image" content="https://i.loli.net/2021/01/23/zer2NxcJFMV5afg.png">
 
-<link rel="canonical" href="https://sunskey.top/history01.html">
+<link rel="canonical" href="https://sunskey.top/mysql-learning11.html">
 
 
 <script id="page-configurations">
@@ -48,7 +50,7 @@
   };
 </script>
 
-  <title>战国时期的第一个霸主-魏国 | Sunskey</title>
+  <title>如何正确显示随机消息 | Sunskey</title>
   
 
 
@@ -170,7 +172,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/history01.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning11.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -183,7 +185,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          战国时期的第一个霸主-魏国
+          如何正确显示随机消息
         </h1>
 
         <div class="post-meta">
@@ -192,23 +194,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-12-30 16:22:06" itemprop="dateCreated datePublished" datetime="2020-12-30T16:22:06+08:00">2020-12-30</time>
+              <time title="创建时间：2021-01-23 10:09:03 / 修改时间：10:16:27" itemprop="dateCreated datePublished" datetime="2021-01-23T10:09:03+08:00">2021-01-23</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-31 17:19:17" itemprop="dateModified" datetime="2020-12-31T17:19:17+08:00">2020-12-31</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8E%86%E5%8F%B2/" itemprop="url" rel="index"><span itemprop="name">历史</span></a>
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
                 </span>
             </span>
 
@@ -228,8 +224,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/history01.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/history01.html" itemprop="commentCount"></span>
+    <a title="valine" href="/mysql-learning11.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning11.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -245,61 +241,32 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="1-李悝变法"><a href="#1-李悝变法" class="headerlink" title="1.李悝变法"></a>1.李悝变法</h3><h4 id="李悝变法的主要内容"><a href="#李悝变法的主要内容" class="headerlink" title="李悝变法的主要内容"></a>李悝变法的主要内容</h4><p>李悝变法，是战国初年魏文候当政时，于公元前422年，任命李悝（前455年－前395年）为相，实行变法。</p>
-<p>变法的内容主要包含以下4个部分。</p>
-<ul>
-<li>废除世袭制度，根据才能选择官吏，招纳贤才。</li>
-<li>废除井田制，鼓励老百姓进行垦荒，估算合理的国家土地产量，指定合理的税收政策。</li>
-<li>建立了《法经》，针对官员的奖励和惩恶，国家职能等做了完备的规定，基本的国家的法令。</li>
-<li>改革军事制度，建立“魏武卒”，免除其家的赋田税。</li>
-</ul>
-<h4 id="李悝变法的意义"><a href="#李悝变法的意义" class="headerlink" title="李悝变法的意义"></a>李悝变法的意义</h4><p>1.剥削了旧贵族的势力，使得普通老百姓也能够通过才能去晋升。</p>
-<p>2.使用包产到户的政策，极大的提高了农民的积极性。同时，根据合理的税收政策和估算，计算出国家的国力，为国家稳定的发展提供了一定的根基。</p>
-<p>3.以法治国，使得各种行为和准则都有了指导的方针。《法经》分为《盗法》、《贼法》、《囚法》、《捕法》、《杂法》、《具法》6篇，后续的秦朝的法律也在此基础上建立而成。具有划时代的意义。</p>
-<p>4.极大提高了士兵们的积极性，建立了一只强大的军队。</p>
-<h3 id="2-魏国强大的根本"><a href="#2-魏国强大的根本" class="headerlink" title="2.魏国强大的根本"></a>2.魏国强大的根本</h3><ul>
-<li>政治优势</li>
-</ul>
-<p>1.人才济济。魏文侯很会识人，他手下的班子吴起、李悝、任座、魏成、乐羊、西门豹等。</p>
-<p>2.打通了人才经络，废除了旧的世袭制度，开始根据能力选拔官员。</p>
-<p>3.打通了土地经络，极大的提高了农民的积极性，帮助魏文侯摸清了国家的实力。</p>
-<p>4.出台《法经》，使整个国家运行在法制之下。</p>
-<p>5.打通军事经络，建立“魏武卒”，奖励优秀者。</p>
-<ul>
-<li>军事优势</li>
-</ul>
-<p>第一个实行军事改革的国家，拥有强大的“魏武卒”，同时拥有战国时期初年第一站神吴起，在吴起的带领下，进行了72场战斗，取得了64胜，8平的优秀战绩。</p>
-<ul>
-<li>经济优势</li>
-</ul>
-<p>魏国的国土拥有丰富的资源：小米和盐。小米一方面能够提供丰富的营养价值，另一方面，拥有优秀的保质期。最长的存储时间可以达到9年，是大米的两倍。其次，魏国的洼盐补充了人们对盐的需求，盐也可以作为腌料，用来储存猪肉等食品。</p>
-<ul>
-<li>地理优势</li>
-</ul>
-<p>魏国的国土总共分为四块，河内、河东、河西、河间之地。</p>
-<p><img src="https://i.loli.net/2020/12/31/NSDH1bYP2QKqRvt.png"></p>
-<p>河东（今山西运城）：丰富的盐和铁矿资源，东连上党，西面黄河，北隔晋阳，南面直通中原，进可攻，退可守。魏国的政治和文化中心。</p>
-<p>河西（今陕西延安）：虽然穷，但是享受黄河之限。</p>
-<p>河内（今焦作、新乡、安阳等地）：人民的文明程度比较高，地址险恶，与其他其他国家的土壤详接，退无可守，属于四站之地。</p>
-<p>河间：拥有两道在后面一千年内都被称为华夏最重要的地理通道：豫西和豫北通道。豫北通道是东西跨越太行山脉的最省力途径。豫西通道则是黄河以南连接东西的最主要的交通线。而豫西通道中有着战略地位极其重要的“函谷关”。“一夫当关万夫莫敌”说的就是函谷关，易守难攻，同时可借助黄河之力，运送物资。</p>
-<p>河内的扩展成本极低：</p>
-<ul>
-<li>土地肥沃，粮食产量高。</li>
-<li>地址平坦，便于部队投放。</li>
-<li>周边国家力量不强，用兵的损失小，收益大。</li>
-<li>中华名族的发祥地，政治上的意义比较高。</li>
-</ul>
-<h3 id="3-桂陵之战、马陵之战"><a href="#3-桂陵之战、马陵之战" class="headerlink" title="3.桂陵之战、马陵之战"></a>3.桂陵之战、马陵之战</h3><ul>
-<li>桂陵之战</li>
-</ul>
-<p>得到韩昭侯、秦孝公、齐威王的不帮架的承诺后，兴兵伐赵，直逼邯郸，齐国派出孙膑营救赵国，历史上著名的”围魏救赵“。 孙膑把庞涓引到齐国的土地后，利用“不知战之地，不知战之时”的主场优势，大败魏军。打破了魏国不可战胜的神话。</p>
-<ul>
-<li>马陵之战</li>
-</ul>
-<p>桂陵之后的十三年，魏国伐韩，想一举灭掉韩国，齐国本着“中原均势”的政治战略，派出孙膑解救韩国，还是一样的配方，一样的味道，指至魏国国都大梁，魏惠王举全国之力，转而进攻齐国，孙膑再次引诱庞涓，采用“减灶法”，让庞涓以为齐国人都怂了，逃跑了。引庞涓来到马陵（山东濮县），利用地理优势，再次大败魏军。从此，魏国一蹶不振，国力大大衰减。</p>
-<p>《孙子兵法》：“主不可怒而兴师，将不可愠而致战”。</p>
-<p>马陵之战是秦国与中原大地的重大的历史转折点。</p>
-<h3 id="4-衰落的原因"><a href="#4-衰落的原因" class="headerlink" title="4.衰落的原因"></a>4.衰落的原因</h3><p>战略的错误：错误的选择战场，一直把中原之地作为首要目标。如果选择攻打秦国，坐拥函谷关和黄河之险，养精蓄锐，自东向西的一步一步的攻打其他国家，那么最后历史的走向很有可能不同。</p>
+        <h3 id="如何正确显示随机消息"><a href="#如何正确显示随机消息" class="headerlink" title="如何正确显示随机消息"></a>如何正确显示随机消息</h3><h4 id="内存临时表"><a href="#内存临时表" class="headerlink" title="内存临时表"></a>内存临时表</h4><p>使用oder by rand()</p>
+<p>对于InnoDB表，执行全字段排序会减少磁盘访问，因此会被优先选择。</p>
+<p>对于内存表，回表过程只是简单地根据数据行的位置，直接访问内存得到数据，根本不会导致多访问磁盘，从而选择rowid排序。</p>
+<p>select word from words order by rand() limit 3;</p>
+<h5 id="整个执行过程"><a href="#整个执行过程" class="headerlink" title="整个执行过程"></a>整个执行过程</h5><p>1.创建一个临时表。这个临时表使用的是 memory 引擎，表里有两个字段，第一个字段是 double 类型，为了后面描述方便，记为字段 R，第二个字段是 varchar(64) 类型，记为字段 W。并且，这个表没有建索引。</p>
+<p>2.从 words 表中，按主键顺序取出所有的 word 值。对于每一个 word 值，调用 rand() 函数生成一个大于 0 小于 1 的随机小数，并把这个随机小数和 word 分别存入临时表的 R 和 W 字段中，到此，扫描行数是 10000。</p>
+<p>3.现在临时表有 10000 行数据了，接下来你要在这个没有索引的内存临时表上，按照字段 R 排序。</p>
+<p>4.初始化 sort_buffer。sort_buffer 中有两个字段，一个是 double 类型，另一个是整型。</p>
+<p>5.从内存临时表中一行一行地取出 R 值和位置信息（我后面会和你解释这里为什么是“位置信息”），分别存入 sort_buffer 中的两个字段里。</p>
+<p>6.这个过程要对内存临时表做全表扫描，此时扫描行数增加 10000，变成了 20000。在 sort_buffer 中根据 R 的值进行排序。注意，这个过程没有涉及到表操作，所以不会增加扫描行数。</p>
+<p>7.排序完成后，取出前三个结果的位置信息，依次到内存临时表中取出 word 值，返回给客户端。这个过程中，访问了表的三行数据，总扫描行数变成了 20003</p>
+<img src="https://i.loli.net/2021/01/23/zer2NxcJFMV5afg.png" style="zoom:50%;" />
+
+<p>如果你创建的表没有主键，或者把一个表的主键删掉了，那么 InnoDB 会自己生成一个长度为 6 字节的 rowid 来作为主键。</p>
+<p>对于有主键的InnoDB表来说，整个rowid就是主键ID。</p>
+<p>对于没有主键的InnoDB表来说，这个rowid就是系统生成的。</p>
+<p>order by rand() 使用了内存临时表，内存临时表排序的时候使用了rowid排序算法。</p>
+<h4 id="磁盘临时表"><a href="#磁盘临时表" class="headerlink" title="磁盘临时表"></a>磁盘临时表</h4><p>tmp_table_size限制了内存表的大小，默认值是16M。如果临时表的大小超过了tmp_table_size，那么内存临时表就会转成磁盘临时表。</p>
+<p>磁盘临时表默认使用InnoDB，是由参数Internal_tmp_disk_storage_engine取控制。</p>
+<p>MySQL5.6引入：优先队列排序算法，不需要使用临时文件的算法(归并排序），而是采用了优先队列排序算法。</p>
+<img src="https://i.loli.net/2021/01/23/DFnrBLS4lY7cAWj.png" style="zoom:40%;" />
+
+<p>总之，不管使用那种类型的临时表，order_by_rand()这种写法都会让计算过程非常复杂，需要大量的扫描行数。</p>
+<h4 id="随机排序方法"><a href="#随机排序方法" class="headerlink" title="随机排序方法"></a>随机排序方法</h4><p>1.取得整个表的行数，并记为C.</p>
+<p>2.取得Y = floor(C*rand())。</p>
+<p>3.再利用你limit Y，1取得一行。</p>
 
     </div>
 
@@ -309,7 +276,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E5%8E%86%E5%8F%B2/" rel="tag"># 历史</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
           </div>
 
         
@@ -318,13 +286,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/booklist.html" rel="prev" title="2021年书单">
-      <i class="fa fa-chevron-left"></i> 2021年书单
+    <a href="/mysql-learning10.html" rel="prev" title="MySQL 加锁规则">
+      <i class="fa fa-chevron-left"></i> MySQL 加锁规则
     </a></div>
-      <div class="post-nav-item">
-    <a href="/learn-note01.html" rel="next" title="《做时间的朋友读书笔记》">
-      《做时间的朋友读书笔记》 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -384,7 +349,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9D%8E%E6%82%9D%E5%8F%98%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">1.李悝变法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%8E%E6%82%9D%E5%8F%98%E6%B3%95%E7%9A%84%E4%B8%BB%E8%A6%81%E5%86%85%E5%AE%B9"><span class="nav-number">1.1.</span> <span class="nav-text">李悝变法的主要内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%8E%E6%82%9D%E5%8F%98%E6%B3%95%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">李悝变法的意义</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%AD%8F%E5%9B%BD%E5%BC%BA%E5%A4%A7%E7%9A%84%E6%A0%B9%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">2.魏国强大的根本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%A1%82%E9%99%B5%E4%B9%8B%E6%88%98%E3%80%81%E9%A9%AC%E9%99%B5%E4%B9%8B%E6%88%98"><span class="nav-number">3.</span> <span class="nav-text">3.桂陵之战、马陵之战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%A1%B0%E8%90%BD%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">4.</span> <span class="nav-text">4.衰落的原因</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E6%98%BE%E7%A4%BA%E9%9A%8F%E6%9C%BA%E6%B6%88%E6%81%AF"><span class="nav-number">1.</span> <span class="nav-text">如何正确显示随机消息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%B8%B4%E6%97%B6%E8%A1%A8"><span class="nav-number">1.1.</span> <span class="nav-text">内存临时表</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B4%E4%B8%AA%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">整个执行过程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E4%B8%B4%E6%97%B6%E8%A1%A8"><span class="nav-number">1.2.</span> <span class="nav-text">磁盘临时表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">随机排序方法</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
