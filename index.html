@@ -304,7 +304,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-23 10:08:50" itemprop="dateModified" datetime="2021-01-23T10:08:50+08:00">2021-01-23</time>
+                <time title="修改时间：2021-01-23 10:17:47" itemprop="dateModified" datetime="2021-01-23T10:17:47+08:00">2021-01-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1268,7 +1268,7 @@
 <p>2.到主键查到主键值是ID2的行，判断email的值是否正确，将这行记录加入结果集</p>
 <p>3.取index1索引树上刚刚查到的位置的下一条记录，发现不满足email=’zhangssxyz@xxx.com’的条件，循环结束。</p>
 <h5 id="使用部分索引"><a href="#使用部分索引" class="headerlink" title="使用部分索引"></a>使用部分索引</h5><p>1.从index2 索引树找到满足索引值“zhangs”的记录，找到一个是ID!;</p>
-<p>2.到主键查询主键值ID1的行，判断email的值不是“<a href="mailto:&#122;&#x68;&#97;&#x6e;&#x67;&#x73;&#115;&#115;&#64;&#120;&#x78;&#120;&#x2e;&#x63;&#x6f;&#109;">&#122;&#x68;&#97;&#x6e;&#x67;&#x73;&#115;&#115;&#64;&#120;&#x78;&#120;&#x2e;&#x63;&#x6f;&#109;</a>”，丢弃。</p>
+<p>2.到主键查询主键值ID1的行，判断email的值不是“<a href="mailto:&#x7a;&#x68;&#97;&#x6e;&#103;&#x73;&#115;&#x73;&#x40;&#x78;&#x78;&#x78;&#46;&#x63;&#x6f;&#109;">&#x7a;&#x68;&#97;&#x6e;&#103;&#x73;&#115;&#x73;&#x40;&#x78;&#x78;&#x78;&#46;&#x63;&#x6f;&#109;</a>”，丢弃。</p>
 <p>3.取index2刚刚位置的下一条记录，发现仍然是“zhangs”，取出ID2，回表判断值是否正确，加入结果集</p>
 <p>4.重复上述操作，直到在index2上取到的值不是“zhangs”时，循环结束</p>
 <p>使用好前缀索引，定义好长度，就可以做好既节约空间，又不用额外增加太多的查询成本。</p>

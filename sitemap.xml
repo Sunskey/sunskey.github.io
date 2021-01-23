@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://sunskey.top/learn-redis01.html</loc>
+    
+    <lastmod>2021-01-23</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://sunskey.top/mysql-learning10.html</loc>
+    
+    <lastmod>2021-01-23</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://sunskey.top/mysql-learning11.html</loc>
     
     <lastmod>2021-01-23</lastmod>
@@ -10,13 +24,6 @@
   
   <url>
     <loc>https://sunskey.top/mysql-learning09.html</loc>
-    
-    <lastmod>2021-01-23</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://sunskey.top/mysql-learning10.html</loc>
     
     <lastmod>2021-01-23</lastmod>
     
@@ -73,13 +80,6 @@
   
   <url>
     <loc>https://sunskey.top/mysql-learning04.html</loc>
-    
-    <lastmod>2021-01-22</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://sunskey.top/learn-redis01.html</loc>
     
     <lastmod>2021-01-22</lastmod>
     
@@ -151,21 +151,14 @@
 
   
   <url>
+    <loc>https://sunskey.top/tags/%E4%B9%A6%E5%8D%95/</loc>
+    <lastmod>2021-01-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://sunskey.top/tags/%E5%8E%86%E5%8F%B2/</loc>
-    <lastmod>2021-01-23</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://sunskey.top/tags/Redis/</loc>
-    <lastmod>2021-01-23</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2021-01-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -179,14 +172,21 @@
   </url>
   
   <url>
-    <loc>https://sunskey.top/tags/%E4%B9%A6%E5%8D%95/</loc>
+    <loc>https://sunskey.top/tags/MySQL/</loc>
     <lastmod>2021-01-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://sunskey.top/tags/MySQL/</loc>
+    <loc>https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2021-01-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://sunskey.top/tags/Redis/</loc>
     <lastmod>2021-01-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -216,6 +216,13 @@
 
   
   <url>
+    <loc>https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/</loc>
+    <lastmod>2021-01-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://sunskey.top/categories/%E5%8E%86%E5%8F%B2/</loc>
     <lastmod>2021-01-23</lastmod>
     <changefreq>daily</changefreq>
@@ -224,13 +231,6 @@
   
   <url>
     <loc>https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/</loc>
-    <lastmod>2021-01-23</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/</loc>
     <lastmod>2021-01-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
