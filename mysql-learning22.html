@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="MySQL主备高可用MySQL是如何保证主备一致的![image-20201208104505467](&#x2F;Users&#x2F;dxm&#x2F;Library&#x2F;Application Support&#x2F;typora-user-images&#x2F;image-20201208104505467.png) 建议把节点B设置成read only 状态 1.有时候一些运营的查询语句会被放到备库上去查，设置只读可以防止误操作。 2.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL主备高可用">
+<meta property="og:url" content="https://sunskey.top/mysql-learning22.html">
+<meta property="og:site_name" content="Sunskey">
+<meta property="og:description" content="MySQL主备高可用MySQL是如何保证主备一致的![image-20201208104505467](&#x2F;Users&#x2F;dxm&#x2F;Library&#x2F;Application Support&#x2F;typora-user-images&#x2F;image-20201208104505467.png) 建议把节点B设置成read only 状态 1.有时候一些运营的查询语句会被放到备库上去查，设置只读可以防止误操作。 2.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/quZE8cX2MwlAN3U.png">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/hcIpnQx3iLAE85K.png">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/JpaxzsM3jGnUOBN.png">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/ZsiMPyYInvmft3B.png">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/4FQt72JHh3P9YgD.png">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/QRqmSd9vHLashWY.png">
+<meta property="og:image" content="https://i.loli.net/2020/12/08/3qGdsKf5anrY7px.png">
+<meta property="article:published_time" content="2021-01-23T11:29:42.000Z">
+<meta property="article:modified_time" content="2021-01-23T11:35:42.926Z">
+<meta property="article:author" content="Sunskey">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/12/08/quZE8cX2MwlAN3U.png">
+
+<link rel="canonical" href="https://sunskey.top/mysql-learning22.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL主备高可用 | Sunskey</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Sunskey" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Sunskey</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">日拱一卒，不期而至</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning22.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL主备高可用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:29:42 / 修改时间：19:35:42" itemprop="dateCreated datePublished" datetime="2021-01-23T19:29:42+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning22.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning22.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="MySQL主备高可用"><a href="#MySQL主备高可用" class="headerlink" title="MySQL主备高可用"></a>MySQL主备高可用</h3><h4 id="MySQL是如何保证主备一致的"><a href="#MySQL是如何保证主备一致的" class="headerlink" title="MySQL是如何保证主备一致的"></a>MySQL是如何保证主备一致的</h4><p>![image-20201208104505467](/Users/dxm/Library/Application Support/typora-user-images/image-20201208104505467.png)</p>
+<p>建议把节点B设置成read only 状态</p>
+<p>1.有时候一些运营的查询语句会被放到备库上去查，设置只读可以防止误操作。</p>
+<p>2.防止切换逻辑有bug，比如切换过程中出现双写，造成主备不一致。</p>
+<p>3.可以用read only，来判断节点的角色。</p>
+<h5 id="binlog备份执行过程"><a href="#binlog备份执行过程" class="headerlink" title="binlog备份执行过程"></a>binlog备份执行过程</h5><p><img src="https://i.loli.net/2020/12/08/quZE8cX2MwlAN3U.png"></p>
+<ol>
+<li><p>在备库 B 上通过 change master 命令，设置主库 A 的 IP、端口、用户名、密码，以及要从哪个位置开始请求 binlog，这个位置包含文件名和日志偏移量。</p>
+</li>
+<li><p>在备库 B 上执行 start slave 命令，这时候备库会启动两个线程，就是图中的 io_thread 和 sql_thread。其中 io_thread 负责与主库建立连接。</p>
+</li>
+<li><p>主库 A 校验完用户名、密码后，开始按照备库 B 传过来的位置，从本地读取 binlog，发给 B。</p>
+</li>
+<li><p>备库 B 拿到 binlog 后，写到本地文件，称为中转日志（relay log）。</p>
+</li>
+<li><p>sql_thread 读取中转日志，解析出日志里的命令，并执行。</p>
+</li>
+</ol>
+<h5 id="binlog三种格式的对比"><a href="#binlog三种格式的对比" class="headerlink" title="binlog三种格式的对比"></a>binlog三种格式的对比</h5><ol>
+<li><p>statement：记录的是具体的语句。可能会因去主备不一致。</p>
+</li>
+<li><p>row：记录的是逻辑上具体的行为。日志的更加的详细。</p>
+</li>
+<li><p>mixed：由于采用row会记录具体逻辑上的日志，所以占用的空间比statement更大。MySQl会自己判断这条语句是否可能引起主备不一致，如果有可能，就用statemnt。</p>
+</li>
+</ol>
+<p>使用row格式的好处在于，<strong>更方便恢复数据</strong>。</p>
+<h5 id="循环复制问题"><a href="#循环复制问题" class="headerlink" title="循环复制问题"></a>循环复制问题</h5><p>![image-20201208110741362](/Users/dxm/Library/Application Support/typora-user-images/image-20201208110741362.png)</p>
+<p>双M架构和M-S结构，节点A和节点B之间总是互为主备。</p>
+<p>业务逻辑上在节点A上更新一条语句后，把生成的binlog发送给节点B，节点B执行完也会生成binlog，这样节点A又会去执行节点B生成的binlog。从而造成循环执行，怎么解决？</p>
+<ol>
+<li>规定两个库的server id必须不同，如果相同，则它们之间不能设定为主备关系。</li>
+<li>一个备库接到到binlog并在重放的过程中，生成与原binlog的server id相同的新的bingo.</li>
+<li>每个库收到从自己主库发送过来的日志后，先判断server id,如果跟自己相同，表示这个日志是自己生成的，则直接丢弃这个日志。</li>
+<li></li>
+</ol>
+<h5 id="线上数据库设置成“非双1”的场景。"><a href="#线上数据库设置成“非双1”的场景。" class="headerlink" title="线上数据库设置成“非双1”的场景。"></a>线上数据库设置成“非双1”的场景。</h5><ol>
+<li><p>业务高峰期。</p>
+</li>
+<li><p>备库延迟，为了备库尽快赶上主库。</p>
+</li>
+<li><p>用备份恢复主库的副本，应用binlog的过程。</p>
+</li>
+<li><p>批量导入数据的时候。</p>
+</li>
+</ol>
+<h4 id="MySQL怎么保证高可用"><a href="#MySQL怎么保证高可用" class="headerlink" title="MySQL怎么保证高可用"></a>MySQL怎么保证高可用</h4><h5 id="“同步延迟”"><a href="#“同步延迟”" class="headerlink" title="“同步延迟”"></a>“同步延迟”</h5><ol>
+<li><p>主库A执行完成一个事务，写入binlog，我们把这个时刻记为T1。</p>
+</li>
+<li><p>之后传给备库B，我们把备库接受的这个binlog称为T2。</p>
+</li>
+<li><p>备库B执行完成这个事务，把这个时间成为T3。</p>
+</li>
+</ol>
+<p>所谓的主备延迟，就是在同一个事务中，在备库完成的时间和主库执行完时间之间的差值，也就是T3 - T1。</p>
+<p>可以在show slave status，seconds_behind_master用于表示当前备库延迟了多少秒。</p>
+<p>主备延迟的主要原因是备库消费日志的速度（relay log），比主库生产的binlog的速度慢的多。</p>
+<h5 id="主备延迟的来源"><a href="#主备延迟的来源" class="headerlink" title="主备延迟的来源"></a>主备延迟的来源</h5><ol>
+<li>有些部署条件下，备库的所有机器性能要比主库所在的机器性能差。</li>
+<li>备库的压力大了。例如：一些后台分析的语句，只能在备库上跑，不能影响正常的业务。</li>
+</ol>
+<p><strong>解决方案：</strong></p>
+<ul>
+<li>一主多从。除了备库外，可以多接几个从库，让这些从库来分担读的压力。</li>
+<li>通过binlog输出到外部系统。比如Hadoop这类系统，让外部提供统计和查询的能力。</li>
+</ul>
+<p>3.大事务。例如：不要用delete一次性删除太多的数据。大表的DDL，建议采用gh-ost方案。</p>
+<p>4.备库的并行复制能力过低。</p>
+<h5 id="可靠性优先策略"><a href="#可靠性优先策略" class="headerlink" title="可靠性优先策略"></a>可靠性优先策略</h5><p>1.判断备库B上的seconds_behind_master，如果小于某个值继续下一秒。否则重试</p>
+<p>2.把主库A改成只读状态，即把readonly设置为true</p>
+<p>3.判断备库B的seconds_behind_master，直到这个值变为0</p>
+<p>4.把备库改写成可读写状态，把readonly设置为false;</p>
+<p>5.把业务请求切到备库B</p>
+<p>这个切换流程，一般是由专门的 HA 系统来完成的，我们暂时称之为可靠性优先流程。</p>
+<h5 id="可用性有限策略"><a href="#可用性有限策略" class="headerlink" title="可用性有限策略"></a>可用性有限策略</h5><p>把步骤4，5调整到最开始执行，不等主备数据同步，直接把连接切到备库B，并且让备库B可以读写，那么系统几乎没有不可用时间了。但是可能会产生数据不一致的情况。</p>
+<p>例如：可用性策略，且binlog_format=mixed时的切换流程和数据结果。</p>
+<p><img src="https://i.loli.net/2020/12/08/hcIpnQx3iLAE85K.png"></p>
+<ol>
+<li><p>步骤 2 中，主库 A 执行完 insert 语句，插入了一行数据（4,4），之后开始进行主备切换。</p>
+</li>
+<li><p>步骤 3 中，由于主备之间有 5 秒的延迟，所以备库 B 还没来得及应用“插入 c=4”这个中转日志，就开始接收客户端“插入 c=5”的命令。</p>
+</li>
+<li><p>步骤 4 中，备库 B 插入了一行数据（4,5），并且把这个 binlog 发给主库 A。</p>
+</li>
+<li><p>步骤 5 中，备库 B 执行“插入 c=4”这个中转日志，插入了一行数据（5,4）。而直接在备库 B 执行的“插入 c=5”这个语句，传到主库 A，就插入了一行新数据（5,5）。</p>
+</li>
+</ol>
+<p>可用性优先策略binlog_format=row时下的结果。</p>
+<p><img src="https://i.loli.net/2020/12/08/JpaxzsM3jGnUOBN.png"></p>
+<p>备库的B的（5，4）和主库A(5,5)这两行数据均不会被对方执行。</p>
+<ol>
+<li><p>使用row格式的binlog时，数据不一致的问题更容易被发现。</p>
+</li>
+<li><p>主备切换的可用性优先策略会导致数据不一致。建议针对大多数应用来说，数据可靠性一般还是要优于可用性的。</p>
+</li>
+</ol>
+<p>MySQL的可用性时依赖主备延迟的，延迟时间越小，在出库故障的时候，服务恢复需要的时间就越短，可用性就越高。</p>
+<h4 id="备库延迟过高怎么解决"><a href="#备库延迟过高怎么解决" class="headerlink" title="备库延迟过高怎么解决"></a>备库延迟过高怎么解决</h4><p>如果备库执行日志的速度持续低于主库生成日志的速度，那这个延迟就有可能成了小时级别。而且对于一个压力持续比较高的主库来说，备库很可能永远都追不上主库的节奏。</p>
+<p><img src="https://i.loli.net/2020/12/08/ZsiMPyYInvmft3B.png"></p>
+<p>如果图中sql_thread 更新数据DATA是采用单线程，就会导致备库应用日志不够快，造成主备延迟。</p>
+<p>5.6版本前，MySQL只支持单线程，由此在主库并发高，TPS高时就会出现严重的主备延迟问题。</p>
+<h5 id="多线程模型"><a href="#多线程模型" class="headerlink" title="多线程模型"></a>多线程模型</h5><p><img src="https://i.loli.net/2020/12/08/4FQt72JHh3P9YgD.png"></p>
+<p>图中的coordinator就是原来的sql_thread模型，只负责读取中转和分发事务。work线程的个数由slave_parallel_workers决定，建议设置在8～16之间最好。</p>
+<p>coordinator在分发的时候，需要满足以下两个基本的要求</p>
+<p>1.不能造成更新覆盖。这要求 更新同一行的事务，必须被分发到同一个worker中。</p>
+<p>2.同一个事务不能被拆开，必须放到同一个worker中。</p>
+<h5 id="按表分发策略"><a href="#按表分发策略" class="headerlink" title="按表分发策略"></a>按表分发策略</h5><p><img src="https://i.loli.net/2020/12/08/QRqmSd9vHLashWY.png"></p>
+<p>每个事务在分发的时候，跟所有worker的冲突关系包括以下三种情况：</p>
+<p>1.如果跟所有worker都不冲突，coornaditor线程就会把这个事务分配给最空闲的worker。</p>
+<p>2.如果跟多于一个worker冲突，coordinator进入等待状态，直到和这个事务存在冲突关系的worker只剩一个。</p>
+<p>3.如果只跟一个worker冲突，coordinator线程就会把这个事务分配给由冲突关系的worker。</p>
+<p>缺点：如果碰到热点表更新的时候，所有的事务都会被分配同一个worker，就会变成单线程复制。</p>
+<h5 id="按行分发策略"><a href="#按行分发策略" class="headerlink" title="按行分发策略"></a>按行分发策略</h5><p>如果两个事务没有更新相同的行，它们在备库上可以并行执行。显然这个模式binlog必须要求row。</p>
+<p>按行复制和按表复制的数据结构查不多，为每一个worker，分配一个hash表，只要是按行分发，这时候的key，就必须是“库名+表明+唯一键的值”。</p>
+<p>相比按表并行分发策略，按行并行策略在决定线程分发的时候，需要消耗更多的计算资源，同时还存在一些约束条件。</p>
+<ol>
+<li><p>要能够从binlog里面解析出表名、主键值和唯一索引的值。binlog必须为row。</p>
+</li>
+<li><p>表必须由主键。</p>
+</li>
+<li><p>不能有外键。表上如果有外键，级联更新的行不会记录在binlog中，这样冲突检测就不准确。</p>
+</li>
+</ol>
+<p>缺点：1、耗费内存。2、耗费cpu。</p>
+<h5 id="MySQL5-6版本的并行复制策略"><a href="#MySQL5-6版本的并行复制策略" class="headerlink" title="MySQL5.6版本的并行复制策略"></a>MySQL5.6版本的并行复制策略</h5><p>用于决定分发策略的hash表里，key就是数据库名。</p>
+<p>优势: 1、构建hash的值时候跟快。 2、不要求binlog格式。</p>
+<p>如果主库上有多个DB，并且各个DB的压力均衡，使用这个策略的效果会很好。</p>
+<h5 id="MariaDB的并行策略"><a href="#MariaDB的并行策略" class="headerlink" title="MariaDB的并行策略"></a>MariaDB的并行策略</h5><p>Maria 并行复制 利用了redo log组提交的两个特性。</p>
+<p>1.能够在同一组提交的事务，一定不会修改同一行。</p>
+<p>2.主库上可以并行执行的事务，备库上也一定可以并行执行的。</p>
+<p>在实现上，MariaDB是这么做的</p>
+<p>1.一组提交事务，里面有一个相同的commit_id,下一组就是commit_id+1;</p>
+<p>2.commit_id 直接写到binlog里面。</p>
+<p>3.传到备库应用的时候，相同commit_id的事务分发到多个worker执行。</p>
+<p>4.这一组全部执行完成后，coordinator再去去下一批。</p>
+<p>缺点：要等第一组事务完全执行后，第二组事务才能开始执行，这样系统的吞吐量不够。这个方案很容易被大事务拖后腿。</p>
+<h5 id="MySQL-5-7的并行复制策略"><a href="#MySQL-5-7的并行复制策略" class="headerlink" title="MySQL 5.7的并行复制策略"></a>MySQL 5.7的并行复制策略</h5><p>1.配置DATABASE，表示使用MySQL5.6版本的按库执行</p>
+<p>2.配置LOGICAL_CLOCK，提供了类似MariaDB的策略。</p>
+<p>并行复制策略的思路：</p>
+<p>1.同时处于prepare状态的事务，在备库执行时可以并行的。</p>
+<p>2.处于prepare状态的事务，与处于commit状态的事务之间，在备库执行时也是可以并行的。</p>
+<p>可以增加binlog_group_commit_sync_delay和binlog_group_commit_sync_no_delay_count参数，让主库提交慢一些，从而达到提升备库复制并发度的目的。</p>
+<h5 id="MySQL-5-7-22的并行复制"><a href="#MySQL-5-7-22的并行复制" class="headerlink" title="MySQL 5.7.22的并行复制"></a>MySQL 5.7.22的并行复制</h5><p>MySQL新增了一个新的并行度复制策略，基于WRITESET的并行复制。</p>
+<p>相应地，新增binlog-transaction-dependency-tracking，来控制是否启用。</p>
+<p>1.COMMIT_ORDER，同时进入prapare和commit来判断是否可以并行的策略。</p>
+<p>2.WRITESET，表示的是对于事务涉及更新的每一行，计算出这一行的 hash 值，组成集合 writeset。如果两个事务没有操作相同的行，也就是说它们的 writeset 没有交集，就可以并行。</p>
+<p>3.WRITESET_SESSION，是在 WRITESET 的基础上多了一个约束，即在主库上同一个线程先后执行的两个事务，在备库执行的时候，要保证相同的先后顺序。</p>
+<p>hash值是通过“库名+表名+索引值+值”计算出来的，如果一个这个表上还有除主键索引外，那么对于每个唯一索引，insert语句对应的hash的值。</p>
+<p>1.writeset是在主库生成后，直接写入，在备库执行的时候，节省了很多计算量。</p>
+<p>2.不需要把整个事务的binlog都扫一遍才能决定分发到哪个worker，更省内存。</p>
+<p>3.由于备库的分发策略不以来于binlog内容，所以binlog是statement格式也可以的。</p>
+<h4 id="主库出问题了，从库怎么办？"><a href="#主库出问题了，从库怎么办？" class="headerlink" title="主库出问题了，从库怎么办？"></a>主库出问题了，从库怎么办？</h4><h5 id="一主多从的结构"><a href="#一主多从的结构" class="headerlink" title="一主多从的结构"></a>一主多从的结构</h5><img src="https://i.loli.net/2020/12/08/3qGdsKf5anrY7px.png" style="zoom:80%;" />
+
+<p>其中A和A’互为主备，从库B、C、D指向的是主库A。</p>
+<p>相比一主一备，一主多从结构在切换完成后，A’会成为新的主库，从库B、C、D也要改接到A’，所以主备切换的复杂性也相应增加了。</p>
+<p>当我们把节点B设置成节点A’的从库的时候，需要执行一条change master命令：</p>
+<p>![image-20201208164303574](/Users/dxm/Library/Application Support/typora-user-images/image-20201208164303574.png)</p>
+<p>关键在于如何设置从主库的master_log_name文件以及位置。</p>
+<p>一种取同步位点的方法</p>
+<p>1.等待新主库A’把中转日志(relay log)全部同步完成</p>
+<p>2.在A’上执行show master status,得到当前A’最新的File和Position</p>
+<p>3.取原主库A故障的时刻T</p>
+<p>4.用mysqlbinlog工具解析A‘的File,得到T时刻的位点。</p>
+<p>但是有可能存在主键冲突等错误。通常，在切换任务的时候，要先主动跳过这些错误。</p>
+<p>1.主动跳过一个事务。set global sql_slave_skip_counter=1;每次碰到这些错误 ，执行一次跳过命令，直到不再出现停下来的情况。</p>
+<p>2.通过设置slave_skip_errors参数，直接设置跳过制定的错误，等主备的同步关系建立后，并稳定执行一段时间后，把这个参数设置为空，以免真的出现主从数据不一致，也跳过了。</p>
+<ul>
+<li>1062 错误插入数据时唯一键冲突。</li>
+<li>1032 错误是删除数据时找不行。</li>
+</ul>
+<h5 id="GTID"><a href="#GTID" class="headerlink" title="GTID"></a>GTID</h5><p>GTID的全称是GTID 的全称是 Global Transaction Identifier，也就是全局事务 ID，是一个事务在提交的时候生成的，是这个事务的唯一标识。它由两部分组成，</p>
+<p>格式是：GTID=server_uuid:gno</p>
+<p>其中：</p>
+<p>server_uuid是一个实例第一次启动时自动生成的，是一个全局唯一的值。</p>
+<p>gno是一个整数，初始值是1，每次提交事务的时候分配这个事务，并加1。</p>
+<p>事务id（transaction id）是在事务执行过程中分配的，如果这个事务回滚了，事务id也会增加，而gno是在事务提交的时候才会分配。</p>
+<p>在GTID模式下，每一个事务都会跟一个GTID一一对应。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/mysql-learning21.html" rel="prev" title="MySQL 扩展知识点">
+      <i class="fa fa-chevron-left"></i> MySQL 扩展知识点
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL%E4%B8%BB%E5%A4%87%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">MySQL主备高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL%E6%98%AF%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%B8%BB%E5%A4%87%E4%B8%80%E8%87%B4%E7%9A%84"><span class="nav-number">1.1.</span> <span class="nav-text">MySQL是如何保证主备一致的</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#binlog%E5%A4%87%E4%BB%BD%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">binlog备份执行过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#binlog%E4%B8%89%E7%A7%8D%E6%A0%BC%E5%BC%8F%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">1.1.2.</span> <span class="nav-text">binlog三种格式的对比</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%A4%8D%E5%88%B6%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.3.</span> <span class="nav-text">循环复制问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E7%BD%AE%E6%88%90%E2%80%9C%E9%9D%9E%E5%8F%8C1%E2%80%9D%E7%9A%84%E5%9C%BA%E6%99%AF%E3%80%82"><span class="nav-number">1.1.4.</span> <span class="nav-text">线上数据库设置成“非双1”的场景。</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL%E6%80%8E%E4%B9%88%E4%BF%9D%E8%AF%81%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">MySQL怎么保证高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%80%9C%E5%90%8C%E6%AD%A5%E5%BB%B6%E8%BF%9F%E2%80%9D"><span class="nav-number">1.2.1.</span> <span class="nav-text">“同步延迟”</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BB%E5%A4%87%E5%BB%B6%E8%BF%9F%E7%9A%84%E6%9D%A5%E6%BA%90"><span class="nav-number">1.2.2.</span> <span class="nav-text">主备延迟的来源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%BC%98%E5%85%88%E7%AD%96%E7%95%A5"><span class="nav-number">1.2.3.</span> <span class="nav-text">可靠性优先策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E7%94%A8%E6%80%A7%E6%9C%89%E9%99%90%E7%AD%96%E7%95%A5"><span class="nav-number">1.2.4.</span> <span class="nav-text">可用性有限策略</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%87%E5%BA%93%E5%BB%B6%E8%BF%9F%E8%BF%87%E9%AB%98%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3"><span class="nav-number">1.3.</span> <span class="nav-text">备库延迟过高怎么解决</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.1.</span> <span class="nav-text">多线程模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%89%E8%A1%A8%E5%88%86%E5%8F%91%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.2.</span> <span class="nav-text">按表分发策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%89%E8%A1%8C%E5%88%86%E5%8F%91%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.3.</span> <span class="nav-text">按行分发策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MySQL5-6%E7%89%88%E6%9C%AC%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%A4%8D%E5%88%B6%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.4.</span> <span class="nav-text">MySQL5.6版本的并行复制策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MariaDB%E7%9A%84%E5%B9%B6%E8%A1%8C%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.5.</span> <span class="nav-text">MariaDB的并行策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MySQL-5-7%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%A4%8D%E5%88%B6%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.6.</span> <span class="nav-text">MySQL 5.7的并行复制策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MySQL-5-7-22%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%A4%8D%E5%88%B6"><span class="nav-number">1.3.7.</span> <span class="nav-text">MySQL 5.7.22的并行复制</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%BA%93%E5%87%BA%E9%97%AE%E9%A2%98%E4%BA%86%EF%BC%8C%E4%BB%8E%E5%BA%93%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">主库出问题了，从库怎么办？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%80%E4%B8%BB%E5%A4%9A%E4%BB%8E%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.4.1.</span> <span class="nav-text">一主多从的结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#GTID"><span class="nav-number">1.4.2.</span> <span class="nav-text">GTID</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sunskey"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Sunskey</p>
+  <div class="site-description" itemprop="description">做时间的朋友</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+   <div class="feed-link motion-element">
+     <a href="/atom.xml" rel="alternate">
+       <i class="fa fa-rss"></i>
+       RSS
+     </a>
+   </div>
+
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sunskey" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sunskey" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:154218965@qq.com" title="E-Mail → mailto:154218965@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sunskey</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'IeQnDEu3RFIAA4RTfDqdXeV2-gzGzoHsz',
+      appKey     : 'eSw8Svi50Fp5BMlPaiSS02nv',
+      placeholder: "快来发表自己的评论吧",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+    //新增以下代码即可，可以移除.info下所有子节点。
+var infoEle = document.querySelector('#valine-comments .vpower');
+infoEle.style.display='none'; 
+ }, window.Valine);
+});
+
+
+</script>
+
+</body>
+</html>

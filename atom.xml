@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-01-23T02:16:27.356Z</updated>
+  <updated>2021-01-23T11:35:42.926Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,297 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MySQL主备高可用</title>
+    <link href="https://sunskey.top/mysql-learning22.html"/>
+    <id>https://sunskey.top/mysql-learning22.html</id>
+    <published>2021-01-23T11:29:42.000Z</published>
+    <updated>2021-01-23T11:35:42.926Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL主备高可用&quot;&gt;&lt;a href=&quot;#MySQL主备高可用&quot; class=&quot;headerlink&quot; title=&quot;MySQL主备高可用&quot;&gt;&lt;/a&gt;MySQL主备高可用&lt;/h3&gt;&lt;h4 id=&quot;MySQL是如何保证主备一致的&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 扩展知识点</title>
+    <link href="https://sunskey.top/mysql-learning21.html"/>
+    <id>https://sunskey.top/mysql-learning21.html</id>
+    <published>2021-01-23T11:27:32.000Z</published>
+    <updated>2021-01-23T11:35:38.090Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL-扩展知识点&quot;&gt;&lt;a href=&quot;#MySQL-扩展知识点&quot; class=&quot;headerlink&quot; title=&quot;MySQL 扩展知识点&quot;&gt;&lt;/a&gt;MySQL 扩展知识点&lt;/h3&gt;&lt;h4 id=&quot;Grant和权限&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 自增主键</title>
+    <link href="https://sunskey.top/mysql-learning20.html"/>
+    <id>https://sunskey.top/mysql-learning20.html</id>
+    <published>2021-01-23T11:20:21.000Z</published>
+    <updated>2021-01-23T11:23:37.198Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;自增主键为什么不是连续的&quot;&gt;&lt;a href=&quot;#自增主键为什么不是连续的&quot; class=&quot;headerlink&quot; title=&quot;自增主键为什么不是连续的&quot;&gt;&lt;/a&gt;自增主键为什么不是连续的&lt;/h3&gt;&lt;h4 id=&quot;自增值的存储&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 快速复制一张表</title>
+    <link href="https://sunskey.top/mysql-learning19.html"/>
+    <id>https://sunskey.top/mysql-learning19.html</id>
+    <published>2021-01-23T11:16:33.000Z</published>
+    <updated>2021-01-23T11:20:55.440Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL-快速复制一张表&quot;&gt;&lt;a href=&quot;#MySQL-快速复制一张表&quot; class=&quot;headerlink&quot; title=&quot;MySQL 快速复制一张表&quot;&gt;&lt;/a&gt;MySQL 快速复制一张表&lt;/h3&gt;&lt;h4</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL Memory表</title>
+    <link href="https://sunskey.top/mysql-learning18.html"/>
+    <id>https://sunskey.top/mysql-learning18.html</id>
+    <published>2021-01-23T11:09:43.000Z</published>
+    <updated>2021-01-23T11:21:01.101Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL-Memory表&quot;&gt;&lt;a href=&quot;#MySQL-Memory表&quot; class=&quot;headerlink&quot; title=&quot;MySQL Memory表&quot;&gt;&lt;/a&gt;MySQL Memory表&lt;/h3&gt;&lt;h4 id=&quot;Memory的基础知识&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL 临时表</title>
+    <link href="https://sunskey.top/mysql-learning17.html"/>
+    <id>https://sunskey.top/mysql-learning17.html</id>
+    <published>2021-01-23T11:05:05.000Z</published>
+    <updated>2021-01-23T11:16:18.584Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL-临时表&quot;&gt;&lt;a href=&quot;#MySQL-临时表&quot; class=&quot;headerlink&quot; title=&quot;MySQL 临时表&quot;&gt;&lt;/a&gt;MySQL 临时表&lt;/h3&gt;&lt;p&gt;内存表，指的使用Memory引擎的表，建表语法是create table…</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Join 相关知识点</title>
+    <link href="https://sunskey.top/mysql-learning16.html"/>
+    <id>https://sunskey.top/mysql-learning16.html</id>
+    <published>2021-01-23T10:59:24.000Z</published>
+    <updated>2021-01-23T11:04:03.772Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;到底可不可以使用join&quot;&gt;&lt;a href=&quot;#到底可不可以使用join&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>大数据对数据库的影响</title>
+    <link href="https://sunskey.top/mysql-learning15.html"/>
+    <id>https://sunskey.top/mysql-learning15.html</id>
+    <published>2021-01-23T09:02:44.000Z</published>
+    <updated>2021-01-23T10:58:07.873Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;大数据对数据库的影响&quot;&gt;&lt;a href=&quot;#大数据对数据库的影响&quot; class=&quot;headerlink&quot; title=&quot;大数据对数据库的影响&quot;&gt;&lt;/a&gt;大数据对数据库的影响&lt;/h3&gt;&lt;h4 id=&quot;全表扫描对server层的影响&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kill不掉的语句</title>
+    <link href="https://sunskey.top/mysql-learning14.html"/>
+    <id>https://sunskey.top/mysql-learning14.html</id>
+    <published>2021-01-23T08:57:53.000Z</published>
+    <updated>2021-01-23T09:02:33.855Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;Kill不掉的语句&quot;&gt;&lt;a href=&quot;#Kill不掉的语句&quot; class=&quot;headerlink&quot; title=&quot;Kill不掉的语句&quot;&gt;&lt;/a&gt;Kill不掉的语句&lt;/h3&gt;&lt;p&gt;两个kill命令：一个kill query +</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>误删数据，如何恢复？</title>
+    <link href="https://sunskey.top/mysql-learning13.html"/>
+    <id>https://sunskey.top/mysql-learning13.html</id>
+    <published>2021-01-23T08:52:37.000Z</published>
+    <updated>2021-01-23T08:57:24.683Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;误删数据，如何恢复？&quot;&gt;&lt;a href=&quot;#误删数据，如何恢复？&quot; class=&quot;headerlink&quot; title=&quot;误删数据，如何恢复？&quot;&gt;&lt;/a&gt;误删数据，如何恢复？&lt;/h3&gt;&lt;p&gt;误差数据的4个方法</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何判断一个数据库是不是出问题了？</title>
+    <link href="https://sunskey.top/mysql-learning12.html"/>
+    <id>https://sunskey.top/mysql-learning12.html</id>
+    <published>2021-01-23T08:50:21.000Z</published>
+    <updated>2021-01-23T08:52:24.874Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;如何判断一个数据库是不是出问题了？&quot;&gt;&lt;a href=&quot;#如何判断一个数据库是不是出问题了？&quot; class=&quot;headerlink&quot; title=&quot;如何判断一个数据库是不是出问题了？&quot;&gt;&lt;/a&gt;如何判断一个数据库是不是出问题了？&lt;/h3&gt;&lt;h4</summary>
+        
+      
+    
+    
+    
+    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
+    
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
+    
+    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
   
   <entry>
     <title>如何正确显示随机消息</title>
@@ -257,218 +548,6 @@
     <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>MySQL 索引相关知识</title>
-    <link href="https://sunskey.top/mysql-learning02.html"/>
-    <id>https://sunskey.top/mysql-learning02.html</id>
-    <published>2021-01-22T11:08:42.000Z</published>
-    <updated>2021-01-22T12:36:50.529Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;MySQL-索引相关知识&quot;&gt;&lt;a href=&quot;#MySQL-索引相关知识&quot; class=&quot;headerlink&quot; title=&quot;MySQL 索引相关知识&quot;&gt;&lt;/a&gt;MySQL 索引相关知识&lt;/h3&gt;&lt;h4 id=&quot;索引的选择&quot;&gt;&lt;a href=&quot;#索引的选择&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
-    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java性能调优与测试</title>
-    <link href="https://sunskey.top/performance-tune-learn01.html"/>
-    <id>https://sunskey.top/performance-tune-learn01.html</id>
-    <published>2021-01-22T05:24:58.000Z</published>
-    <updated>2021-01-22T06:16:09.257Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;后台服务出现明显“变慢”&quot;&gt;&lt;a href=&quot;#后台服务出现明显“变慢”&quot; class=&quot;headerlink&quot; title=&quot;后台服务出现明显“变慢”&quot;&gt;&lt;/a&gt;后台服务出现明显“变慢”&lt;/h4&gt;&lt;h5 id=&quot;具体步骤&quot;&gt;&lt;a href=&quot;#具体步骤&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="Java" scheme="https://sunskey.top/tags/Java/"/>
-    
-    <category term="性能调优" scheme="https://sunskey.top/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Redis淘汰策略和持久化</title>
-    <link href="https://sunskey.top/learn-redis01.html"/>
-    <id>https://sunskey.top/learn-redis01.html</id>
-    <published>2021-01-17T15:08:58.000Z</published>
-    <updated>2021-01-23T02:30:28.023Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;Redis-key的淘汰策略&quot;&gt;&lt;a href=&quot;#Redis-key的淘汰策略&quot; class=&quot;headerlink&quot; title=&quot;Redis key的淘汰策略&quot;&gt;&lt;/a&gt;Redis key的淘汰策略&lt;/h3&gt;&lt;h4 id=&quot;过期策略&quot;&gt;&lt;a</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-    <category term="Redis" scheme="https://sunskey.top/tags/Redis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>MySQL 基础架构</title>
-    <link href="https://sunskey.top/mysql-learning01.html"/>
-    <id>https://sunskey.top/mysql-learning01.html</id>
-    <published>2021-01-15T09:27:14.000Z</published>
-    <updated>2021-01-22T11:47:09.474Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;mysql基础架构&quot;&gt;&lt;a href=&quot;#mysql基础架构&quot; class=&quot;headerlink&quot; title=&quot;mysql基础架构&quot;&gt;&lt;/a&gt;mysql基础架构&lt;/h3&gt;&lt;img</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
-    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>《做时间的朋友读书笔记》</title>
-    <link href="https://sunskey.top/learn-note01.html"/>
-    <id>https://sunskey.top/learn-note01.html</id>
-    <published>2021-01-10T14:55:59.000Z</published>
-    <updated>2021-01-10T15:09:19.463Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;作者：&lt;a</summary>
-        
-      
-    
-    
-    
-    <category term="读书" scheme="https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/"/>
-    
-    
-    <category term="读书笔记" scheme="https://sunskey.top/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>战国时期的第一个霸主-魏国</title>
-    <link href="https://sunskey.top/history01.html"/>
-    <id>https://sunskey.top/history01.html</id>
-    <published>2020-12-30T08:22:06.000Z</published>
-    <updated>2020-12-31T09:19:17.522Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;1-李悝变法&quot;&gt;&lt;a href=&quot;#1-李悝变法&quot; class=&quot;headerlink&quot; title=&quot;1.李悝变法&quot;&gt;&lt;/a&gt;1.李悝变法&lt;/h3&gt;&lt;h4 id=&quot;李悝变法的主要内容&quot;&gt;&lt;a href=&quot;#李悝变法的主要内容&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="历史" scheme="https://sunskey.top/categories/%E5%8E%86%E5%8F%B2/"/>
-    
-    
-    <category term="历史" scheme="https://sunskey.top/tags/%E5%8E%86%E5%8F%B2/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>2021年书单</title>
-    <link href="https://sunskey.top/booklist.html"/>
-    <id>https://sunskey.top/booklist.html</id>
-    <published>2020-12-28T06:55:36.000Z</published>
-    <updated>2021-01-10T14:57:07.150Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;技术方面&quot;&gt;&lt;a href=&quot;#技术方面&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="读书" scheme="https://sunskey.top/categories/%E8%AF%BB%E4%B9%A6/"/>
-    
-    
-    <category term="书单" scheme="https://sunskey.top/tags/%E4%B9%A6%E5%8D%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>线程安全学习笔记(一)</title>
-    <link href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html"/>
-    <id>https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html</id>
-    <published>2020-12-25T05:56:53.000Z</published>
-    <updated>2020-12-25T11:31:52.493Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;线程安全&quot;&gt;&lt;a href=&quot;#线程安全&quot; class=&quot;headerlink&quot; title=&quot;线程安全&quot;&gt;&lt;/a&gt;线程安全&lt;/h3&gt;&lt;p&gt;线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。&lt;/p&gt;
-&lt;h4</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="Java" scheme="https://sunskey.top/tags/Java/"/>
-    
-    <category term="线程安全" scheme="https://sunskey.top/tags/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/"/>
     
   </entry>
   

@@ -165,7 +165,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning11.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning22.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -179,7 +179,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/mysql-learning11.html" class="post-title-link" itemprop="url">如何正确显示随机消息</a>
+            <a href="/mysql-learning22.html" class="post-title-link" itemprop="url">MySQL主备高可用</a>
         </h2>
 
         <div class="post-meta">
@@ -190,7 +190,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-01-23 10:09:03 / 修改时间：10:16:27" itemprop="dateCreated datePublished" datetime="2021-01-23T10:09:03+08:00">2021-01-23</time>
+              <time title="创建时间：2021-01-23 19:29:42 / 修改时间：19:35:42" itemprop="dateCreated datePublished" datetime="2021-01-23T19:29:42+08:00">2021-01-23</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -211,8 +211,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/mysql-learning11.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning11.html" itemprop="commentCount"></span>
+    <a title="valine" href="/mysql-learning22.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning22.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -228,938 +228,183 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="如何正确显示随机消息"><a href="#如何正确显示随机消息" class="headerlink" title="如何正确显示随机消息"></a>如何正确显示随机消息</h3><h4 id="内存临时表"><a href="#内存临时表" class="headerlink" title="内存临时表"></a>内存临时表</h4><p>使用oder by rand()</p>
-<p>对于InnoDB表，执行全字段排序会减少磁盘访问，因此会被优先选择。</p>
-<p>对于内存表，回表过程只是简单地根据数据行的位置，直接访问内存得到数据，根本不会导致多访问磁盘，从而选择rowid排序。</p>
-<p>select word from words order by rand() limit 3;</p>
-<h5 id="整个执行过程"><a href="#整个执行过程" class="headerlink" title="整个执行过程"></a>整个执行过程</h5><p>1.创建一个临时表。这个临时表使用的是 memory 引擎，表里有两个字段，第一个字段是 double 类型，为了后面描述方便，记为字段 R，第二个字段是 varchar(64) 类型，记为字段 W。并且，这个表没有建索引。</p>
-<p>2.从 words 表中，按主键顺序取出所有的 word 值。对于每一个 word 值，调用 rand() 函数生成一个大于 0 小于 1 的随机小数，并把这个随机小数和 word 分别存入临时表的 R 和 W 字段中，到此，扫描行数是 10000。</p>
-<p>3.现在临时表有 10000 行数据了，接下来你要在这个没有索引的内存临时表上，按照字段 R 排序。</p>
-<p>4.初始化 sort_buffer。sort_buffer 中有两个字段，一个是 double 类型，另一个是整型。</p>
-<p>5.从内存临时表中一行一行地取出 R 值和位置信息（我后面会和你解释这里为什么是“位置信息”），分别存入 sort_buffer 中的两个字段里。</p>
-<p>6.这个过程要对内存临时表做全表扫描，此时扫描行数增加 10000，变成了 20000。在 sort_buffer 中根据 R 的值进行排序。注意，这个过程没有涉及到表操作，所以不会增加扫描行数。</p>
-<p>7.排序完成后，取出前三个结果的位置信息，依次到内存临时表中取出 word 值，返回给客户端。这个过程中，访问了表的三行数据，总扫描行数变成了 20003</p>
-<img src="https://i.loli.net/2021/01/23/zer2NxcJFMV5afg.png" style="zoom:50%;" />
-
-<p>如果你创建的表没有主键，或者把一个表的主键删掉了，那么 InnoDB 会自己生成一个长度为 6 字节的 rowid 来作为主键。</p>
-<p>对于有主键的InnoDB表来说，整个rowid就是主键ID。</p>
-<p>对于没有主键的InnoDB表来说，这个rowid就是系统生成的。</p>
-<p>order by rand() 使用了内存临时表，内存临时表排序的时候使用了rowid排序算法。</p>
-<h4 id="磁盘临时表"><a href="#磁盘临时表" class="headerlink" title="磁盘临时表"></a>磁盘临时表</h4><p>tmp_table_size限制了内存表的大小，默认值是16M。如果临时表的大小超过了tmp_table_size，那么内存临时表就会转成磁盘临时表。</p>
-<p>磁盘临时表默认使用InnoDB，是由参数Internal_tmp_disk_storage_engine取控制。</p>
-<p>MySQL5.6引入：优先队列排序算法，不需要使用临时文件的算法(归并排序），而是采用了优先队列排序算法。</p>
-<img src="https://i.loli.net/2021/01/23/DFnrBLS4lY7cAWj.png" style="zoom:40%;" />
-
-<p>总之，不管使用那种类型的临时表，order_by_rand()这种写法都会让计算过程非常复杂，需要大量的扫描行数。</p>
-<h4 id="随机排序方法"><a href="#随机排序方法" class="headerlink" title="随机排序方法"></a>随机排序方法</h4><p>1.取得整个表的行数，并记为C.</p>
-<p>2.取得Y = floor(C*rand())。</p>
-<p>3.再利用你limit Y，1取得一行。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning10.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning10.html" class="post-title-link" itemprop="url">MySQL 加锁规则</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-01-22 20:47:40" itemprop="dateCreated datePublished" datetime="2021-01-22T20:47:40+08:00">2021-01-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-23 10:17:47" itemprop="dateModified" datetime="2021-01-23T10:17:47+08:00">2021-01-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning10.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning10.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="加锁规则"><a href="#加锁规则" class="headerlink" title="加锁规则"></a>加锁规则</h3><p>加锁规则里面，包含了两个”原则‘、两个“优化”和一个“bug”。</p>
-<p>1.原则1：加锁基本单位是next-key lock。前开后闭区间。</p>
-<p>2.原则2：查找过程中访问到的对象才会加锁。</p>
-<p>3.优化1：索引上的等值查询，给唯一索引加锁的时候，next-key lock退化为 行锁。</p>
-<p>4.优化2：索引上的等值查询，向右遍历且最后一个不满足等值条件的时候，next-key lock退化为间隙锁。</p>
-<p>5.一个bug：唯一索引上的范围查询会访问到不满足条件的第一个值为止。</p>
-<img src="https://i.loli.net/2021/01/23/6ChDo3XBTL5jyEl.png" style="zoom:50%;" />
-
-
-
-<h4 id="案例一：等值查询间隙锁"><a href="#案例一：等值查询间隙锁" class="headerlink" title="案例一：等值查询间隙锁"></a>案例一：等值查询间隙锁</h4><img src="https://i.loli.net/2021/01/23/otv9XOWDCjSdQcy.png" style="zoom:50%;" />
-
-<h4 id="案例二：非唯一索引等值锁"><a href="#案例二：非唯一索引等值锁" class="headerlink" title="案例二：非唯一索引等值锁"></a>案例二：非唯一索引等值锁</h4><img src="https://i.loli.net/2021/01/23/pAhGQdrXiFV7alt.png" style="zoom:50%;" />
-
+          <h3 id="MySQL主备高可用"><a href="#MySQL主备高可用" class="headerlink" title="MySQL主备高可用"></a>MySQL主备高可用</h3><h4 id="MySQL是如何保证主备一致的"><a href="#MySQL是如何保证主备一致的" class="headerlink" title="MySQL是如何保证主备一致的"></a>MySQL是如何保证主备一致的</h4><p>![image-20201208104505467](/Users/dxm/Library/Application Support/typora-user-images/image-20201208104505467.png)</p>
+<p>建议把节点B设置成read only 状态</p>
+<p>1.有时候一些运营的查询语句会被放到备库上去查，设置只读可以防止误操作。</p>
+<p>2.防止切换逻辑有bug，比如切换过程中出现双写，造成主备不一致。</p>
+<p>3.可以用read only，来判断节点的角色。</p>
+<h5 id="binlog备份执行过程"><a href="#binlog备份执行过程" class="headerlink" title="binlog备份执行过程"></a>binlog备份执行过程</h5><p><img src="https://i.loli.net/2020/12/08/quZE8cX2MwlAN3U.png"></p>
 <ol>
-<li><p>根据原则 1，加锁单位是 next-key lock，因此会给 (0,5]加上 next-key lock。</p>
+<li><p>在备库 B 上通过 change master 命令，设置主库 A 的 IP、端口、用户名、密码，以及要从哪个位置开始请求 binlog，这个位置包含文件名和日志偏移量。</p>
 </li>
-<li><p>要注意 c 是普通索引，因此仅访问 c=5 这一条记录是不能马上停下来的，需要向右遍历，查到 c=10 才放弃。</p>
+<li><p>在备库 B 上执行 start slave 命令，这时候备库会启动两个线程，就是图中的 io_thread 和 sql_thread。其中 io_thread 负责与主库建立连接。</p>
 </li>
-<li><p>根据原则 2，访问到的都要加锁，因此要给 (5,10]加 next-key lock。但是同时这个符合优化 2：等值判断，向右遍历，最后一个值不满足 c=5 这个等值条件，因此退化成间隙锁 (5,10)。</p>
+<li><p>主库 A 校验完用户名、密码后，开始按照备库 B 传过来的位置，从本地读取 binlog，发给 B。</p>
 </li>
-<li><p>根据原则 2 ，只有访问到的对象才会加锁，这个查询使用覆盖索引，并不需要访问主键索引，所以主键索引上没有加任何锁，这就是为什么 session B 的 update 语句可以执行完成。</p>
+<li><p>备库 B 拿到 binlog 后，写到本地文件，称为中转日志（relay log）。</p>
+</li>
+<li><p>sql_thread 读取中转日志，解析出日志里的命令，并执行。</p>
 </li>
 </ol>
-<p>lock in share mode只锁覆盖索引，但是如果是for update 就不一样。执行for update，会顺便给主键索引上满足条件的行加上锁。</p>
-<h4 id="案例三：主键索引范围锁"><a href="#案例三：主键索引范围锁" class="headerlink" title="案例三：主键索引范围锁"></a>案例三：主键索引范围锁</h4><p>mysql&gt; select * from t where id=10 for update;<br>mysql&gt; select * from t where id&gt;=10 and id&lt;11 for update;</p>
-<p>语句1，只会对语句10进行加锁</p>
-<img src="https://i.loli.net/2021/01/23/fX5AJePvWgon21M.png" style="zoom:50%;" />
-
-
-
-<p>而语句2则是行锁id =10  和 next-key（10，15】</p>
-<h4 id="案例四：非唯一索引范围锁"><a href="#案例四：非唯一索引范围锁" class="headerlink" title="案例四：非唯一索引范围锁"></a>案例四：非唯一索引范围锁</h4><img src="https://i.loli.net/2021/01/23/TfeIONuZJgvLEQb.png" style="zoom:50%;" />
-
-<p>加锁范围为(5,10] 和 (10,15] 这两个 next-key lock。</p>
-<h4 id="案例五：唯一索引范围锁bug"><a href="#案例五：唯一索引范围锁bug" class="headerlink" title="案例五：唯一索引范围锁bug"></a>案例五：唯一索引范围锁bug</h4><img src="https://i.loli.net/2021/01/23/owaiyQN7k6D8P1p.png" style="zoom:50%;" />
-
-<p>yi因为id是唯一键，所以循环判断id = 15这一行就停止了 。但是实现上，InnoDB会往前扫面第一个不满足条件的行为止，因此（16，20】这个next - key -lock也会被锁上。</p>
-<h4 id="案例六：非唯一索引上存在“等值”的例子"><a href="#案例六：非唯一索引上存在“等值”的例子" class="headerlink" title="案例六：非唯一索引上存在“等值”的例子"></a>案例六：非唯一索引上存在“等值”的例子</h4><img src="https://i.loli.net/2021/01/23/CtwdR236iqPOrcD.png" style="zoom:50%;" />
-
-<p>这时，session A 在遍历的时候，先访问第一个 c=10 的记录。</p>
-<p>同样地，根据原则 1，这里加的是 (c=5,id=5) 到 (c=10,id=10) 这个 next-key lock。</p>
-<p>然后，session A 向右查找，直到碰到 (c=15,id=15) 这一行，循环才结束。</p>
-<p>根据优化 2，这是一个等值查询，向右查找到了不满足条件的行，所以会退化成 (c=10,id=10) 到 (c=15,id=15) 的间隙锁。</p>
-<p>也就是说，这个 delete 语句在索引 c 上的加锁范围，就是下图中蓝色区域覆盖的部分。</p>
-<h4 id="案例七：limit语句加锁"><a href="#案例七：limit语句加锁" class="headerlink" title="案例七：limit语句加锁"></a>案例七：limit语句加锁</h4><img src="https://i.loli.net/2021/01/23/Jrz1ZMpx7qmuvPs.png" style="zoom:50%;" />
-
-<p>这是因为，案例七里的 delete 语句明确加了 limit 2 的限制，因此在遍历到 (c=10, id=30) 这一行之后，满足条件的语句已经有两条，循环就结束了。因此，索引 c 上的加锁范围就变成了从（c=5,id=5) 到（c=10,id=30) 这个前开后闭区间，如下图所示：</p>
-<img src="https://i.loli.net/2021/01/23/Yl6UQG3g74ENCKh.png" style="zoom:50%;" />
-
-<p><strong>在删除数据的时候尽量加limit</strong>。这样不仅可以控制删除数据的条数，让操作更安全，还可以减小加锁的范围。</p>
-<h4 id="案例八：一个死锁的例子"><a href="#案例八：一个死锁的例子" class="headerlink" title="案例八：一个死锁的例子"></a>案例八：一个死锁的例子</h4><img src="https://i.loli.net/2021/01/23/CAQ7tarNwmZKEMs.png" style="zoom:50%;" />
-
-<p>session A 启动事务后执行查询语句加 lock in share mode，在索引 c 上加了 next-key lock(5,10] 和间隙锁 (10,15)；</p>
-<p>session B 的 update 语句也要在索引 c 上加 next-key lock(5,10] ，进入锁等待；</p>
-<p>然后 session A 要再插入 (8,8,8) 这一行，被 session B 的间隙锁锁住。由于出现了死锁，InnoDB 让 session B 回滚。</p>
-<p>其实是这样的，session B 的“加 next-key lock(5,10] ”操作，实际上分成了两步，先是加 (5,10) 的间隙锁，加锁成功；然后加 c=10 的行锁，这时候才被锁住的。</p>
-<p>实际上next-key lock 来分析。具体执行的时候，要分成间隙锁和行锁两端来执行的。</p>
-<p>读已提交除在外键条件下不存在间隙锁，还有个优化，即：语句执行过程中加上的行锁，在语句执行完成后，就把“不满足条件的行”上的行锁直接释放了，不需要等到事务提交。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning09.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning09.html" class="post-title-link" itemprop="url">什么是幻读</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-01-22 20:47:34" itemprop="dateCreated datePublished" datetime="2021-01-22T20:47:34+08:00">2021-01-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-23 10:08:55" itemprop="dateModified" datetime="2021-01-23T10:08:55+08:00">2021-01-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning09.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning09.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="什么是幻读"><a href="#什么是幻读" class="headerlink" title="什么是幻读"></a>什么是幻读</h3><img src="https://i.loli.net/2021/01/22/VCiQI2LT6zBneGM.png" style="zoom:50%;" />
-
-<img src="https://i.loli.net/2021/01/22/hUTB4MzEsHq6mef.png" style="zoom:50%;" />
-
-<p>1.在可重复读的级别下，普通的查询时快照读，是不会看到别的事务插入的数据的。因此，幻读在“当前读“下才会出现。</p>
-<p>2.上面sessionB的修改结果，被session  A之后的select 语句用”当前读“看到，不能称为幻读。幻读仅专指”新插入的行“。</p>
-<h4 id="幻读有什么问题"><a href="#幻读有什么问题" class="headerlink" title="幻读有什么问题"></a>幻读有什么问题</h4><p>1.破环了语义上的意思。”要把所有满足条件的行锁住，不准别的事务进行读写操作“</p>
-<p>2.数据一致性的问题。</p>
-<p>即使把所有的记录都加上锁，还是阻止不了新插入的记录。</p>
-<h4 id="如何解决幻读"><a href="#如何解决幻读" class="headerlink" title="如何解决幻读"></a>如何解决幻读</h4><p>1.产生幻读的原因是，行锁只能锁住行，但是新插入这个动作，要更新记录之间的”间隙“。因此，为了解决幻读，InnoDB引入新的锁，也就是间隙锁（Gap Lock）。</p>
-<img src="https://i.loli.net/2021/01/22/VhwrjMaP3b84fDo.png" style="zoom:50%;" />
-
-<p>就这样不止给数据库中已有的6个记录加上行锁，还同时加了7个间隙锁。这样确保了无法插入新的记录。</p>
-<p>跟间隙锁存在冲突关系的，是”往这个间隙中插入一个记录“这个操作。</p>
-<p>间隙锁和行锁合成next-key lock，每个next-key lock是前开后闭区间。例如：分别是 (-∞,0]、(0,5]、(5,10]、(10,15]、(15,20]、(20, 25]、(25, +supremum]。</p>
-<p>间隙锁的引入，可能会导致同样的语句锁住更大的范围，这其实是影响了并发度的。</p>
-<p>间隙锁是在可重复读隔离级别下才会生效的。如果把隔离级别设置成读提交，就没有间隙锁。但是需要解决数据和日志不一致的问题，需要把binlog格式设置为row。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning08.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning08.html" class="post-title-link" itemprop="url">order by 工作原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 20:37:19 / 修改时间：20:55:36" itemprop="dateCreated datePublished" datetime="2021-01-22T20:37:19+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning08.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning08.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="order-by工作原理"><a href="#order-by工作原理" class="headerlink" title="order by工作原理"></a>order by工作原理</h3><h4 id="全字段排序"><a href="#全字段排序" class="headerlink" title="全字段排序"></a>全字段排序</h4><p>MySQL会给每个线程分配一块内存用于排序，称为sort buffer。</p>
-<p>1.初始化 sort_buffer，确定放入 name、city、age 这三个字段；</p>
-<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
-<p>3.到主键 id 索引取出整行，取 name、city、age 三个字段的值，存入 sort_buffer 中；</p>
-<p>4.从索引 city 取下一个记录的主键 id；</p>
-<p>5.重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的 ID_Y；</p>
-<p>6.对 sort_buffer 中的数据按照字段 name 做快速排序；</p>
-<p>7.按照排序结果取前 1000 行返回给客户端。</p>
-<p>sort_buffer_size ，就是MySQL为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于sort_buffer_size，排序就在内存中完成。如果数据量太大，内存放不下，则不得不利用磁盘临时文件辅助排序。</p>
-<img src="https://i.loli.net/2021/01/22/XrfTwBDKqWbPmFd.png" style="zoom:50%;" />
-
-<h4 id="rowid排序"><a href="#rowid排序" class="headerlink" title="rowid排序"></a>rowid排序</h4><p>如果sort_buffer里面要存放的字段数太多，这样内存能存的行数很少，要分成很多个临时文件，排序性能会很差。可以通过修改max_length_for_sort_data的值来改变排序算法。</p>
-<p>1.初始化 sort_buffer，确定放入两个字段，即 name 和 id；</p>
-<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
-<p>3.到主键 id 索引取出整行，取 name、id 这两个字段，存入 sort_buffer 中；</p>
-<p>4.从索引 city 取下一个记录的主键 id；</p>
-<p>5.重复步骤 3、4 直到不满足 city=’杭州’条件为止，也就是图中的 ID_Y；</p>
-<p>6.对 sort_buffer 中的数据按照字段 name 进行排序；</p>
-<p>7.遍历排序结果，取前 1000 行，并按照 id 的值回到原表中取出 city、name 和 age 三个字段返回给客户端。</p>
-<img src="https://i.loli.net/2021/01/22/9LYQciKfheZ5lxE.png" style="zoom:50%;" />
-
-<h4 id="全字段排序-VS-Rowid排序"><a href="#全字段排序-VS-Rowid排序" class="headerlink" title="全字段排序 VS Rowid排序"></a>全字段排序 VS Rowid排序</h4><p>由于Rowid排序涉及到回表，如果内存足够，就优先使用内存，即全字段排序。</p>
-<p>优化手段：可以使用覆盖索引，索引上的信息足够满足查询请求，不需要再回主键索引上去取数据。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning07.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning07.html" class="post-title-link" itemprop="url">MySQL 保证数据不丢失的秘密</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 20:18:12 / 修改时间：20:55:39" itemprop="dateCreated datePublished" datetime="2021-01-22T20:18:12+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning07.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning07.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="保证数据不丢失的秘密"><a href="#保证数据不丢失的秘密" class="headerlink" title="保证数据不丢失的秘密"></a>保证数据不丢失的秘密</h3><h4 id="binlog写入机制"><a href="#binlog写入机制" class="headerlink" title="binlog写入机制"></a>binlog写入机制</h4><p>binlog写入逻辑：事务执行过程中，先把日志写到binlog cache，事务提交的时候，再把binlog cache写到binlog中。</p>
-<p>每个线程由自己的binlog cache ,但是共用同一份binlog文件。</p>
-<p>write，指的是把日志写入文件系统的page cache,并没有把数据持久化到磁盘，所以速度快。</p>
-<p>fsync，将数据持久化到磁盘的操作。</p>
-<img src="https://i.loli.net/2021/01/22/unLfoqTdmyXH1pc.png" style="zoom:50%;" />
-
-<p>write和fsync的时机，是由参数sync_binlog控制的；</p>
-<p>1.sync_binlog = 0的时候，表示每次提交事务都只write，不fsync;</p>
-<p>2.sync_binlog =1的时候，表示每次提交事务都会执行fsync;</p>
-<p>3.sync_binlog=N(N&gt;1) 的时候，表示每次提交事务都 write，但累积 N 个事务后才 fsync。</p>
-<h4 id="redo-log的写入机制"><a href="#redo-log的写入机制" class="headerlink" title="redo log的写入机制"></a>redo log的写入机制</h4><img src="https://static001.geekbang.org/resource/image/9d/d4/9d057f61d3962407f413deebc80526d4.png" alt="img" style="zoom:50%;" />
-
-<p>1.存在redo log buffer中，物理上是在MySQL进程内存中。</p>
-<p>2.写到磁盘（write）,但是没有持久化(fsync)，物理上文件系统的page cache里面。</p>
-<p>3.持久化到磁盘，对应的是hard disk。</p>
-<p>InnoDB提供了innodb_flush_log_at_trx_commit参数控制redo log的写入策略。</p>
-<p>0：表示每次事务提交时都只是把redo log留在redo log buffer中</p>
-<p>1：表示每次事务提交都将redo log持久化硬盘</p>
-<p>2：每次提交都只是把redo log写到page cache</p>
-<p>InnoDB有一个后台线程，每间隔一秒，就会把redo log buffer中的日志，调用write 写到文件系统的page cache ，然后fsync持久化磁盘。</p>
-<p>3种情况会把让没有提交事务的redo log写入到磁盘中</p>
-<p>1.后台线程每秒一次的轮询操作。</p>
-<p>2.redo log buffer占用的空间即将达到innodb_log_buffer_size一半的时候，后台线程会主动写盘。</p>
-<p>3.并行的事务提交的时候，顺带将这个事务的redo log buffer持久化到磁盘。</p>
-<p>MySQL的双一配置。指的就是sync_binlog和innodb_flush_log_at_trx_commit都设置成1。一个事务完整提交前，需要等待两次刷盘，一次是redo log（prepare ）,一次是binlog.</p>
-<p>日志逻辑序列（LSN）是单调递增的，用来对应redo log的一个个写入点。每次写入length的redo log，LSN的值就会加上length。</p>
-<p>一次组提交里面，里面的组员越多，节约磁盘IOPS的效果越好。</p>
-<p>日志记录过程</p>
-<img src="https://i.loli.net/2021/01/22/B2GzKH3tRJqySns.png" style="zoom:50%;" />
-
-
-
-<p>如果想binlog提升组提交的效果，可以通过设置binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count 来实现。</p>
-<p>1.binlog_group_commit_sync_delay参数，表示多少微秒后才调用fsync</p>
-<p>2.binlog_group_commit_sync_no_delay_count，表示多少次以后才调用fsync</p>
-<p>如果MySQL出现了性能瓶颈，而且瓶颈在IO上</p>
-<p>1.通过设置binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count参数你，减少binlog的写盘速度。</p>
-<p>2.将sync_binlog设置大于1，这样做的风险是，这个主机掉电会丢失binlog日志。</p>
-<p>3.innodb_flush_log_at_trx_commit 设置为 2。这样做的风险是，主机掉电的时候会丢数据。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning06.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning06.html" class="post-title-link" itemprop="url">MySQL 提高性能的办法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 20:18:09 / 修改时间：20:35:08" itemprop="dateCreated datePublished" datetime="2021-01-22T20:18:09+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning06.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning06.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="MySQL-提高性能的办法"><a href="#MySQL-提高性能的办法" class="headerlink" title="MySQL 提高性能的办法"></a>MySQL 提高性能的办法</h3><p>短连接存在的一个风险，就是一旦数据库处理得慢一些，连接数就会暴涨。</p>
-<p>max_connection参数，用来控制一个MySQL最大连接数，超过这个值，系统就会提示“too many connections”从而导致数据库不可用。</p>
-<p>解决方案</p>
-<p>1.先处理掉那些占着链接但是不工作的线程。</p>
-<p>如果连接数过多，可以优先断开事务外空闲太久的链接；如果这样还不够，在考虑断开事务内空闲太久的链接。</p>
-<p>使用 kill connection + id的方式，使用show processlist查看结果。</p>
-<p>2.减少连接过程的消耗</p>
-<p>跳过权限验证的方法是：重启数据库，并使用-skip-grant-tables参数启动。这样连接过程和语句执行过程都会跳过权限校验阶段。(但是不建议这么做，风险极高)。</p>
-<h4 id="慢查询性能问题"><a href="#慢查询性能问题" class="headerlink" title="慢查询性能问题"></a>慢查询性能问题</h4><p>1.索引没有设计好</p>
-<p>2.SQL语句没写好</p>
-<p>3.MySQL选错了索引</p>
-<p>1.上线前，在测试环境，把慢查询日志打开，并且把long_query_time设置成0，确保每个语句都会被记录</p>
-<p>2.在测试表插入线上的数据，做一遍回归测试</p>
-<p>3.观察慢查询里每类语句的输出，特别留意Row_examined字段是否一致。</p>
-<p>call query_rewrite.flush_rewrite_rules() 这个存储过程，是让插入的新规则生效，也就是我们说的“查询重写”。</p>
-<h4 id="QPS突增问题"><a href="#QPS突增问题" class="headerlink" title="QPS突增问题"></a>QPS突增问题</h4><p>1.如果是由全新业务的bug导致的，那么就可以从数据库直接把白名单去掉。</p>
-<p>2.如果这个新功能使用的单独的数据库用户，可以直接删除用户。</p>
-<p>3.如果跟主题功能绑定在一块，使用语句重写的功能，把压力最大的SQL直接重写成“select 1”返回。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning05.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning05.html" class="post-title-link" itemprop="url">数据表空间回收</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 19:50:10 / 修改时间：20:11:35" itemprop="dateCreated datePublished" datetime="2021-01-22T19:50:10+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning05.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning05.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="数据表空间回收"><a href="#数据表空间回收" class="headerlink" title="数据表空间回收"></a>数据表空间回收</h3><p>MySQL8.0版本前，表的结构是存在以.frm为后缀的文件里。而8.0后，允许把表结构定义放在系统数据表中。因为结构定义占用的空间很小。</p>
-<p>表数据既可以存在共享表空间里面，也可以是单独的文件。这个行为是由参数innodb_file_per_table控制。从Mysql5.6.6以后，默认为on。</p>
-<p>off：表的数据放在系统共享表空间，也就是跟数据字典放在一起；</p>
-<p>on：每个InnoDB表数据存储在一个以.idb为后缀的文件中。</p>
-<h4 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h4><p>删除一个数据页上的所有记录，整个数据页的复用跟记录的复用是不同的。</p>
-<p>使用delete 命令只是把记录或者数据页标记为“可复用”，不能回收表的空间，而没有使用的空间，看起来就像空洞，不止删除数据回暖造成空洞，插入数据也会。</p>
-<h4 id="重建表"><a href="#重建表" class="headerlink" title="重建表"></a>重建表</h4><p>新建一个与原表结构相同的新表，然后按照主键ID递增的顺序，把数据一行一行地从原表读到表B，然后用B替换A，从而起到收缩表A空间的作用，解决空洞的问题。</p>
-<p>在MySQL5.5之后，可以之前使用alter table A engine = InnoDB来重建表。</p>
-<img src="https://i.loli.net/2021/01/22/sh7lNaZ1xGMFi9k.png" style="zoom:50%;" />
-
-<p>在这个过程中，如果有新数据要写入表A的话，就回造成数据丢失。</p>
-<p>为了保证整个重建表的正常，原表不能进行更新，5.6版本后引入了Online DDL，优化了该过程。</p>
-<h4 id="Online-DDL"><a href="#Online-DDL" class="headerlink" title="Online DDL"></a>Online DDL</h4><p>1.建立一个临时文件，扫描表A主键的所有数据页。</p>
-<p>2.用数据页中表A的记录生成B+树，存储到临时文件中。</p>
-<p>3.生成的临时文件的过程中，将所有对A的操作记录再一个日志文件（row  log）中。</p>
-<p>4.临时文件生成后，将日志文件的操作应用到临时文件中，得到与表A相同的数据文件。</p>
-<p>5.用临时文件替换表A的数据文件。</p>
-<p>整个过程中，MDL的写锁会转化为MDL的读锁，从而提高效率。</p>
-<p>整个过程很消耗CPU和IO,如果想安全操作，推荐使用gh-os来做。</p>
-<h5 id="Online和inplace-的区别"><a href="#Online和inplace-的区别" class="headerlink" title="Online和inplace 的区别"></a>Online和inplace 的区别</h5><p>对于server层没有把数据移动到临时表，是一个“原地”操作，这就过程称为inplace。</p>
-<p>1.DDL过程如果是Online的，就一定是inplace的</p>
-<p>2.inplace的DDL，有可能不是Online的。8.0后添加全文索引（FULLTEXT index）和空间索引（SPATIAL index）就属于这种情况。</p>
-<h5 id="optimize-table、analyze-table和alter-table三种重建表的区别"><a href="#optimize-table、analyze-table和alter-table三种重建表的区别" class="headerlink" title="optimize table、analyze table和alter table三种重建表的区别"></a>optimize table、analyze table和alter table三种重建表的区别</h5><p>1.从MySQL 5.6版本开始，alter table t engine = InnoDB默认就是Online DDL。</p>
-<p>2.analyze table t，只是对索引信息进行重新统计，没有修改数据，加入MDL读锁。</p>
-<p>3.optimize table = analyze  + alter</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning04.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning04.html" class="post-title-link" itemprop="url">count(*)很“慢”？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 19:35:58 / 修改时间：19:47:00" itemprop="dateCreated datePublished" datetime="2021-01-22T19:35:58+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning04.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning04.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="count-很“慢”？"><a href="#count-很“慢”？" class="headerlink" title="count(*)很“慢”？"></a>count(*)很“慢”？</h3><h4 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h4><p>1.MyISAM引擎把一个表的总行数存在磁盘上，执行count(*)的时候会直接返回这个数。</p>
-<p>2.InnoDB时，则需要一行一行的从引擎里面读出来，然后累计计数。</p>
-<p>对于count(*)这样的操作，MySQL优化器会找到最小的那棵树来遍历。再保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。</p>
-<p>show table status命令是采用采样估计来估算的，不能直接使用。</p>
-<h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>1.通过缓存保存计数。</p>
-<p>将计数保存在缓存系统中的方式，还不只是丢失更新的问题。即使Redis 正常工作，这个值还是逻辑上不精确的。</p>
-<p>2.在数据库保存计数</p>
-<p>由于事务的可见性，可保证逻辑上的数据的一致性。</p>
-<h4 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h4><p>count()函数的参数不是NULL，累计值就加1，否则不加。最后返回累计值。</p>
-<p>count(*)，count(主键)，count(1)，count(字段)的区别</p>
-<p>count(主键id)，遍历每一行把每一行的id值取出来，返回给id层，server层拿到id后，判断不为空，则按行累加。</p>
-<p>count(1),server层对于返回的每一行，放一个数字“1”进去，按行累加。</p>
-<p>count(字段)：一行一行的从记录里面读取字段</p>
-<p>1.定义为not null的话，一行行的从记录里面读出这个字段，判断不能为null，按行累加。</p>
-<p>2.定义为允许null，那么执行的时候，判断到有可能是null，还要把值取出来判断一下，不是null才累加。</p>
-<p>count(*),并不会把全部字段取出来，而是专门做了优化，不取值。</p>
-<p>按照效率排序的话：count(字段)&lt;count(主键 id)&lt;count(1)≈count(*)。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning03.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning03.html" class="post-title-link" itemprop="url">SQL慢的原因和解决办法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 19:22:59 / 修改时间：20:54:09" itemprop="dateCreated datePublished" datetime="2021-01-22T19:22:59+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning03.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning03.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="SQL执行过慢的原因"><a href="#SQL执行过慢的原因" class="headerlink" title="SQL执行过慢的原因"></a>SQL执行过慢的原因</h3><h4 id="1-查询长时间不返回"><a href="#1-查询长时间不返回" class="headerlink" title="1.查询长时间不返回"></a>1.查询长时间不返回</h4><ul>
-<li>等待MDL锁</li>
-</ul>
-<p>mysql&gt; select * from t where id=1;</p>
-<p>一般是表t被锁住了。可以利用show processlist看看语句处于什么状态。</p>
-<p>如果是Waiting for table metadata lock的示意图，则表示有一个线程正在表t上请求或者持有MDL写锁。</p>
-<p>通过查询sys.schema_table_lock_waits这张表，我们可以直接找到阻塞进程的id，然后把这个链接kill掉。  </p>
+<h5 id="binlog三种格式的对比"><a href="#binlog三种格式的对比" class="headerlink" title="binlog三种格式的对比"></a>binlog三种格式的对比</h5><ol>
+<li><p>statement：记录的是具体的语句。可能会因去主备不一致。</p>
+</li>
+<li><p>row：记录的是逻辑上具体的行为。日志的更加的详细。</p>
+</li>
+<li><p>mixed：由于采用row会记录具体逻辑上的日志，所以占用的空间比statement更大。MySQl会自己判断这条语句是否可能引起主备不一致，如果有可能，就用statemnt。</p>
+</li>
+</ol>
+<p>使用row格式的好处在于，<strong>更方便恢复数据</strong>。</p>
+<h5 id="循环复制问题"><a href="#循环复制问题" class="headerlink" title="循环复制问题"></a>循环复制问题</h5><p>![image-20201208110741362](/Users/dxm/Library/Application Support/typora-user-images/image-20201208110741362.png)</p>
+<p>双M架构和M-S结构，节点A和节点B之间总是互为主备。</p>
+<p>业务逻辑上在节点A上更新一条语句后，把生成的binlog发送给节点B，节点B执行完也会生成binlog，这样节点A又会去执行节点B生成的binlog。从而造成循环执行，怎么解决？</p>
+<ol>
+<li>规定两个库的server id必须不同，如果相同，则它们之间不能设定为主备关系。</li>
+<li>一个备库接到到binlog并在重放的过程中，生成与原binlog的server id相同的新的bingo.</li>
+<li>每个库收到从自己主库发送过来的日志后，先判断server id,如果跟自己相同，表示这个日志是自己生成的，则直接丢弃这个日志。</li>
+<li></li>
+</ol>
+<h5 id="线上数据库设置成“非双1”的场景。"><a href="#线上数据库设置成“非双1”的场景。" class="headerlink" title="线上数据库设置成“非双1”的场景。"></a>线上数据库设置成“非双1”的场景。</h5><ol>
+<li><p>业务高峰期。</p>
+</li>
+<li><p>备库延迟，为了备库尽快赶上主库。</p>
+</li>
+<li><p>用备份恢复主库的副本，应用binlog的过程。</p>
+</li>
+<li><p>批量导入数据的时候。</p>
+</li>
+</ol>
+<h4 id="MySQL怎么保证高可用"><a href="#MySQL怎么保证高可用" class="headerlink" title="MySQL怎么保证高可用"></a>MySQL怎么保证高可用</h4><h5 id="“同步延迟”"><a href="#“同步延迟”" class="headerlink" title="“同步延迟”"></a>“同步延迟”</h5><ol>
+<li><p>主库A执行完成一个事务，写入binlog，我们把这个时刻记为T1。</p>
+</li>
+<li><p>之后传给备库B，我们把备库接受的这个binlog称为T2。</p>
+</li>
+<li><p>备库B执行完成这个事务，把这个时间成为T3。</p>
+</li>
+</ol>
+<p>所谓的主备延迟，就是在同一个事务中，在备库完成的时间和主库执行完时间之间的差值，也就是T3 - T1。</p>
+<p>可以在show slave status，seconds_behind_master用于表示当前备库延迟了多少秒。</p>
+<p>主备延迟的主要原因是备库消费日志的速度（relay log），比主库生产的binlog的速度慢的多。</p>
+<h5 id="主备延迟的来源"><a href="#主备延迟的来源" class="headerlink" title="主备延迟的来源"></a>主备延迟的来源</h5><ol>
+<li>有些部署条件下，备库的所有机器性能要比主库所在的机器性能差。</li>
+<li>备库的压力大了。例如：一些后台分析的语句，只能在备库上跑，不能影响正常的业务。</li>
+</ol>
+<p><strong>解决方案：</strong></p>
 <ul>
-<li>等flush</li>
+<li>一主多从。除了备库外，可以多接几个从库，让这些从库来分担读的压力。</li>
+<li>通过binlog输出到外部系统。比如Hadoop这类系统，让外部提供统计和查询的能力。</li>
 </ul>
-<p>有一个线程正要对表t做flush操作，MySQL里面对表做flush操作的用法。</p>
-<p>flush tables t with read lock;</p>
-<p>flush tables with read lock;</p>
-<p>这个两个flush语句，如果制定表 t 的话，代表的只关闭表t，如果没有指定具体的表名，则表示关闭MySQL里所有打开的表。</p>
-<p>所以出现Waiting for table flush 状态的可能情况是：有一个命令被别的语句堵住，然后它有堵住了我们select的语句。</p>
-<p><img src="https://i.loli.net/2021/01/22/2qgHDfrzZEtPGjC.png"></p>
-<ul>
-<li>等行锁</li>
-</ul>
-<p>如果一个事务在这行记录上面上持有一个写锁，那么我们的select 语句就会被堵住。</p>
-<p><img src="https://i.loli.net/2021/01/22/6HhCZGowEaSjlqe.png"></p>
-<p>可以通过sys.innodb_lock_waits表查到。</p>
-<h4 id="2-查询慢"><a href="#2-查询慢" class="headerlink" title="2.查询慢"></a>2.查询慢</h4><p>1.没有索引</p>
-<p>2.为了一致性读，undo log日志过长导致的，判断是不是有长事务。</p>
-<h3 id="SQL为什么突然变“慢”"><a href="#SQL为什么突然变“慢”" class="headerlink" title="SQL为什么突然变“慢”"></a>SQL为什么突然变“慢”</h3><p>当内存数据页和磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘的数据页的内容就一直了，称为“干净页”。刷新脏页的过程为称为flush。</p>
-<h4 id="flush的4种场景"><a href="#flush的4种场景" class="headerlink" title="flush的4种场景"></a>flush的4种场景</h4><p>1.对于InnoDB 的redo log写满了。</p>
-<p>2.对应的系统内存不足。在需要新的内存页，而内存不够用的时候，就要淘汰一些数据页，空出内存给别的数据页使用。如果淘汰的时“脏页”，则先写入磁盘。</p>
-<p>3.MySQL会合理的安排时间，见缝插针的刷新“脏页”。</p>
-<p>4.MySQL重启的时候。</p>
-<p>刷新脏页虽然时常态，但都是明显影响性能的。</p>
-<p>1.一个查询要淘汰的脏页过多，会导致查询的响应时间明显变长。</p>
-<p>2.日志写满，更新性能全部堵住，写性能跌为0，这种情况对敏感的业务来说，不能接受。</p>
-<h4 id="InnoDB刷新脏页的控制策略"><a href="#InnoDB刷新脏页的控制策略" class="headerlink" title="InnoDB刷新脏页的控制策略"></a>InnoDB刷新脏页的控制策略</h4><p>1.调用fio工具，来正确设置innodb_io_capacity的这个参数</p>
-<p>Innodb的刷盘速度主要考虑两个因素：一个脏页比例，一个是redo log写盘速度。</p>
-<img src="https://i.loli.net/2021/01/22/p6tYAvMoGwkPUW2.png" style="zoom:50%;" />
+<p>3.大事务。例如：不要用delete一次性删除太多的数据。大表的DDL，建议采用gh-ost方案。</p>
+<p>4.备库的并行复制能力过低。</p>
+<h5 id="可靠性优先策略"><a href="#可靠性优先策略" class="headerlink" title="可靠性优先策略"></a>可靠性优先策略</h5><p>1.判断备库B上的seconds_behind_master，如果小于某个值继续下一秒。否则重试</p>
+<p>2.把主库A改成只读状态，即把readonly设置为true</p>
+<p>3.判断备库B的seconds_behind_master，直到这个值变为0</p>
+<p>4.把备库改写成可读写状态，把readonly设置为false;</p>
+<p>5.把业务请求切到备库B</p>
+<p>这个切换流程，一般是由专门的 HA 系统来完成的，我们暂时称之为可靠性优先流程。</p>
+<h5 id="可用性有限策略"><a href="#可用性有限策略" class="headerlink" title="可用性有限策略"></a>可用性有限策略</h5><p>把步骤4，5调整到最开始执行，不等主备数据同步，直接把连接切到备库B，并且让备库B可以读写，那么系统几乎没有不可用时间了。但是可能会产生数据不一致的情况。</p>
+<p>例如：可用性策略，且binlog_format=mixed时的切换流程和数据结果。</p>
+<p><img src="https://i.loli.net/2020/12/08/hcIpnQx3iLAE85K.png"></p>
+<ol>
+<li><p>步骤 2 中，主库 A 执行完 insert 语句，插入了一行数据（4,4），之后开始进行主备切换。</p>
+</li>
+<li><p>步骤 3 中，由于主备之间有 5 秒的延迟，所以备库 B 还没来得及应用“插入 c=4”这个中转日志，就开始接收客户端“插入 c=5”的命令。</p>
+</li>
+<li><p>步骤 4 中，备库 B 插入了一行数据（4,5），并且把这个 binlog 发给主库 A。</p>
+</li>
+<li><p>步骤 5 中，备库 B 执行“插入 c=4”这个中转日志，插入了一行数据（5,4）。而直接在备库 B 执行的“插入 c=5”这个语句，传到主库 A，就插入了一行新数据（5,5）。</p>
+</li>
+</ol>
+<p>可用性优先策略binlog_format=row时下的结果。</p>
+<p><img src="https://i.loli.net/2020/12/08/JpaxzsM3jGnUOBN.png"></p>
+<p>备库的B的（5，4）和主库A(5,5)这两行数据均不会被对方执行。</p>
+<ol>
+<li><p>使用row格式的binlog时，数据不一致的问题更容易被发现。</p>
+</li>
+<li><p>主备切换的可用性优先策略会导致数据不一致。建议针对大多数应用来说，数据可靠性一般还是要优于可用性的。</p>
+</li>
+</ol>
+<p>MySQL的可用性时依赖主备延迟的，延迟时间越小，在出库故障的时候，服务恢复需要的时间就越短，可用性就越高。</p>
+<h4 id="备库延迟过高怎么解决"><a href="#备库延迟过高怎么解决" class="headerlink" title="备库延迟过高怎么解决"></a>备库延迟过高怎么解决</h4><p>如果备库执行日志的速度持续低于主库生成日志的速度，那这个延迟就有可能成了小时级别。而且对于一个压力持续比较高的主库来说，备库很可能永远都追不上主库的节奏。</p>
+<p><img src="https://i.loli.net/2020/12/08/ZsiMPyYInvmft3B.png"></p>
+<p>如果图中sql_thread 更新数据DATA是采用单线程，就会导致备库应用日志不够快，造成主备延迟。</p>
+<p>5.6版本前，MySQL只支持单线程，由此在主库并发高，TPS高时就会出现严重的主备延迟问题。</p>
+<h5 id="多线程模型"><a href="#多线程模型" class="headerlink" title="多线程模型"></a>多线程模型</h5><p><img src="https://i.loli.net/2020/12/08/4FQt72JHh3P9YgD.png"></p>
+<p>图中的coordinator就是原来的sql_thread模型，只负责读取中转和分发事务。work线程的个数由slave_parallel_workers决定，建议设置在8～16之间最好。</p>
+<p>coordinator在分发的时候，需要满足以下两个基本的要求</p>
+<p>1.不能造成更新覆盖。这要求 更新同一行的事务，必须被分发到同一个worker中。</p>
+<p>2.同一个事务不能被拆开，必须放到同一个worker中。</p>
+<h5 id="按表分发策略"><a href="#按表分发策略" class="headerlink" title="按表分发策略"></a>按表分发策略</h5><p><img src="https://i.loli.net/2020/12/08/QRqmSd9vHLashWY.png"></p>
+<p>每个事务在分发的时候，跟所有worker的冲突关系包括以下三种情况：</p>
+<p>1.如果跟所有worker都不冲突，coornaditor线程就会把这个事务分配给最空闲的worker。</p>
+<p>2.如果跟多于一个worker冲突，coordinator进入等待状态，直到和这个事务存在冲突关系的worker只剩一个。</p>
+<p>3.如果只跟一个worker冲突，coordinator线程就会把这个事务分配给由冲突关系的worker。</p>
+<p>缺点：如果碰到热点表更新的时候，所有的事务都会被分配同一个worker，就会变成单线程复制。</p>
+<h5 id="按行分发策略"><a href="#按行分发策略" class="headerlink" title="按行分发策略"></a>按行分发策略</h5><p>如果两个事务没有更新相同的行，它们在备库上可以并行执行。显然这个模式binlog必须要求row。</p>
+<p>按行复制和按表复制的数据结构查不多，为每一个worker，分配一个hash表，只要是按行分发，这时候的key，就必须是“库名+表明+唯一键的值”。</p>
+<p>相比按表并行分发策略，按行并行策略在决定线程分发的时候，需要消耗更多的计算资源，同时还存在一些约束条件。</p>
+<ol>
+<li><p>要能够从binlog里面解析出表名、主键值和唯一索引的值。binlog必须为row。</p>
+</li>
+<li><p>表必须由主键。</p>
+</li>
+<li><p>不能有外键。表上如果有外键，级联更新的行不会记录在binlog中，这样冲突检测就不准确。</p>
+</li>
+</ol>
+<p>缺点：1、耗费内存。2、耗费cpu。</p>
+<h5 id="MySQL5-6版本的并行复制策略"><a href="#MySQL5-6版本的并行复制策略" class="headerlink" title="MySQL5.6版本的并行复制策略"></a>MySQL5.6版本的并行复制策略</h5><p>用于决定分发策略的hash表里，key就是数据库名。</p>
+<p>优势: 1、构建hash的值时候跟快。 2、不要求binlog格式。</p>
+<p>如果主库上有多个DB，并且各个DB的压力均衡，使用这个策略的效果会很好。</p>
+<h5 id="MariaDB的并行策略"><a href="#MariaDB的并行策略" class="headerlink" title="MariaDB的并行策略"></a>MariaDB的并行策略</h5><p>Maria 并行复制 利用了redo log组提交的两个特性。</p>
+<p>1.能够在同一组提交的事务，一定不会修改同一行。</p>
+<p>2.主库上可以并行执行的事务，备库上也一定可以并行执行的。</p>
+<p>在实现上，MariaDB是这么做的</p>
+<p>1.一组提交事务，里面有一个相同的commit_id,下一组就是commit_id+1;</p>
+<p>2.commit_id 直接写到binlog里面。</p>
+<p>3.传到备库应用的时候，相同commit_id的事务分发到多个worker执行。</p>
+<p>4.这一组全部执行完成后，coordinator再去去下一批。</p>
+<p>缺点：要等第一组事务完全执行后，第二组事务才能开始执行，这样系统的吞吐量不够。这个方案很容易被大事务拖后腿。</p>
+<h5 id="MySQL-5-7的并行复制策略"><a href="#MySQL-5-7的并行复制策略" class="headerlink" title="MySQL 5.7的并行复制策略"></a>MySQL 5.7的并行复制策略</h5><p>1.配置DATABASE，表示使用MySQL5.6版本的按库执行</p>
+<p>2.配置LOGICAL_CLOCK，提供了类似MariaDB的策略。</p>
+<p>并行复制策略的思路：</p>
+<p>1.同时处于prepare状态的事务，在备库执行时可以并行的。</p>
+<p>2.处于prepare状态的事务，与处于commit状态的事务之间，在备库执行时也是可以并行的。</p>
+<p>可以增加binlog_group_commit_sync_delay和binlog_group_commit_sync_no_delay_count参数，让主库提交慢一些，从而达到提升备库复制并发度的目的。</p>
+<h5 id="MySQL-5-7-22的并行复制"><a href="#MySQL-5-7-22的并行复制" class="headerlink" title="MySQL 5.7.22的并行复制"></a>MySQL 5.7.22的并行复制</h5><p>MySQL新增了一个新的并行度复制策略，基于WRITESET的并行复制。</p>
+<p>相应地，新增binlog-transaction-dependency-tracking，来控制是否启用。</p>
+<p>1.COMMIT_ORDER，同时进入prapare和commit来判断是否可以并行的策略。</p>
+<p>2.WRITESET，表示的是对于事务涉及更新的每一行，计算出这一行的 hash 值，组成集合 writeset。如果两个事务没有操作相同的行，也就是说它们的 writeset 没有交集，就可以并行。</p>
+<p>3.WRITESET_SESSION，是在 WRITESET 的基础上多了一个约束，即在主库上同一个线程先后执行的两个事务，在备库执行的时候，要保证相同的先后顺序。</p>
+<p>hash值是通过“库名+表名+索引值+值”计算出来的，如果一个这个表上还有除主键索引外，那么对于每个唯一索引，insert语句对应的hash的值。</p>
+<p>1.writeset是在主库生成后，直接写入，在备库执行的时候，节省了很多计算量。</p>
+<p>2.不需要把整个事务的binlog都扫一遍才能决定分发到哪个worker，更省内存。</p>
+<p>3.由于备库的分发策略不以来于binlog内容，所以binlog是statement格式也可以的。</p>
+<h4 id="主库出问题了，从库怎么办？"><a href="#主库出问题了，从库怎么办？" class="headerlink" title="主库出问题了，从库怎么办？"></a>主库出问题了，从库怎么办？</h4><h5 id="一主多从的结构"><a href="#一主多从的结构" class="headerlink" title="一主多从的结构"></a>一主多从的结构</h5><img src="https://i.loli.net/2020/12/08/3qGdsKf5anrY7px.png" style="zoom:80%;" />
 
-<p>合理设置innodb_io_capacity的值，并且多关注脏页比例，**不要让它接近75%**。</p>
-<p>脏页的比例是通过Innodb_buffer_pool_pages_dirty/Innodb_buffer_pool_pages_total得到的</p>
-<p>其中innodb_flush_neighbors 参数为1会顺带把邻居的脏页同步刷新，适用于机械硬盘的场景。5.8以后默认</p>
-<p>innodb_flush_neighbors 为0。</p>
+<p>其中A和A’互为主备，从库B、C、D指向的是主库A。</p>
+<p>相比一主一备，一主多从结构在切换完成后，A’会成为新的主库，从库B、C、D也要改接到A’，所以主备切换的复杂性也相应增加了。</p>
+<p>当我们把节点B设置成节点A’的从库的时候，需要执行一条change master命令：</p>
+<p>![image-20201208164303574](/Users/dxm/Library/Application Support/typora-user-images/image-20201208164303574.png)</p>
+<p>关键在于如何设置从主库的master_log_name文件以及位置。</p>
+<p>一种取同步位点的方法</p>
+<p>1.等待新主库A’把中转日志(relay log)全部同步完成</p>
+<p>2.在A’上执行show master status,得到当前A’最新的File和Position</p>
+<p>3.取原主库A故障的时刻T</p>
+<p>4.用mysqlbinlog工具解析A‘的File,得到T时刻的位点。</p>
+<p>但是有可能存在主键冲突等错误。通常，在切换任务的时候，要先主动跳过这些错误。</p>
+<p>1.主动跳过一个事务。set global sql_slave_skip_counter=1;每次碰到这些错误 ，执行一次跳过命令，直到不再出现停下来的情况。</p>
+<p>2.通过设置slave_skip_errors参数，直接设置跳过制定的错误，等主备的同步关系建立后，并稳定执行一段时间后，把这个参数设置为空，以免真的出现主从数据不一致，也跳过了。</p>
+<ul>
+<li>1062 错误插入数据时唯一键冲突。</li>
+<li>1032 错误是删除数据时找不行。</li>
+</ul>
+<h5 id="GTID"><a href="#GTID" class="headerlink" title="GTID"></a>GTID</h5><p>GTID的全称是GTID 的全称是 Global Transaction Identifier，也就是全局事务 ID，是一个事务在提交的时候生成的，是这个事务的唯一标识。它由两部分组成，</p>
+<p>格式是：GTID=server_uuid:gno</p>
+<p>其中：</p>
+<p>server_uuid是一个实例第一次启动时自动生成的，是一个全局唯一的值。</p>
+<p>gno是一个整数，初始值是1，每次提交事务的时候分配这个事务，并加1。</p>
+<p>事务id（transaction id）是在事务执行过程中分配的，如果这个事务回滚了，事务id也会增加，而gno是在事务提交的时候才会分配。</p>
+<p>在GTID模式下，每一个事务都会跟一个GTID一一对应。</p>
 
       
     </div>
@@ -1179,7 +424,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning02.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning21.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -1193,7 +438,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/mysql-learning02.html" class="post-title-link" itemprop="url">MySQL 索引相关知识</a>
+            <a href="/mysql-learning21.html" class="post-title-link" itemprop="url">MySQL 扩展知识点</a>
         </h2>
 
         <div class="post-meta">
@@ -1204,7 +449,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-01-22 19:08:42 / 修改时间：20:36:50" itemprop="dateCreated datePublished" datetime="2021-01-22T19:08:42+08:00">2021-01-22</time>
+              <time title="创建时间：2021-01-23 19:27:32 / 修改时间：19:35:38" itemprop="dateCreated datePublished" datetime="2021-01-23T19:27:32+08:00">2021-01-23</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1225,8 +470,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/mysql-learning02.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning02.html" itemprop="commentCount"></span>
+    <a title="valine" href="/mysql-learning21.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning21.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -1242,49 +487,993 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="MySQL-索引相关知识"><a href="#MySQL-索引相关知识" class="headerlink" title="MySQL 索引相关知识"></a>MySQL 索引相关知识</h3><h4 id="索引的选择"><a href="#索引的选择" class="headerlink" title="索引的选择"></a>索引的选择</h4><h5 id="查询过程"><a href="#查询过程" class="headerlink" title="查询过程"></a>查询过程</h5><p>普通索引：在查找满足条件的第一个记录后，查找下一个记录你，直到碰到不满足的条件的记录。</p>
-<p>唯一索引：在查找第一个满足条件的记录后，就会停止继续检索。</p>
-<h5 id="更新过程"><a href="#更新过程" class="headerlink" title="更新过程"></a>更新过程</h5><p>唯一索引的更新不能使用change buffer。而普通索引则可以。</p>
-<p>索引的选择，两类索引在查询性能上没差别的，主要是考虑对更新的性能。推荐使用普通索引。</p>
-<h5 id="changebuffer"><a href="#changebuffer" class="headerlink" title="changebuffer"></a>changebuffer</h5><p>定义：当需要更新一个数据的时候，如果数据页在内存中就直接更新，而如果这个数据页还没有在内存中的话，在不影响数据一致性的前提下，InnoDB将会将这些更新操作缓存在change buffer中，这样就不需要从磁盘中读入数据页了。在下次查询需要访问这个数据页的时候，将数据读入内存，然后执行change buffer中与这个页有关的操作。通过这种方式就能保证这个数据逻辑的正确性。</p>
-<p>作用：减少读磁盘，语句的执行速度会得到明显的提升 ，提高内存利用率。</p>
-<p>change buffer的时使用场景：主要目的就是将记录的变更动作缓存下来，在一个数据页做merge之前，记录的越多，收益越大。对于写多读少的业务（例如：账单类、日志类）使用效果较好。但是对于写入之后马上会做查询的场景。由于更新之后马上会读取数据页，出发merge的过程，这样反而会增加change buffer的维护代价。</p>
-<p>change buffer:是buffer poll里面的内存，可以通过innodb_change_buffer_max_size去设置。</p>
-<p>changebuffer和 redo log的区别</p>
-<p>redo log主要节省的是随机磁盘的IO消耗（转化顺序写），而change buffer主要节省的是随机读磁盘的IO的消耗。</p>
-<h4 id="MySQL索引的错误选择"><a href="#MySQL索引的错误选择" class="headerlink" title="MySQL索引的错误选择"></a>MySQL索引的错误选择</h4><p>优化器选择扫描行数、临时表，是否排序等因素综合找出一个最优的解决方案，用最小的代价去执行语句。</p>
-<p>扫行行数：通过“区分度”来建立估算扫描行数，显然“基础”越大，索引的区分度越好。</p>
-<p>通过show index from table 中cardinality属性可以得到区分度。</p>
-<p>采用统计：InnoDB会默认选择N个数据页，统计这些页面上的不同值，得到一个平均值，然后乘以这个索引的页面数，就得到这个索引的基数。当变更行数超过1/M的时候，会自动触发重新做一次索引统计。</p>
-<p>在MySQL中，有两种存储索引的统计方式，可通过innodb_stats_persistent的值来选择。</p>
-<p>on:持久化存储。默认N是20，M是10。</p>
-<p>off:内存。默认N是8，M是16。</p>
-<h5 id="索引选择异常和处理"><a href="#索引选择异常和处理" class="headerlink" title="索引选择异常和处理"></a>索引选择异常和处理</h5><p>1.采用force index强行选择索引。</p>
-<p>2.修改语句，引导MySQL使用我们期望的索引。</p>
-<p>3.在有些场景下，我们可以新建一个索引，提供给优化器做选择或者删除误用的索引。</p>
-<h4 id="字符串加索引"><a href="#字符串加索引" class="headerlink" title="字符串加索引"></a>字符串加索引</h4><p>mysql&gt; alter table SUser add index index1(email);<br>mysql&gt; alter table SUser add index index2(email(6));</p>
-<p>select id,name,email from SUser where email=’zhangssxyz@xxx.com’;</p>
-<h5 id="如果使用全索引"><a href="#如果使用全索引" class="headerlink" title="如果使用全索引"></a>如果使用全索引</h5><p>1.从index1索引树找到满足索引值”zhangssxyz”的这条记录，取得ID2的值</p>
-<p>2.到主键查到主键值是ID2的行，判断email的值是否正确，将这行记录加入结果集</p>
-<p>3.取index1索引树上刚刚查到的位置的下一条记录，发现不满足email=’zhangssxyz@xxx.com’的条件，循环结束。</p>
-<h5 id="使用部分索引"><a href="#使用部分索引" class="headerlink" title="使用部分索引"></a>使用部分索引</h5><p>1.从index2 索引树找到满足索引值“zhangs”的记录，找到一个是ID!;</p>
-<p>2.到主键查询主键值ID1的行，判断email的值不是“<a href="mailto:&#x7a;&#x68;&#97;&#x6e;&#103;&#x73;&#115;&#x73;&#x40;&#x78;&#x78;&#x78;&#46;&#x63;&#x6f;&#109;">&#x7a;&#x68;&#97;&#x6e;&#103;&#x73;&#115;&#x73;&#x40;&#x78;&#x78;&#x78;&#46;&#x63;&#x6f;&#109;</a>”，丢弃。</p>
-<p>3.取index2刚刚位置的下一条记录，发现仍然是“zhangs”，取出ID2，回表判断值是否正确，加入结果集</p>
-<p>4.重复上述操作，直到在index2上取到的值不是“zhangs”时，循环结束</p>
-<p>使用好前缀索引，定义好长度，就可以做好既节约空间，又不用额外增加太多的查询成本。</p>
-<p>mysql&gt; select<br>  count(distinct left(email,4)）as L4,<br>  count(distinct left(email,5)）as L5,<br>  count(distinct left(email,6)）as L6,<br>  count(distinct left(email,7)）as L7,<br>from SUser;</p>
-<p>在L4-L7中，找出不小于L*95%的值。</p>
-<p>使用前缀索引就用不上覆盖索引的查询性能的优化了。</p>
-<h5 id="字符串索引的劣势"><a href="#字符串索引的劣势" class="headerlink" title="字符串索引的劣势"></a>字符串索引的劣势</h5><p>对于区分度不高的场景，例如身份证前6位对于一个市、县区分度并不高的解决方案。</p>
-<p>1.使用倒序存储</p>
-<p>2.使用hash字段</p>
-<p>hash字段和倒序存储的区别</p>
-<p>1.倒序存储不消耗额外的空间，不需要新增hash字段。</p>
-<p>2.自增hash字段的方式，倒序rerverse()相比hash函数的效率更高。</p>
-<p>3.从查询效率上看，使用hash字段方式的查询性能相对稳定。</p>
-<h4 id="索引的失效"><a href="#索引的失效" class="headerlink" title="索引的失效"></a>索引的失效</h4><p>1.对索引字段做函数操作，可能会破环索引值的有序性，因此优化器就决定放弃走树搜索功能。</p>
-<p>2.隐式的类型转换</p>
-<p>3.隐式的字符编码转化</p>
+          <h3 id="MySQL-扩展知识点"><a href="#MySQL-扩展知识点" class="headerlink" title="MySQL 扩展知识点"></a>MySQL 扩展知识点</h3><h4 id="Grant和权限"><a href="#Grant和权限" class="headerlink" title="Grant和权限"></a>Grant和权限</h4><p>Grant 语句会同时修改数据表和内存，判断权限的时候使用的内存数据，因此，规范的使用grant和revoke 语句，是不需要随后加上flush privileges。</p>
+<p>flush privileges语句本身会用数据库的数据重建一份内存权限，所以在权限数据可能存在不一致的情况下再使用。而这种不一致往往是由于直接用DML语句操作系统权限导致的</p>
+<h4 id="My-SQL系统自增id"><a href="#My-SQL系统自增id" class="headerlink" title="My SQL系统自增id"></a>My SQL系统自增id</h4><h5 id="表定义自增值id"><a href="#表定义自增值id" class="headerlink" title="表定义自增值id"></a>表定义自增值id</h5><p>表定义的自增值达到上限后的逻辑是：再申请下一个id时，得到的值不变。</p>
+<h5 id="InnoDB-系统自增-row-id"><a href="#InnoDB-系统自增-row-id" class="headerlink" title="InnoDB 系统自增 row_id"></a>InnoDB 系统自增 row_id</h5><p>写入表row_id时从0开始到2^48-1。达到上限后，下一个值就是 0，然后继续循环。</p>
+<h5 id="Xid"><a href="#Xid" class="headerlink" title="Xid"></a>Xid</h5><p>MySQL内部维护了一个全局变量global_query_id，每次执行语句的时候将它赋值给Query_id，然后给这个变量加1。如果当前语句时这个事务执行的第一条语句，那么MySQL还会同时把Query_id赋值给这个事务的Xid。</p>
+<p>MySQL重启后会生成新的binlog文件，这就保证了，同一个binlog文件，Xid一定时唯一的。达到上限后，就继续从0开始计数。</p>
+<p>global_query_id定义的长度是8个字节，这个自增值的上限是2^64-1。</p>
+<h5 id="Innodb-trx-id"><a href="#Innodb-trx-id" class="headerlink" title="Innodb trx_id"></a>Innodb trx_id</h5><p>Xid是由server层维护，InnoDB内部使用Xid，就是为了能够再InnoDB事务和server之间做关联。InnoDB 自己的 trx_id，是另外维护的。</p>
+<p>InnoDB 内部维护了一个 max_trx_id 全局变量，每次需要申请一个新的 trx_id 时，就获得 max_trx_id 的当前值，然后并将 max_trx_id 加 1。</p>
+<p>InnoDB 数据可见性的核心思想是：每一行数据都记录了更新它的 trx_id，当一个事务读到一行数据的时候，判断这个数据是否可见的方法，就是通过事务的一致性视图与这行数据的 trx_id 做对比。</p>
+<h5 id="thread-id"><a href="#thread-id" class="headerlink" title="thread_id"></a>thread_id</h5><p>系统保存了一个全局变量thread_id_counter，每新建一个连接，就将thread_id_counter赋值给这个新连接的线程变量。thread_id_counter 定义的大小是 4 个字节，因此达到 232-1 后，它就会重置为 0，然后继续增加。</p>
+<h4 id="分区表的使用"><a href="#分区表的使用" class="headerlink" title="分区表的使用"></a>分区表的使用</h4><p>MyISAM分区表使用的策略，称为通用策略，每次访问分区都由server层控制。通用分区策略，是MySQL一开始支持分区表就存在的，在文件管理、表管理的实现上很粗糙，因此有比较严重的性能问题。</p>
+<p>MySQL5.7.9 ，InnoDB引擎引入了本地分区策略.InnoDB内部管理分区的行为。</p>
+<p>1.MySQL在第一次打开分区表的时候，需要访问所有的分区；</p>
+<p>2.在server层，认为这是同一张表，因此所有分区公用同一个MDL锁。</p>
+<p>3.在引擎层，认为这是不同的表，因此MDL锁之后的执行过程，会根据分区表规则，只访问必要的分区。</p>
+<h4 id="Insert语句为什么加那么多锁"><a href="#Insert语句为什么加那么多锁" class="headerlink" title="Insert语句为什么加那么多锁"></a>Insert语句为什么加那么多锁</h4><p>Insert….select 是很常见的在两个表之间拷贝数据的方法。在可重复读隔离级别下，这个语句会给select的表扫描到的记录和间隙加读锁。</p>
+<p>如果insert和select的对象是同一个表，则有可能会造成循环写入，需要引入用户临时表来优化。</p>
+<p>insert语句出现唯一键冲突，会在冲突的唯一值上加共享的next-key lock(S锁)。因此，要尽快提交或者回滚事务，避免枷锁时间过长。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning20.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning20.html" class="post-title-link" itemprop="url">MySQL 自增主键</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:20:21 / 修改时间：19:23:37" itemprop="dateCreated datePublished" datetime="2021-01-23T19:20:21+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning20.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning20.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="自增主键为什么不是连续的"><a href="#自增主键为什么不是连续的" class="headerlink" title="自增主键为什么不是连续的"></a>自增主键为什么不是连续的</h3><h4 id="自增值的存储"><a href="#自增值的存储" class="headerlink" title="自增值的存储"></a>自增值的存储</h4><p>表的自增值是保存在表结构定义里，表的结构定义放在后缀名为.frm的文件中，但是并不会保存自增值。</p>
+<p>不同的引擎对于自增值的保存策略不同。</p>
+<ul>
+<li>MyISAM引擎保存在数据文件中。</li>
+<li>InnoDB引擎自增值，其实保存在了内存里。5.7版本以前会去寻找最大的max(id)，放入内存中。而5.8以后则是记录在了redo log中。</li>
+</ul>
+<h4 id="自增值修改机制"><a href="#自增值修改机制" class="headerlink" title="自增值修改机制"></a>自增值修改机制</h4><ol>
+<li>如果插入数据时id字段指定为0、null或者未指定值、把就这个表当前的AUTO_INCREMENT值填到自增字段；</li>
+<li>如果插入数据id字段指定了具体的值，就直接使用语句里指定的值。</li>
+</ol>
+<p>假设，某次要插入的值是X，当前的自增值是Y。</p>
+<ol>
+<li><p>如果X&lt;Y，那么这个表的自增值不变；</p>
+</li>
+<li><p>如果X≥Y，需要把当前自增值修改为新的自增值。</p>
+</li>
+</ol>
+<p>新的自增值生成算法是：从auto_increment_offset 开始，以auto_increment_increment为步长，直到着到第一个大于X的值，作为新的自增值。</p>
+<h4 id="自增值的修改时机"><a href="#自增值的修改时机" class="headerlink" title="自增值的修改时机"></a>自增值的修改时机</h4><p>自增数据的是在真正执行插入数据的操作之前。</p>
+<h4 id="自增主键id不连续的原因"><a href="#自增主键id不连续的原因" class="headerlink" title="自增主键id不连续的原因"></a>自增主键id不连续的原因</h4><p>1.唯一键冲突</p>
+<p>2.事务的回滚</p>
+<p>3.批量插入</p>
+<p>InnoDB语句执行失败也不回退自增id。所以才只保证了自增id是递增的，但不保证是连续的。</p>
+<h4 id="自增锁优化"><a href="#自增锁优化" class="headerlink" title="自增锁优化"></a>自增锁优化</h4><p>自增锁id并不是一个事务锁，而是每次申请完就马上释放。</p>
+<p>对于批量插入数据的语句，MySQL有一个批量申请自增id的策略</p>
+<p>1.语句执行过程中，第一次申请自增id，会分配1个；</p>
+<p>2.1个用完以后，这个语句第二次申请自增id，会分配2个；</p>
+<p>3.2个用完以后，这个语句第三次申请自增id，会分配4个；</p>
+<p>4.依次类推，同一个语句去申请自增id，每次申请到的自增id个数都是上一次的两倍。</p>
+<p>在生产上，尤其是有insert…select这种批量插入数据的场景时，从并发插入数据的角度考虑，建议设置</p>
+<p>innodb_autoinc_lock_mode=2 ，并且 binlog_format=row. </p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning19.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning19.html" class="post-title-link" itemprop="url">MySQL 快速复制一张表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:16:33 / 修改时间：19:20:55" itemprop="dateCreated datePublished" datetime="2021-01-23T19:16:33+08:00">2021-01-23</time>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning19.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning19.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-快速复制一张表"><a href="#MySQL-快速复制一张表" class="headerlink" title="MySQL 快速复制一张表"></a>MySQL 快速复制一张表</h3><h4 id="1-使用mysqldump方法，将命令数据导成一组INSERT语句。"><a href="#1-使用mysqldump方法，将命令数据导成一组INSERT语句。" class="headerlink" title="1.使用mysqldump方法，将命令数据导成一组INSERT语句。"></a>1.使用mysqldump方法，将命令数据导成一组INSERT语句。</h4><p>mysqldump -h$host -P$port -u$user –add-locks=0 –no-create-info –single-transaction  –set-gtid-purged=OFF db1 t –where=”a&gt;900” –result-file=/client_tmp/t.sql</p>
+<ol>
+<li>–single-transaction 的作用是，在导出数据的时候不需要对表db1.t加锁，而是使用START TRANSACTION WITH CONSISTENT SNAPSHOT 的方法；</li>
+<li>–add-locks 设置为 0，表示在输出的文件结果里，不增加” LOCK TABLES t WRITE;” ；</li>
+<li>–no-create-info 的意思是，不需要导出表结构；</li>
+<li>–set-gtid-purged=off 表示的是，不输出跟 GTID 相关的信息；</li>
+<li>–result-file 指定了输出文件的路径，其中 client 表示生成的文件是在客户端机器上。</li>
+</ol>
+<p>之后执行mysql -h127.0.0.1 -P13000  -uroot db2 -e “source /client_tmp/t.sql”</p>
+<h4 id="2-导出csv文件"><a href="#2-导出csv文件" class="headerlink" title="2.导出csv文件"></a>2.导出csv文件</h4><p>另一种方法是直接将结果导出成.csv文件。</p>
+<p>select * from db1.t where a&gt;900 into outfile ‘/server_tmp/t.csv’;</p>
+<ol>
+<li><p>这条语句会将结果保存在服务端。</p>
+</li>
+<li><p>into_outfile指定了文件的生成位置（/server_tmp/），这个位置必须受参数secure_file_priv的限制。</p>
+</li>
+<li><p>这条命令不会帮助覆盖文件，因此确保文件不存在，存在则会报错。</p>
+</li>
+<li><p>这条命令生成的文本文件中，原则上一个数据行对应文本的一行。</p>
+</li>
+</ol>
+<p>得到.csv 导出文件后，你就可以用下面的 load data 命令将数据导入到目标表 db2.t 中.</p>
+<p>load data infile ‘/server_tmp/t.csv’ into table db2.t</p>
+<p><strong>load data 命令有两种用法</strong></p>
+<ol>
+<li>不加“local”，是读取服务端的文件，这个文件必须自secure_file_priv指定的目录或者子目录下</li>
+<li>加上“local”，读取的是客户端的文件，只要mysql客户端有访问这个文件的权限即可。</li>
+</ol>
+<p>select …into outfile 方法不会生成表结构文件,单独导出需要使用如下命令。</p>
+<p>mysqldump -h$host -P$port -uuser —single-transaction  –set-gtid-purged=OFF db1 t –where=”a&gt;900” –tab=$secure_file_priv</p>
+<h4 id="3-物理拷贝方法"><a href="#3-物理拷贝方法" class="headerlink" title="3.物理拷贝方法"></a>3.物理拷贝方法</h4><p>MySQL5.6版本引入了可传输表空间的方法，可以通过导出+导入表空间的方式，实现物理拷贝表的功能。</p>
+<ol>
+<li><p>执行 create table r like t，创建一个相同表结构的空表。</p>
+</li>
+<li><p>执行alter table discard table space，这时候r.ibd文件会被删除。</p>
+</li>
+<li><p>执行flush table t for export, 这时候db1目录下会生成一个t.cfg文件。</p>
+</li>
+<li><p>在db1目录下执行cp t.cfg r.cfg; cp t.ibd r.ibd；这两个命令</p>
+</li>
+<li><p>执行unlock tables，这时候t.cfg文件会被删除；</p>
+</li>
+<li><p>执行alter table r import table space, 将这个r.ibd文件作为表r的新空间。</p>
+</li>
+</ol>
+<p><strong>注意事项</strong></p>
+<p>1.在执行import tablespace的时候，为了让文件里的表空间id和数据字典中的一致，会修改r.ibd的表空间id。</p>
+<p>2.flush tables命令之后，db1.t整个表处于只读状态，知道执行unlock tables 命令才释放读锁。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning18.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning18.html" class="post-title-link" itemprop="url">MySQL Memory表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:09:43 / 修改时间：19:21:01" itemprop="dateCreated datePublished" datetime="2021-01-23T19:09:43+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning18.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning18.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-Memory表"><a href="#MySQL-Memory表" class="headerlink" title="MySQL Memory表"></a>MySQL Memory表</h3><h4 id="Memory的基础知识"><a href="#Memory的基础知识" class="headerlink" title="Memory的基础知识"></a>Memory的基础知识</h4><p>内存表的数据部分以数组的方式单独存放，而主键id索引里，存的是每个数据的位置。主键id是hash索引，所以索引上的key并不是有序的。</p>
+<p>InnoDB和Memory引擎的数据组织方式是不同的：</p>
+<p>InnoDB引擎把数据放在主键索引上，其他索引上保存的主键id。这中方式成为索引组织表。</p>
+<p>Memory引擎采用的是把数据单独存放，索引上保存数据位置的数据组织形式，我们称之为堆组织表。</p>
+<h4 id="InnoDB和Memory引擎的区别"><a href="#InnoDB和Memory引擎的区别" class="headerlink" title="InnoDB和Memory引擎的区别"></a>InnoDB和Memory引擎的区别</h4><p>1.InnoDB表的数据总是有序存放的，而内存表就是按照写入的顺序。</p>
+<p>2.当数据文件有空洞时候，InnoDB表在插入新数据的时候，为了保证数据有序性，只能在固定的位置写入新值，而内存表找到空位就可以插入新值。</p>
+<p>3.InnoDB 表用主键索引查询时需要走一次索引查找，用普通索引查询的时候，需要走两次。而内存表没有这个区别，索引的“地位”都是相同的。</p>
+<p>4.数据位置发生变化的时候，InnoDB表只需要修改主键索引，而内存表需要修改所有索引。</p>
+<p>5.InnoDB 支持变长数据类型，不同记录的长度不同；内存表不支持Blob和Text字段，并且即使定义了 varchar（N）,实际也当作char(N)，也就是固定长度字符串来存储，因此内存表的每行数据长度相同。</p>
+<h4 id="不建议在生产环境上使用内存表"><a href="#不建议在生产环境上使用内存表" class="headerlink" title="不建议在生产环境上使用内存表"></a>不建议在生产环境上使用内存表</h4><ul>
+<li>锁粒度问题</li>
+</ul>
+<p>内存表不支持行锁，只支持表锁。跟行锁比起来对并发的支持不够好，决定了它在处理并发事务的时候，性能也不会太好。</p>
+<ul>
+<li>数据持久化问题</li>
+</ul>
+<p>M-S模式下，slave机器重启或者升级，会导致“数据丢失”。MySQL担心主库重启后，出现主备不一致，会在binlog里面写入一行DELETE FROM t1。</p>
+<p>双M模式下，在备库重启的时候，备库的binlog的里面delete语句会传到主库，然后把主库内存表的内存删除。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning17.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning17.html" class="post-title-link" itemprop="url">MySQL 临时表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:05:05 / 修改时间：19:16:18" itemprop="dateCreated datePublished" datetime="2021-01-23T19:05:05+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning17.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning17.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-临时表"><a href="#MySQL-临时表" class="headerlink" title="MySQL 临时表"></a>MySQL 临时表</h3><p>内存表，指的使用Memory引擎的表，建表语法是create table… engine = memory。这种表的数据都保存在内存里，系统重启的时候会被清空，但是表结构还在。</p>
+<p>临时表，可以使用各种引擎（MySQL、Memory），写数据的时候写到磁盘上。</p>
+<h4 id="临时表的特性"><a href="#临时表的特性" class="headerlink" title="临时表的特性"></a>临时表的特性</h4><p>1.建表语法是create temporary table ….</p>
+<p>2.一个临时表只能被创建它的session访问，对其他线程不可见。</p>
+<p>3.临时表可以与普通表同名</p>
+<p>4.session A内有同名的临时表和普通表的时候，show create语句，以及增删改查访问的临时表。</p>
+<p>5.show tables命令不显示临时表。</p>
+<p>由于临时表只能被创建它的sesssion访问，session结束会自动删除，所以临时表就特别适合优化join的场景。</p>
+<h4 id="临时表的应用"><a href="#临时表的应用" class="headerlink" title="临时表的应用"></a>临时表的应用</h4><p>1.由于不用担心线程之间的重名冲突，临时表经常会被用在复制查询的优化过程中。其中，分库分表系统的跨库查询就是一个典型的使用场景。</p>
+<p>分区key的选择是“减少跨库和跨表查询”。如果大部分的语句都会包含f的等值条件，那么就要用f做分区键。</p>
+<p>但是如果查询条件中没有分区字段，只能到所有的分区中查询满足条件的所有行，然后统一做order by的操作。两种常见的思路。</p>
+<p>1.在proxy层的进程代码中实现排序。</p>
+<p>优点：处理速度快。缺点：需要开发的工作量比较大，对proxy端的压力比较大。</p>
+<p>2.在各个分库拿到的数据，汇总到一个MySQL实例的一个表中，然后在这个汇总实例上做逻辑操作。</p>
+<p>在汇总库中创建一个临时库temp_ht，包含三个字段 v、k、modified；</p>
+<p>在各个分库上执行</p>
+<p>select v,k,t_modified from ht_x where k &gt;= M order by t_modified desc limit 100;</p>
+<p>把分库执行的结果插入到temp_ht表中；</p>
+<p>执行 select v from temp_ht order by t_modified desc limit 100; 得到结果。</p>
+<p>在实际中，往往会发现每个分库的计算量都不饱和，所以会直接把临时表temp_ht放到32个分库中的某一个上。</p>
+<h4 id="临时表的命名"><a href="#临时表的命名" class="headerlink" title="临时表的命名"></a>临时表的命名</h4><p>MySQL用一个frm文件保存表结构的定义，这个frm文件放在临时文件下，文件名的后缀是.frm，前缀是“#sql{进程 id}<em>{线程</em> id}_序列号”</p>
+<p>5.6以及之前的版本里，MySQL会在临时文件目录下创建一个相同前缀，以.ibd为后缀的文件，用来存放数据文件。</p>
+<p>5.7版本开始，MySQL引入了一个临时文件表空间，专门用来存放临时文件的数据。</p>
+<p>MySQL维护数据表，除了物理上要有文外，内存里面也有一套机制区别不同的表，每个表都对应一个table_def_key。</p>
+<p>一个普通的table_def_key的值是由“库名+表名“得到的。</p>
+<p>临时表，则是在”库名+表名“基础上，又加入了”server_id+thread_id”</p>
+<p>在实现上，每个线程都维护了自己的临时表链表。</p>
+<h4 id="临时表和主备复制"><a href="#临时表和主备复制" class="headerlink" title="临时表和主备复制"></a>临时表和主备复制</h4><p>当前binlog_format =row，那么跟 临时表有关的语句，就不会记录到binlog里面，也就是在binglog_format=statemnt/mixed的时候，binlog中才会记录临时表的操作。</p>
+<p>这种情况下，创建临时表的语句会传到备库执行，因此备库的同步线程会创建这个临时表。主库在线程退出的时候，会自动删除临时表，但是备库同步线程是持续运行的。所以这时候需要在主库再写一个DROP TEMPORARY TBAlE传给备库执行。</p>
+<p>不同线程创建同名给的临时表是没问题的，但是传到备库是怎么执行的呢？</p>
+<p>MySQL在记录binlog的时候，会在主库执行这个语句的线程id写到binlog中。这样，在备库的应用线程就能直到每个语句的主库线程id，并利用这个线程id来构造临时表的table_def_table。</p>
+<h4 id="内存临时表"><a href="#内存临时表" class="headerlink" title="内存临时表"></a>内存临时表</h4><h5 id="1-union-执行流程"><a href="#1-union-执行流程" class="headerlink" title="1. union 执行流程"></a>1. union 执行流程</h5><p>在union时，这里的内存临时表起到了暂存数据的作用，而且计算过程还用上了临时表主键id的唯一约束，实现了union的语义。</p>
+<h5 id="2-group-by-执行流程"><a href="#2-group-by-执行流程" class="headerlink" title="2. group by 执行流程"></a>2. group by 执行流程</h5><p>如果需要并不需要对结果进行排序，那可以在SQL语句末尾增加 order by null。</p>
+<p>group by 优化方法 – 索引</p>
+<p>MySQL 5.7 版本支持了generated column 机制，用来实现列数据的关联更新。你可以用下面的方法创建一个列z，然后在z 列上创建一个索引。</p>
+<p>group by 优化方法 – 直接排序</p>
+<p>在group by语句中加入SQL_BIG_RESULT这个提示(hint)，就可以告诉优化器：这个语句涉及的数据量很大，请直接用磁盘临时表。</p>
+<p>select SQL_BIG_RESULT id%100 as m, count(*) as c from t1 group by m;</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning16.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning16.html" class="post-title-link" itemprop="url">Join 相关知识点</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 18:59:24 / 修改时间：19:04:03" itemprop="dateCreated datePublished" datetime="2021-01-23T18:59:24+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning16.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning16.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="到底可不可以使用join"><a href="#到底可不可以使用join" class="headerlink" title="到底可不可以使用join"></a>到底可不可以使用join</h4><ul>
+<li>不让使用join，使用join有什么问题？</li>
+<li>如果有两个大小不同的表做Join，应该用哪个表做驱动表？</li>
+</ul>
+<h5 id="Index-Nested-Loop-Join"><a href="#Index-Nested-Loop-Join" class="headerlink" title="Index Nested-Loop Join"></a>Index Nested-Loop Join</h5><p>select * from t1 straight_join t2 on (t1.a=t2.a);</p>
+<p>1.从表t1中读入一行数据R;</p>
+<p>2.从数据行R中，取出a字段到表t2里去查找；</p>
+<p>3.取出表t2中满足条件的行，跟R组成一行，作为结果集的一部分；</p>
+<p>4.重复执行步骤1 到 3，直到表t1的末尾循环结束。</p>
+<p>这个过程就成我们写程序时的嵌套查询类似，并且可以用上被驱动表的索引，索引我们称之为”Index Nested-Loop Join“，简称NLJ。</p>
+<p>在驱动表时走的全表扫描，而被驱动表走的树搜索。</p>
+<p>假设被驱动表的行数是M。每次在被驱动表查一行数据，要先搜索索引a，在搜索主键索引，每次搜索一颗树近似复杂度是以2为底的M的对数，记为 log2M，所以在被驱动表上查一行的时间复杂度是 2*log2M。</p>
+<p>假设驱动表的行数为N，执行过程就要扫描驱动表N行，对于每一行，到被驱动表上匹配一次。</p>
+<p>近似复杂度是N + N<em>2</em>log2M。</p>
+<p>显示，N对扫描行数的影响更大，因此应该让小表来做驱动表。</p>
+<p>结论：</p>
+<p>1.使用join语句，性能比强行拆分多个单表执行SQL语句的性能要好；</p>
+<p>2.如果使用join语句的话，需要让小表做驱动表。</p>
+<h5 id="Simple-Nested-Loop-Join"><a href="#Simple-Nested-Loop-Join" class="headerlink" title="Simple Nested-Loop Join"></a>Simple Nested-Loop Join</h5><p>被驱动表没有索引</p>
+<p>select * from t1 straight_join t2 on (t1.a=t2.b);</p>
+<p>如果继续使用算法2的话，这个算法的结果是正确的，算法叫做”Simple Nested-Loop Join”。整个扫描需要N*M行，显然效率和扫描的行数就十分的低下。</p>
+<h5 id="Block-Nested-Loop-Join"><a href="#Block-Nested-Loop-Join" class="headerlink" title="Block Nested-Loop Join"></a>Block Nested-Loop Join</h5><p>被驱动表上没有索引</p>
+<p>1.把表t1的数据读入线程内存join_buffer中，由于我们这个语句中写的是select *，因此是把整个表t1放入内存；</p>
+<p>2.扫描表t2，把表t2的每一行取出来，跟Join buffer中的数据做对比，满足join条件的，作为结果集返回。</p>
+<p>总的扫描行数是1100行，由于join_buffer是以无序数组的方式组织，因此，对表t2中的每一行，都要做一百次判断，总共需要在内存中做的判断次数是：100* 1000 = 10万次。</p>
+<p>假设小表的行数是N，大表的行数是M，那么在这个算法里：</p>
+<p>1.两个表都做一次全表扫描，所以总的扫描行数是M+N。</p>
+<p>2.内存中的 判断次数是M*N。</p>
+<p>如果由于join_buffer过小，驱动表的数据行数是N，需要分K段才能完成算法流程，被驱动表的数据行数是M。</p>
+<p>注意，这个这里的K不是常数，N越大K就会越大，因此把 K 表示为λ*N，显然λ的取值范围是 (0,1)。</p>
+<p>这个算法的执行过程</p>
+<p>1.扫描行数N+λ<em>N</em>M；</p>
+<p>2.内存判断 N*M 次。</p>
+<p>join_buffer_size越大，一次可以放入的行越多，分成的段数也就越少，被驱动表的全表扫描次数就越少。</p>
+<h5 id="问题解答"><a href="#问题解答" class="headerlink" title="问题解答"></a>问题解答</h5><ul>
+<li>能不能使用join语句。</li>
+</ul>
+<p>1.如果可以使用Index Nested-Loop Join算法，也就是使用被驱动表上的索引，其实没有问题。</p>
+<p>2.如果使用Block Nesetd-Loop Join算法，扫描的行数就会过多，尤其大表上的join，这样可能要扫描被驱动表很多次，会占用大量的系统资源，所以这种join尽量不要有。</p>
+<ul>
+<li>如果要使用join，应该选择大表做驱动还是选择小表做驱动。</li>
+</ul>
+<p>1.如果是Index Nested-Loop join算法，应该选择小表做驱动表。</p>
+<p>2.如果是Block Nestd-Loop join算法</p>
+<p>在join_buffer_size足够大的时候，是一样的。</p>
+<p>在join_buffer_size不够大的时候，应该选择小表做驱动表。</p>
+<p>在决定哪个表做驱动表的时候，应该是两个表按照各自的条件过滤，过滤完成后，计算参与join的各个字段的总数据量，数据小的那张表，就是“小表”，应该作为驱动表。</p>
+<h4 id="join该怎么优化"><a href="#join该怎么优化" class="headerlink" title="join该怎么优化"></a>join该怎么优化</h4><h5 id="Multi-Range-Read（MMR）优化"><a href="#Multi-Range-Read（MMR）优化" class="headerlink" title="Multi-Range Read（MMR）优化"></a>Multi-Range Read（MMR）优化</h5><p>这个优化的主要目的是尽量使用顺序读盘。</p>
+<p>因为大多数数据都是按照主键递增顺序插入得到的，所以可以认为i，如果按照主键的递增顺序查询的话，对磁盘的读比交接近顺序读，能够提升读性能。</p>
+<p><strong>MRR优化思路</strong></p>
+<p>1.根据索引a，定位到满足条件的记录，将id值放入read_rnd_buffer中；</p>
+<p>2.将read_rnd_buffer中的id进行递增排序</p>
+<p>3.排序后的id数组，依次到主键id索引中查记录，并作为结果返回。</p>
+<p>MRR能够提升性能的核心在于，可以得到足够多的主键id。这样通过排序以后，再去主键索引查数据，才能体现出“顺序性”的优势。</p>
+<h5 id="Batched-Key-Access"><a href="#Batched-Key-Access" class="headerlink" title="Batched Key Access"></a>Batched Key Access</h5><p>MySQL5.6以后引入这个算法，其实就是对NLJ算法的优化。</p>
+<p>一次性从表驱动表中多拿一些行出来，一起传给被驱动表。</p>
+<p>如果要使用BKA优化算法的话，需要执行SQL语句之前，先设置</p>
+<p>set optimizer_switch=’mrr=on,mrr_cost_based=off,batched_key_access=on’;</p>
+<h5 id="BNL算法的性能问题"><a href="#BNL算法的性能问题" class="headerlink" title="BNL算法的性能问题"></a>BNL算法的性能问题</h5><p>大表join操作虽然对IO有影响，但是语句执行结束后，对IO的影响也就结束了。但是，对Buffer Pool的影响是持续性的，需要依靠后续的查询请求慢慢恢复内存命中率。</p>
+<p>BNL算法对系统的影响主要包括3个方面：</p>
+<p>1.可能会多次扫描被驱动表，占用磁盘IO资源；</p>
+<p>2.判断join条件需要执行M*N次对比，如果是大表就会占用非常多的CPU资源；</p>
+<p>3.可能回暖导致Buffer Pool的热数据被淘汰，影响内存命中率。</p>
+<h4 id="BNL转BKA"><a href="#BNL转BKA" class="headerlink" title="BNL转BKA"></a>BNL转BKA</h4><p>一些情况下，我们可以在被驱动表上建立索引，这是就可以直接转成BKA算法了。</p>
+<p>创建临时表</p>
+<p>1.把表t2中满足条件的数据放在临时表tmp_t中；</p>
+<p>2.为了让join使用BKA算法，给临时表tmp_t的字段b加上索引；</p>
+<p>3.让表t1和tmp_t做join操作。</p>
+<p>总体思路，无论是在原表上加索引，还是用有索引的临时表，我们的思路都是让join语句能够用上被驱动表上的索引，来触发BKA算法，提升查询性能。</p>
+<h4 id="扩展-hash-join"><a href="#扩展-hash-join" class="headerlink" title="扩展 - hash join"></a>扩展 - hash join</h4><p>join_buffer里面维护的不是一个无序数组，而是一个hash表的话，那么就不是10亿次判断，而是100万次hash查找。这样的话，整条语句的执行速度就会快很多。</p>
+<p>这，也是MySQL的优化器和执行器一直被诟病的一个原因：不支持哈希join.</p>
+<p>具体的优化思路，可以自己在业务端实现。</p>
+<p>1.select * from t1;取得表t1的全部1000行数据，在业务端存入一个hash结构</p>
+<p>2.select * from t2 where b&gt; =1 and b&lt;=2000；获取t2中满足条件的2000行数据。</p>
+<p>3.把这2000行数据，一行一行去到业务端，到hash结构的数据表中寻找匹配的数据。满足匹配的条件的这行数据你，就作为结果集的一行。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning15.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning15.html" class="post-title-link" itemprop="url">大数据对数据库的影响</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 17:02:44 / 修改时间：18:58:07" itemprop="dateCreated datePublished" datetime="2021-01-23T17:02:44+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning15.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning15.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="大数据对数据库的影响"><a href="#大数据对数据库的影响" class="headerlink" title="大数据对数据库的影响"></a>大数据对数据库的影响</h3><h4 id="全表扫描对server层的影响"><a href="#全表扫描对server层的影响" class="headerlink" title="全表扫描对server层的影响"></a>全表扫描对server层的影响</h4><p>1.获取一行，写入net_buffer。大小由net_buffer_length决定，默认16K。</p>
+<p>2.重复获取行，直到net_buffer写满，调用网络接口发出去。</p>
+<p>3.如果发送出去，就清空net_buffer，继续写入net_buffer。</p>
+<p>4.如果发送函数返回EAGAIN或WSAEWOULDBLOCK，就表示本地网络栈（socket send buffer写满了），进入等待。直到网络栈重新可写，在继续发送。</p>
+<p>MySQL是“边读边发的”，如果客户端接受得慢，会导致MySQL服务端由于结果发不出去，这个事务的执时间边长。</p>
+<p>因此，对于正常的线上业务来说，如果一个查询结果不会很多的话，建议使用mysql_store_result这个接口，直接把查询结果保存在本地内存。</p>
+<p>一个查询语句的状态变化是这样的</p>
+<ul>
+<li>MySQL查询语句进入执行阶段后，首先把状态设置成“Sending data”</li>
+<li>然后，发送执行结果的列相关的信息给客户端</li>
+<li>再执行执语句的流程</li>
+<li>执行完成后，把状态设置成空字符串。</li>
+</ul>
+<p>“Sending data”并不是指“正在发送数据”，而可能是处于执行器过程中的任意阶段。</p>
+<p>当一个线程处于“等待客户端接受结果”的状态，才会显示“Sending to client“；如果显示成”Sending data“，意思是正在执行。</p>
+<h4 id="全表扫描对InnoDB的影响"><a href="#全表扫描对InnoDB的影响" class="headerlink" title="全表扫描对InnoDB的影响"></a>全表扫描对InnoDB的影响</h4><p>内存的数据页是在Buffer Pool(BP)中管理，在WAL里Buffer Pool起到了加速更新的作用。而实际上，Buffer Pool还是一个更重要的作用，加速查询。</p>
+<p>Buffer Pool对查询的加速效果，依赖一个重要的指标，即：内存命中率。</p>
+<p>可以通过show engine innodb status，查看BP命中率，一个稳定服务的线上系统，要保证响应时间符合要求的话，内存命中率要99%.</p>
+<p>InnoDB buffer Pool的大小是由参数innodb_buffer_pool_size确定的，一般建议设置成可用物理内存60%-80%。</p>
+<p>在InnoDB改进的LRU算法中，按照5：3的比例把整个LRU链表分成了young区域和old区域。</p>
+<ul>
+<li>扫描过程中，需要新插入的数据页，都被放到了old区域；</li>
+<li>一个数据页里面由多条记录，这个数据页会被多次访问到，但是由于是顺序扫描，这个数据在第一次被访问和最后一次被访问的时间间隔不会超过1秒，因此还是会被保留在old区域。</li>
+<li>在继续扫描后续数据，之前的这个数据页页不会在被访问到，于是始终没有机会移到链表头部，很快就会被淘汰。</li>
+</ul>
+<p>可以看见虽然也用到了Buffer Pool，但是对young区域完全没有影响，从而保证了Buffer Pool响应正常业务的查询。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning14.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning14.html" class="post-title-link" itemprop="url">Kill不掉的语句</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 16:57:53 / 修改时间：17:02:33" itemprop="dateCreated datePublished" datetime="2021-01-23T16:57:53+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning14.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning14.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="Kill不掉的语句"><a href="#Kill不掉的语句" class="headerlink" title="Kill不掉的语句"></a>Kill不掉的语句</h3><p>两个kill命令：一个kill query + 线程id，表示终止这个线程中正在执行的语句。</p>
+<p>一个是kill connection + 线程id，表示断开这个线程的连接。当然如果这个线程有语句正在执行，也要先停止正在执行的语句。</p>
+<h4 id="kill执行的过程"><a href="#kill执行的过程" class="headerlink" title="kill执行的过程"></a>kill执行的过程</h4><p>1.一个语句执行过程中有多处“埋点”，在这些“埋点”的地方判断线程状态，如果发现线程状态是THD::KILL_QUERY，才开始进入语句终止逻辑。</p>
+<p>2.如果处于等待状态，必须是一个可以被唤醒的等待，否则根本不会执行到“埋点”处</p>
+<p>3.语句从开始进入终止逻辑，到终止逻辑完全完成，是由一个过程的。</p>
+<h4 id="kill无效的两类情况"><a href="#kill无效的两类情况" class="headerlink" title="kill无效的两类情况"></a>kill无效的两类情况</h4><p>1.线程没有执行到判断线程状态的逻辑。</p>
+<p>2.终止逻辑耗时较长。</p>
+<ul>
+<li>超大事务执行期间被Kill。回滚需要对事务执行期间生成的所有新数据版本做回收操作，耗时很长。</li>
+<li>大查询回滚。产生了比较大的临时文件，删除临时文件可能需要等待IO资源，导致耗时边长。</li>
+<li>DDL命令执行到最后的阶段，如果被Kill，需要删除中间过程的临时文件，也可能受IO资源影响。</li>
+<li></li>
+</ul>
+<h4 id="关于kill客户端的误解"><a href="#关于kill客户端的误解" class="headerlink" title="关于kill客户端的误解"></a>关于kill客户端的误解</h4><p>1.Ctil + C 是MySQL客户端另外启动一个连接，然后发送一个kill query命令。</p>
+<p>2.如果库里面的表特别多，连接就会很慢。</p>
+<ul>
+<li>执行show databases;</li>
+<li>切到db1库，执行show tables;</li>
+<li>把这两个命令的结果用于构建一个本地的哈希表</li>
+</ul>
+<p>真正耗时的步骤在第三步。我们感知的连接过程慢，其实并不是连接慢，也不是服务器慢，而是客户端慢。</p>
+<p>如果在命令中加上-A，就可以关闭这个自动补全的功能，然后迅速返回。</p>
+<p>3.-quick是一个更容易引起误会的参数，设置这个参数可能会降低服务端的性能。</p>
+<p>客户端接受服务器返回结果方式两种</p>
+<ul>
+<li>本地缓存，也就是在本地开一片内存，结果存起来。如果用API开发，对应就是mysql_store_result。</li>
+<li>不缓存，读一个处理一个。如果用API开发，对应就是mysql_use_result。</li>
+</ul>
+<p>MySQL客户端默认采用第一种方式，如果加上-quick，就会使用第二种不缓存的方式。</p>
+<p>-quick可以达到以下的三种效果</p>
+<ul>
+<li>跳过表名的自动补全功能。</li>
+<li>mysql_store_result需要申请本地内存来缓存结果，如果结果太大，可能会影响客户端本地机器性能。</li>
+<li>不会把执行命令记录到本地的命令历史文件中。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning13.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning13.html" class="post-title-link" itemprop="url">误删数据，如何恢复？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 16:52:37 / 修改时间：16:57:24" itemprop="dateCreated datePublished" datetime="2021-01-23T16:52:37+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning13.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning13.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="误删数据，如何恢复？"><a href="#误删数据，如何恢复？" class="headerlink" title="误删数据，如何恢复？"></a>误删数据，如何恢复？</h3><p>误差数据的4个方法 </p>
+<p>1.使用delete语句误删数据行</p>
+<p>2.使用drop table或者truncate table语句误删数据表</p>
+<p>3.使用drop database 语句误删除数据库</p>
+<p>4.使用rm 命令误删除整个MySQL实例。</p>
+<h4 id="误删行"><a href="#误删行" class="headerlink" title="误删行"></a>误删行</h4><p>利用Flashback工具通过闪回把数据恢复回来。需要确保binlog_format=row和binlog_row_image=FULL</p>
+<ul>
+<li>恢复数据</li>
+</ul>
+<p>具体恢复数据，对单个事务做如下处理</p>
+<p>1.对于Insert语句，对应的binlog类型是write_rows_event，把它改写成delete_rows_event即可。</p>
+<p>2.对于delete语句，将delete_rows_event改成为write_rows_event;</p>
+<p>3.对于update，binlog里面记录了数据行修改前和修改后的值，对调这两行的位置即可。</p>
+<p>对于多个事务，则需要将事务顺序调过来执行。</p>
+<p>恢复数据比较安全的做法，是恢复出一个备份，找一个从库作为临时库，在这个临时库上执行这些操作，然后在将确认过的临时库的数据，恢复回主库。</p>
+<ul>
+<li>如何预防</li>
+</ul>
+<p>1.把sql_safe_updates参数设置为on，如果在update或者update写where条件或者没有包含索引，这条语句的执行就会报错。</p>
+<p>2.代码上线前，必须经过SQL审计。</p>
+<h4 id="误删库-表"><a href="#误删库-表" class="headerlink" title="误删库/表"></a>误删库/表</h4><p>这种情况下，想要恢复数据，就需要使用全量备份，加增量日志的方式了。这个方案要求线上有定期的全量备份，并且实时备份binlog，恢复流程如下。</p>
+<p>1.取出最近一次全量备份</p>
+<p>2.用备份恢复出一个临时库</p>
+<p>3.从日志备份里面，去除凌晨0点之后的日志</p>
+<p>4.把这些日志，除了误删除数据的语句外，全部应用到临时库。</p>
+<p>加速过程</p>
+<p>1.可以使用mysqlbinlog命令，加上一个-database参数，用来指定误删除的库。</p>
+<p>2.应用日志，需要跳过12点误操作的那个语句的binlog。</p>
+<p>如果没有使用GTID模式，先用–stop-position参数执行到误操作之前的日志，然后再用-start-position从误操作之后的日志继续执行。</p>
+<p>如果使用了GTID模式，那么只需要执行set gtid_next= gtid1;bengin;commit;先把这个GTID加到临时实例的GTID集合，之后按照顺序执行binlog的时候，就会自动跳过误操作的语句。</p>
+<p>效率问题：1.如果是表，只需要重放这张表 2.mysqlbinlog解析过程是单线程，效率低。</p>
+<p>一种加速的方法是,在用备份恢复出临时实例之后，将这个临时实例设置成线上备库的从库。</p>
+<p>1.在 start slave 之前，先通过执行﻿﻿change replication filter replicate_do_table = (tbl_name) 命令，就可以让临时库只同步误操作的表；</p>
+<p>2.这样做也可以用上并行复制技术，来加速整个数据恢复过程。</p>
+<p>思路：误删库或者表后，恢复数据的思路主要就是备份，在加上应用binlog的方式。</p>
+<h5 id="延迟复制备库"><a href="#延迟复制备库" class="headerlink" title="延迟复制备库"></a>延迟复制备库</h5><p>如果有非常核心的业务，不允许太长的恢复时间，可以考虑搭建延迟复制的备库。MySQL 5.6版本引入。</p>
+<p>延迟复制的备库是一种特殊的备库，通过CHANGE MASTER TO MASTER_DELAY = N 命令，可以指定这个备库持续保持跟主库有N秒的延迟。</p>
+<h5 id="预防误删库-表的方法"><a href="#预防误删库-表的方法" class="headerlink" title="预防误删库/表的方法"></a>预防误删库/表的方法</h5><p>1.账号的分离。</p>
+<ul>
+<li>只给开DML权限，而不给truncate/drop权限。而如果业务开发人员有DDL需求的话，也可以开发管理系统。</li>
+<li>如果是DBA团队成员，日常也都规定只使用只读账号，必要的时候才使用更新账号。</li>
+</ul>
+<p>2.制定操作规范。</p>
+<ul>
+<li><p>在删除表之前，必须先对表做改名的操作。确保无影响后，再删除这张表。</p>
+</li>
+<li><p>改表名的是偶，要求表明加固定的后缀，然后删除表你的动作必须通过管理系统执行。</p>
+</li>
+</ul>
+<h4 id="rm-删除数据"><a href="#rm-删除数据" class="headerlink" title="rm 删除数据"></a>rm 删除数据</h4><p>只要不是恶意地把整个集群删除，而是只删除其中的某一个节点数据的话，HA系统就会开始工作，选出一个新的主库，从而保证整个集群的正常工作。</p>
 
       
     </div>
@@ -1303,7 +1492,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1371,7 +1560,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
