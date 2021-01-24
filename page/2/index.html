@@ -165,6 +165,138 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning13.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning13.html" class="post-title-link" itemprop="url">误删数据，如何恢复？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 16:52:37 / 修改时间：16:57:24" itemprop="dateCreated datePublished" datetime="2021-01-23T16:52:37+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning13.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning13.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="误删数据，如何恢复？"><a href="#误删数据，如何恢复？" class="headerlink" title="误删数据，如何恢复？"></a>误删数据，如何恢复？</h3><p>误差数据的4个方法 </p>
+<p>1.使用delete语句误删数据行</p>
+<p>2.使用drop table或者truncate table语句误删数据表</p>
+<p>3.使用drop database 语句误删除数据库</p>
+<p>4.使用rm 命令误删除整个MySQL实例。</p>
+<h4 id="误删行"><a href="#误删行" class="headerlink" title="误删行"></a>误删行</h4><p>利用Flashback工具通过闪回把数据恢复回来。需要确保binlog_format=row和binlog_row_image=FULL</p>
+<ul>
+<li>恢复数据</li>
+</ul>
+<p>具体恢复数据，对单个事务做如下处理</p>
+<p>1.对于Insert语句，对应的binlog类型是write_rows_event，把它改写成delete_rows_event即可。</p>
+<p>2.对于delete语句，将delete_rows_event改成为write_rows_event;</p>
+<p>3.对于update，binlog里面记录了数据行修改前和修改后的值，对调这两行的位置即可。</p>
+<p>对于多个事务，则需要将事务顺序调过来执行。</p>
+<p>恢复数据比较安全的做法，是恢复出一个备份，找一个从库作为临时库，在这个临时库上执行这些操作，然后在将确认过的临时库的数据，恢复回主库。</p>
+<ul>
+<li>如何预防</li>
+</ul>
+<p>1.把sql_safe_updates参数设置为on，如果在update或者update写where条件或者没有包含索引，这条语句的执行就会报错。</p>
+<p>2.代码上线前，必须经过SQL审计。</p>
+<h4 id="误删库-表"><a href="#误删库-表" class="headerlink" title="误删库/表"></a>误删库/表</h4><p>这种情况下，想要恢复数据，就需要使用全量备份，加增量日志的方式了。这个方案要求线上有定期的全量备份，并且实时备份binlog，恢复流程如下。</p>
+<p>1.取出最近一次全量备份</p>
+<p>2.用备份恢复出一个临时库</p>
+<p>3.从日志备份里面，去除凌晨0点之后的日志</p>
+<p>4.把这些日志，除了误删除数据的语句外，全部应用到临时库。</p>
+<p>加速过程</p>
+<p>1.可以使用mysqlbinlog命令，加上一个-database参数，用来指定误删除的库。</p>
+<p>2.应用日志，需要跳过12点误操作的那个语句的binlog。</p>
+<p>如果没有使用GTID模式，先用–stop-position参数执行到误操作之前的日志，然后再用-start-position从误操作之后的日志继续执行。</p>
+<p>如果使用了GTID模式，那么只需要执行set gtid_next= gtid1;bengin;commit;先把这个GTID加到临时实例的GTID集合，之后按照顺序执行binlog的时候，就会自动跳过误操作的语句。</p>
+<p>效率问题：1.如果是表，只需要重放这张表 2.mysqlbinlog解析过程是单线程，效率低。</p>
+<p>一种加速的方法是,在用备份恢复出临时实例之后，将这个临时实例设置成线上备库的从库。</p>
+<p>1.在 start slave 之前，先通过执行﻿﻿change replication filter replicate_do_table = (tbl_name) 命令，就可以让临时库只同步误操作的表；</p>
+<p>2.这样做也可以用上并行复制技术，来加速整个数据恢复过程。</p>
+<p>思路：误删库或者表后，恢复数据的思路主要就是备份，在加上应用binlog的方式。</p>
+<h5 id="延迟复制备库"><a href="#延迟复制备库" class="headerlink" title="延迟复制备库"></a>延迟复制备库</h5><p>如果有非常核心的业务，不允许太长的恢复时间，可以考虑搭建延迟复制的备库。MySQL 5.6版本引入。</p>
+<p>延迟复制的备库是一种特殊的备库，通过CHANGE MASTER TO MASTER_DELAY = N 命令，可以指定这个备库持续保持跟主库有N秒的延迟。</p>
+<h5 id="预防误删库-表的方法"><a href="#预防误删库-表的方法" class="headerlink" title="预防误删库/表的方法"></a>预防误删库/表的方法</h5><p>1.账号的分离。</p>
+<ul>
+<li>只给开DML权限，而不给truncate/drop权限。而如果业务开发人员有DDL需求的话，也可以开发管理系统。</li>
+<li>如果是DBA团队成员，日常也都规定只使用只读账号，必要的时候才使用更新账号。</li>
+</ul>
+<p>2.制定操作规范。</p>
+<ul>
+<li><p>在删除表之前，必须先对表做改名的操作。确保无影响后，再删除这张表。</p>
+</li>
+<li><p>改表名的是偶，要求表明加固定的后缀，然后删除表你的动作必须通过管理系统执行。</p>
+</li>
+</ul>
+<h4 id="rm-删除数据"><a href="#rm-删除数据" class="headerlink" title="rm 删除数据"></a>rm 删除数据</h4><p>只要不是恶意地把整个集群删除，而是只删除其中的某一个节点数据的话，HA系统就会开始工作，选出一个新的主库，从而保证整个集群的正常工作。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning12.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1148,128 +1280,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning03.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning03.html" class="post-title-link" itemprop="url">SQL慢的原因和解决办法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 19:22:59 / 修改时间：20:54:09" itemprop="dateCreated datePublished" datetime="2021-01-22T19:22:59+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning03.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning03.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="SQL执行过慢的原因"><a href="#SQL执行过慢的原因" class="headerlink" title="SQL执行过慢的原因"></a>SQL执行过慢的原因</h3><h4 id="1-查询长时间不返回"><a href="#1-查询长时间不返回" class="headerlink" title="1.查询长时间不返回"></a>1.查询长时间不返回</h4><ul>
-<li>等待MDL锁</li>
-</ul>
-<p>mysql&gt; select * from t where id=1;</p>
-<p>一般是表t被锁住了。可以利用show processlist看看语句处于什么状态。</p>
-<p>如果是Waiting for table metadata lock的示意图，则表示有一个线程正在表t上请求或者持有MDL写锁。</p>
-<p>通过查询sys.schema_table_lock_waits这张表，我们可以直接找到阻塞进程的id，然后把这个链接kill掉。  </p>
-<ul>
-<li>等flush</li>
-</ul>
-<p>有一个线程正要对表t做flush操作，MySQL里面对表做flush操作的用法。</p>
-<p>flush tables t with read lock;</p>
-<p>flush tables with read lock;</p>
-<p>这个两个flush语句，如果制定表 t 的话，代表的只关闭表t，如果没有指定具体的表名，则表示关闭MySQL里所有打开的表。</p>
-<p>所以出现Waiting for table flush 状态的可能情况是：有一个命令被别的语句堵住，然后它有堵住了我们select的语句。</p>
-<p><img src="https://i.loli.net/2021/01/22/2qgHDfrzZEtPGjC.png"></p>
-<ul>
-<li>等行锁</li>
-</ul>
-<p>如果一个事务在这行记录上面上持有一个写锁，那么我们的select 语句就会被堵住。</p>
-<p><img src="https://i.loli.net/2021/01/22/6HhCZGowEaSjlqe.png"></p>
-<p>可以通过sys.innodb_lock_waits表查到。</p>
-<h4 id="2-查询慢"><a href="#2-查询慢" class="headerlink" title="2.查询慢"></a>2.查询慢</h4><p>1.没有索引</p>
-<p>2.为了一致性读，undo log日志过长导致的，判断是不是有长事务。</p>
-<h3 id="SQL为什么突然变“慢”"><a href="#SQL为什么突然变“慢”" class="headerlink" title="SQL为什么突然变“慢”"></a>SQL为什么突然变“慢”</h3><p>当内存数据页和磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘的数据页的内容就一直了，称为“干净页”。刷新脏页的过程为称为flush。</p>
-<h4 id="flush的4种场景"><a href="#flush的4种场景" class="headerlink" title="flush的4种场景"></a>flush的4种场景</h4><p>1.对于InnoDB 的redo log写满了。</p>
-<p>2.对应的系统内存不足。在需要新的内存页，而内存不够用的时候，就要淘汰一些数据页，空出内存给别的数据页使用。如果淘汰的时“脏页”，则先写入磁盘。</p>
-<p>3.MySQL会合理的安排时间，见缝插针的刷新“脏页”。</p>
-<p>4.MySQL重启的时候。</p>
-<p>刷新脏页虽然时常态，但都是明显影响性能的。</p>
-<p>1.一个查询要淘汰的脏页过多，会导致查询的响应时间明显变长。</p>
-<p>2.日志写满，更新性能全部堵住，写性能跌为0，这种情况对敏感的业务来说，不能接受。</p>
-<h4 id="InnoDB刷新脏页的控制策略"><a href="#InnoDB刷新脏页的控制策略" class="headerlink" title="InnoDB刷新脏页的控制策略"></a>InnoDB刷新脏页的控制策略</h4><p>1.调用fio工具，来正确设置innodb_io_capacity的这个参数</p>
-<p>Innodb的刷盘速度主要考虑两个因素：一个脏页比例，一个是redo log写盘速度。</p>
-<img src="https://i.loli.net/2021/01/22/p6tYAvMoGwkPUW2.png" style="zoom:50%;" />
-
-<p>合理设置innodb_io_capacity的值，并且多关注脏页比例，**不要让它接近75%**。</p>
-<p>脏页的比例是通过Innodb_buffer_pool_pages_dirty/Innodb_buffer_pool_pages_total得到的</p>
-<p>其中innodb_flush_neighbors 参数为1会顺带把邻居的脏页同步刷新，适用于机械硬盘的场景。5.8以后默认</p>
-<p>innodb_flush_neighbors 为0。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1341,7 +1351,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
