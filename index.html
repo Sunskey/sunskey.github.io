@@ -165,6 +165,164 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/c-symbols.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/c-symbols.html" class="post-title-link" itemprop="url">符号和符号表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-25 22:19:29 / 修改时间：22:29:18" itemprop="dateCreated datePublished" datetime="2021-01-25T22:19:29+08:00">2021-01-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/c-symbols.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/c-symbols.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><hr>
+<p>某日早上， Sunskey 正喝着咖啡，悠闲的听着小曲（不存在的，苦逼写代码）。领导火急火燎的走到了我面前，咱们的加密工具 .so 出现了安全隐患，需要清除符号表，提升安全性。我一脸的懵逼 “什么是符号表“。但是还是毫无犹豫的答应了“好的”。经过简单的查阅相关资料，对符号表有了一个基本认识。</p>
+<div align=center><img src="https://i.loli.net/2021/01/25/FZxjRECDnTV81Xa.png"/></div>
+
+
+
+<h4 id="一-符号和符号表"><a href="#一-符号和符号表" class="headerlink" title="一. 符号和符号表"></a>一. 符号和符号表</h4><hr>
+<h5 id="1-1-什么是符号表"><a href="#1-1-什么是符号表" class="headerlink" title="1.1 什么是符号表"></a>1.1 什么是符号表</h5><p>程序编译成可执行文件后，文件中会有一个专门的表用来保存函数名，变量名，段名和代码或者数据的对应关系，这个表就是符号表(编译阶段产生的)。</p>
+<p>ELF文件中通常会有两张符号表。一张叫符号表（.symtab) ，另一张叫动态符号表(.dynsym)，一般只用对符号表（.symtab) 进行去除的工作。</p>
+<blockquote>
+<p><strong>ELF(Executable and Linkable Format)即可执行可链接文件格式，目前常见的Linux、 Android可执行文件、共享库（.so）、目标文件（ .o）以及Core 文件（吐核）均为此格式。</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>符号表类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>.symtab</td>
+<td>包含大量的信息（包括全局符号global symbols）</td>
+</tr>
+<tr>
+<td>.dynsym</td>
+<td>只保留.symtab中的全局符号</td>
+</tr>
+</tbody></table>
+<h5 id="1-2-符号表的作用"><a href="#1-2-符号表的作用" class="headerlink" title="1.2 符号表的作用"></a>1.2 符号表的作用</h5><p>1.收集符号属性</p>
+<p>编译程序扫描说明部分收集有关标识符的属性，并在符号表中建立符号的相应的属性信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如：int A;  float B[5];</span><br><span class="line">则记录的了符号A是一个整型的变量，而符号B则是一个浮点数组。</span><br></pre></td></tr></table></figure>
+<p>2.上下文语义的合法性检查</p>
+<p>同一个标识符可能出现在不同的地方，需要在上下文中对标识符的属性进行一致性和合法性的检查。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如：int A[3,5];  float A[3,5];</span><br><span class="line">很明显这段代码将会出现语义上的冲突</span><br></pre></td></tr></table></figure>
+<p>3.作为目标代码生成阶段地址分配的依据</p>
+<p>符号变量需要由它符号类型以及次序确定该变量存储在符号表的哪个区域。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">例如：常见的区域有公共区（extern）、文件静态区（extern static）、函数静态区（函数中static）、还是函数运行时的动态区（auto）等。</span><br></pre></td></tr></table></figure>
+<h5 id="1-3-符号表的种类"><a href="#1-3-符号表的种类" class="headerlink" title="1.3 符号表的种类"></a>1.3 符号表的种类</h5><ul>
+<li><p>Global symbols(模块内部定义的全局符号） 由主模块定义并能够被其他模块引用的符号。</p>
+</li>
+<li><p>External symbols(外部定义的全局符号)  由其他模块定义并被主模块引用全局符号。</p>
+</li>
+<li><p>Local symbols(本模块的局部符号)  仅由主模块定义和引用的本地符号。</p>
+</li>
+</ul>
+<h4 id="二-怎么去除符号表"><a href="#二-怎么去除符号表" class="headerlink" title="二. 怎么去除符号表"></a>二. 怎么去除符号表</h4><hr>
+<h5 id="2-1-strip-命令"><a href="#2-1-strip-命令" class="headerlink" title="2.1 strip 命令"></a>2.1 strip 命令</h5><p>strip 经常用来去除目标文件(.so、.a、可执行程序等)中的一些符号表、调试符号表信息，以减小静态库、动态库和程序的大小。</p>
+<div align=center><img src="https://i.loli.net/2021/01/25/svNqUXJrIYc3B7F.png" style="zoom:50%;"/></div>
+
+<p>使用方法：strip 文件名</p>
+<p>通过ls -l 命令可知道原文件的大小。</p>
+<p>通过file 命令可知，原文件是否经过stripped过，也就是strip 处理过的。</p>
+<p>通过nm 命令，可查看原文件的符号表。 </p>
+<blockquote>
+<p>strip命令用法：<a target="_blank" rel="noopener" href="https://www.linuxidc.com/Linux/2011-05/35773.htm">https://www.linuxidc.com/Linux/2011-05/35773.htm</a></p>
+</blockquote>
+<h5 id="2-2-链接阶段使用-s-和-S参数"><a href="#2-2-链接阶段使用-s-和-S参数" class="headerlink" title="2.2 链接阶段使用-s 和 -S参数"></a>2.2 链接阶段使用-s 和 -S参数</h5><p>-s：用于去除所有符号信息</p>
+<p>-S：用于去除调试符号信息</p>
+<p>也可以直接在GCC中通过 -Wl,-s 和-Wl,-S来移除符号信息。</p>
+<h4 id="三-总结"><a href="#三-总结" class="headerlink" title="三 . 总结"></a>三 . 总结</h4><hr>
+<p>符号表基本只在编译阶段和链接阶段有用，移除符号表能够减少程序的大小也能提高一定的安全性能，但是移除符号表之后没办法调试，程序出了问题后，给定位问题带来了一定的难度。<strong>可以根据自己的实际情况，去选择是否需要去除符号表。</strong></p>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><hr>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/af6d0cefdfae">动态链接库优化—清除符号表信息</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b7e44f749211">程序的链接(一)：链接的概述</a> </p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bda60193808d">程序的链接(三)：符号和符号表</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/mayue_web/article/details/104001392">linux gcc strip命令简介</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://xuanxuanblingbling.github.io/ctf/tools/2019/09/06/symbol/">符号表是啥？strip去符号去了啥</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/aigoogle/article/details/45076617">符号表的作用和地位</a></p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/reading-learn02.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -188,10 +346,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-01-24 16:50:18 / 修改时间：16:53:32" itemprop="dateCreated datePublished" datetime="2021-01-24T16:50:18+08:00">2021-01-24</time>
+              <time title="创建时间：2021-01-24 16:50:18" itemprop="dateCreated datePublished" datetime="2021-01-24T16:50:18+08:00">2021-01-24</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-01-25 09:45:34" itemprop="dateModified" datetime="2021-01-25T09:45:34+08:00">2021-01-25</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -245,7 +409,7 @@
 <p>工资增长到一定的水平后，在海外其他新兴经济就会变的更有吸引力。这个阶段社会的各个阶层已经不再均衡。劳工需要自己生存。社会的总体工资水平会停滞不前，国内的投资机会大大减少，这一阶段后被成为刘易斯拐点后的被追赶的阶段。</p>
 <h5 id="政府在三个时期的职能"><a href="#政府在三个时期的职能" class="headerlink" title="政府在三个时期的职能"></a>政府在三个时期的职能</h5><p>在早期工业化中，政府的财政政策会发挥巨大的作用，投资基础设施、资源、出口相关等服务又助于帮助国家迅速进入工业化状态。</p>
 <p>进入成熟阶段，依靠财政政策的进一步投资就会开始和私营部门的投资相互冲突、互相竞争资源。而这一时期、货币政策更能调动给私营部门的积极性，促进经济的发展。</p>
-<p>被追赶阶段，由于私营部门不愿意投资国内，此时政府的财政政策可以以基础建议等促使国内的经济的发展。</p>
+<p>被追赶阶段，由于私营部门不愿意投资国内，此时政府的财政政策可以以基础设施等促使国内的经济的发展。</p>
 <h4 id="文化与文明"><a href="#文化与文明" class="headerlink" title="文化与文明"></a>文化与文明</h4><h5 id="真知"><a href="#真知" class="headerlink" title="真知"></a>真知</h5><p>人生的意义在于真知，人生的意义就是获得真知，并以此让个人、社会、世界变得更加富足、公平、进步、美好、唯一可靠的知识就是用科学的方法获取知识。所有的邪恶源于缺乏社会的认知。</p>
 <h5 id="文化与文明的区分"><a href="#文化与文明的区分" class="headerlink" title="文化与文明的区分"></a>文化与文明的区分</h5><p>文化用于区不同地区、不同人群之间的区别，而文明则是用于描述人类发展的共性，并区别人类与动物的祖先。</p>
 <p>通过生物（DNA）和文化基因两种方式进化，因此人类进化的速度远远大于其他生物。</p>
@@ -288,7 +452,7 @@
 <h4 id="价值投资"><a href="#价值投资" class="headerlink" title="价值投资"></a>价值投资</h4><p>投资的核心是对未来的预测，投资某个国家的企业确实需要对这个国家本身有一个基本认知。</p>
 <h5 id="投资人的两个原则"><a href="#投资人的两个原则" class="headerlink" title="投资人的两个原则"></a>投资人的两个原则</h5><ol>
 <li>把对真知、智慧的追求当作自己的道德责任，要有意识杜绝一切屁股决定脑袋的理论。</li>
-<li>2有真正建立起受托人责任。把投资者的钱当作自己的钱，去取得最大化的收益。</li>
+<li>有真正建立起受托人责任。把投资者的钱当作自己的钱，去取得最大化的收益。</li>
 </ol>
 <h5 id="投资投资的四个概念"><a href="#投资投资的四个概念" class="headerlink" title="投资投资的四个概念"></a>投资投资的四个概念</h5><ol>
 <li>购买的股票是购买公司所有权的一部分。</li>
@@ -1423,123 +1587,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning14.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning14.html" class="post-title-link" itemprop="url">Kill不掉的语句</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-23 16:57:53 / 修改时间：17:02:33" itemprop="dateCreated datePublished" datetime="2021-01-23T16:57:53+08:00">2021-01-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning14.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning14.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="Kill不掉的语句"><a href="#Kill不掉的语句" class="headerlink" title="Kill不掉的语句"></a>Kill不掉的语句</h3><p>两个kill命令：一个kill query + 线程id，表示终止这个线程中正在执行的语句。</p>
-<p>一个是kill connection + 线程id，表示断开这个线程的连接。当然如果这个线程有语句正在执行，也要先停止正在执行的语句。</p>
-<h4 id="kill执行的过程"><a href="#kill执行的过程" class="headerlink" title="kill执行的过程"></a>kill执行的过程</h4><p>1.一个语句执行过程中有多处“埋点”，在这些“埋点”的地方判断线程状态，如果发现线程状态是THD::KILL_QUERY，才开始进入语句终止逻辑。</p>
-<p>2.如果处于等待状态，必须是一个可以被唤醒的等待，否则根本不会执行到“埋点”处</p>
-<p>3.语句从开始进入终止逻辑，到终止逻辑完全完成，是由一个过程的。</p>
-<h4 id="kill无效的两类情况"><a href="#kill无效的两类情况" class="headerlink" title="kill无效的两类情况"></a>kill无效的两类情况</h4><p>1.线程没有执行到判断线程状态的逻辑。</p>
-<p>2.终止逻辑耗时较长。</p>
-<ul>
-<li>超大事务执行期间被Kill。回滚需要对事务执行期间生成的所有新数据版本做回收操作，耗时很长。</li>
-<li>大查询回滚。产生了比较大的临时文件，删除临时文件可能需要等待IO资源，导致耗时边长。</li>
-<li>DDL命令执行到最后的阶段，如果被Kill，需要删除中间过程的临时文件，也可能受IO资源影响。</li>
-<li></li>
-</ul>
-<h4 id="关于kill客户端的误解"><a href="#关于kill客户端的误解" class="headerlink" title="关于kill客户端的误解"></a>关于kill客户端的误解</h4><p>1.Ctil + C 是MySQL客户端另外启动一个连接，然后发送一个kill query命令。</p>
-<p>2.如果库里面的表特别多，连接就会很慢。</p>
-<ul>
-<li>执行show databases;</li>
-<li>切到db1库，执行show tables;</li>
-<li>把这两个命令的结果用于构建一个本地的哈希表</li>
-</ul>
-<p>真正耗时的步骤在第三步。我们感知的连接过程慢，其实并不是连接慢，也不是服务器慢，而是客户端慢。</p>
-<p>如果在命令中加上-A，就可以关闭这个自动补全的功能，然后迅速返回。</p>
-<p>3.-quick是一个更容易引起误会的参数，设置这个参数可能会降低服务端的性能。</p>
-<p>客户端接受服务器返回结果方式两种</p>
-<ul>
-<li>本地缓存，也就是在本地开一片内存，结果存起来。如果用API开发，对应就是mysql_store_result。</li>
-<li>不缓存，读一个处理一个。如果用API开发，对应就是mysql_use_result。</li>
-</ul>
-<p>MySQL客户端默认采用第一种方式，如果加上-quick，就会使用第二种不缓存的方式。</p>
-<p>-quick可以达到以下的三种效果</p>
-<ul>
-<li>跳过表名的自动补全功能。</li>
-<li>mysql_store_result需要申请本地内存来缓存结果，如果结果太大，可能会影响客户端本地机器性能。</li>
-<li>不会把执行命令记录到本地的命令历史文件中。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1611,20 +1658,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

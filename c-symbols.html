@@ -20,21 +20,24 @@
     var CONFIG = {"hostname":"sunskey.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="如何判断一个数据库是不是出问题了？select 1 判断实际上，select 1成功返回，只能说这个库的进程还在，并不能说明主库没问题。 例如：innodb_thread_concurrency参数控制InnoDB的并发线程上限。一旦并发线程达到这个值，InnoDB在接收新请求的时候，就会进入等待状态，直到有线程退出。 通过innodb_thread_concurrency设置为64-128之间的">
+  <meta name="description" content="前言 某日早上， Sunskey 正喝着咖啡，悠闲的听着小曲（不存在的，苦逼写代码）。领导火急火燎的走到了我面前，咱们的加密工具 .so 出现了安全隐患，需要清除符号表，提升安全性。我一脸的懵逼 “什么是符号表“。但是还是毫无犹豫的答应了“好的”。经过简单的查阅相关资料，对符号表有了一个基本认识。     一. 符号和符号表 1.1 什么是符号表程序编译成可执行文件后，文件中会有一个专门的表用来保">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何判断一个数据库是不是出问题了？">
-<meta property="og:url" content="https://sunskey.top/mysql-learning12.html">
+<meta property="og:title" content="符号和符号表">
+<meta property="og:url" content="https://sunskey.top/c-symbols.html">
 <meta property="og:site_name" content="Sunskey">
-<meta property="og:description" content="如何判断一个数据库是不是出问题了？select 1 判断实际上，select 1成功返回，只能说这个库的进程还在，并不能说明主库没问题。 例如：innodb_thread_concurrency参数控制InnoDB的并发线程上限。一旦并发线程达到这个值，InnoDB在接收新请求的时候，就会进入等待状态，直到有线程退出。 通过innodb_thread_concurrency设置为64-128之间的">
+<meta property="og:description" content="前言 某日早上， Sunskey 正喝着咖啡，悠闲的听着小曲（不存在的，苦逼写代码）。领导火急火燎的走到了我面前，咱们的加密工具 .so 出现了安全隐患，需要清除符号表，提升安全性。我一脸的懵逼 “什么是符号表“。但是还是毫无犹豫的答应了“好的”。经过简单的查阅相关资料，对符号表有了一个基本认识。     一. 符号和符号表 1.1 什么是符号表程序编译成可执行文件后，文件中会有一个专门的表用来保">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-01-23T08:50:21.000Z">
-<meta property="article:modified_time" content="2021-01-23T08:52:24.874Z">
+<meta property="og:image" content="https://i.loli.net/2021/01/25/FZxjRECDnTV81Xa.png">
+<meta property="og:image" content="https://i.loli.net/2021/01/25/svNqUXJrIYc3B7F.png">
+<meta property="article:published_time" content="2021-01-25T14:19:29.000Z">
+<meta property="article:modified_time" content="2021-01-25T14:29:18.907Z">
 <meta property="article:author" content="Sunskey">
-<meta property="article:tag" content="学习笔记">
-<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="编译">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/01/25/FZxjRECDnTV81Xa.png">
 
-<link rel="canonical" href="https://sunskey.top/mysql-learning12.html">
+<link rel="canonical" href="https://sunskey.top/c-symbols.html">
 
 
 <script id="page-configurations">
@@ -47,7 +50,7 @@
   };
 </script>
 
-  <title>如何判断一个数据库是不是出问题了？ | Sunskey</title>
+  <title>符号和符号表 | Sunskey</title>
   
 
 
@@ -169,7 +172,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning12.html">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/c-symbols.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -182,7 +185,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          如何判断一个数据库是不是出问题了？
+          符号和符号表
         </h1>
 
         <div class="post-meta">
@@ -193,7 +196,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-01-23 16:50:21 / 修改时间：16:52:24" itemprop="dateCreated datePublished" datetime="2021-01-23T16:50:21+08:00">2021-01-23</time>
+              <time title="创建时间：2021-01-25 22:19:29 / 修改时间：22:29:18" itemprop="dateCreated datePublished" datetime="2021-01-25T22:19:29+08:00">2021-01-25</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -201,7 +204,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
                 </span>
             </span>
 
@@ -221,8 +224,8 @@
       </span>
       <span class="post-meta-item-text">评论次数：</span>
     
-    <a title="valine" href="/mysql-learning12.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning12.html" itemprop="commentCount"></span>
+    <a title="valine" href="/c-symbols.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/c-symbols.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -238,19 +241,82 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="如何判断一个数据库是不是出问题了？"><a href="#如何判断一个数据库是不是出问题了？" class="headerlink" title="如何判断一个数据库是不是出问题了？"></a>如何判断一个数据库是不是出问题了？</h3><h4 id="select-1-判断"><a href="#select-1-判断" class="headerlink" title="select 1 判断"></a>select 1 判断</h4><p>实际上，select 1成功返回，只能说这个库的进程还在，并不能说明主库没问题。</p>
-<p>例如：innodb_thread_concurrency参数控制InnoDB的并发线程上限。一旦并发线程达到这个值，InnoDB在接收新请求的时候，就会进入等待状态，直到有线程退出。</p>
-<p>通过innodb_thread_concurrency设置为64-128之间的值。</p>
-<p>并发连接：show processlist的结果里，看到的几千个连接。</p>
-<p>并发查询：当前正在执行的语句。</p>
-<p>实际上，在线程进入锁等待以后，并发线程的计数会减1，也就是等待行锁（间隙锁）的线程不算在128以内。</p>
-<h4 id="查表判断"><a href="#查表判断" class="headerlink" title="查表判断"></a>查表判断</h4><p>为了能够检测InnoDB并发线程过多导致额系统不可用的系统。一般的做法是，在系统库里创建一个表，比如命令为health check，里面只放一行数据，然后定期执行。</p>
-<p>但是磁盘满的时候，会影响正常写数据，而不影响读数据。</p>
-<h4 id="更新判断"><a href="#更新判断" class="headerlink" title="更新判断"></a>更新判断</h4><p>常见的作法是放一个timestamp字段，用来表示最后一次执行检测的时间。</p>
-<p>可以在mysql.health_check表上存入多行数据，并采用server_id做主键，这样可以保证主、备各自的检测命令不会发生冲突。</p>
-<p>外部检测天然有一个问题，就是随机性。外部检测都需要定时轮询，所以系统可能已经出问题了 ，但是却需要等到下一个检测发起执行语句的时候。</p>
-<h4 id="内部统计"><a href="#内部统计" class="headerlink" title="内部统计"></a>内部统计</h4><p>MySQL5.6版本以后提供perfomance_schema库，就在file_summary_by_event_name表里统计了每次IO请求的时间。</p>
-<p>每一次操作数据库，performance都需要额外地统计这些信息，所以存在性能损耗。建议只开启自己需要的统计项进行统计，然后根据时间判断耗时情况，如果大于指定秒数（200ms）则认为系统不可用。</p>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><hr>
+<p>某日早上， Sunskey 正喝着咖啡，悠闲的听着小曲（不存在的，苦逼写代码）。领导火急火燎的走到了我面前，咱们的加密工具 .so 出现了安全隐患，需要清除符号表，提升安全性。我一脸的懵逼 “什么是符号表“。但是还是毫无犹豫的答应了“好的”。经过简单的查阅相关资料，对符号表有了一个基本认识。</p>
+<div align=center><img src="https://i.loli.net/2021/01/25/FZxjRECDnTV81Xa.png"/></div>
+
+
+
+<h4 id="一-符号和符号表"><a href="#一-符号和符号表" class="headerlink" title="一. 符号和符号表"></a>一. 符号和符号表</h4><hr>
+<h5 id="1-1-什么是符号表"><a href="#1-1-什么是符号表" class="headerlink" title="1.1 什么是符号表"></a>1.1 什么是符号表</h5><p>程序编译成可执行文件后，文件中会有一个专门的表用来保存函数名，变量名，段名和代码或者数据的对应关系，这个表就是符号表(编译阶段产生的)。</p>
+<p>ELF文件中通常会有两张符号表。一张叫符号表（.symtab) ，另一张叫动态符号表(.dynsym)，一般只用对符号表（.symtab) 进行去除的工作。</p>
+<blockquote>
+<p><strong>ELF(Executable and Linkable Format)即可执行可链接文件格式，目前常见的Linux、 Android可执行文件、共享库（.so）、目标文件（ .o）以及Core 文件（吐核）均为此格式。</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>符号表类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>.symtab</td>
+<td>包含大量的信息（包括全局符号global symbols）</td>
+</tr>
+<tr>
+<td>.dynsym</td>
+<td>只保留.symtab中的全局符号</td>
+</tr>
+</tbody></table>
+<h5 id="1-2-符号表的作用"><a href="#1-2-符号表的作用" class="headerlink" title="1.2 符号表的作用"></a>1.2 符号表的作用</h5><p>1.收集符号属性</p>
+<p>编译程序扫描说明部分收集有关标识符的属性，并在符号表中建立符号的相应的属性信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如：int A;  float B[5];</span><br><span class="line">则记录的了符号A是一个整型的变量，而符号B则是一个浮点数组。</span><br></pre></td></tr></table></figure>
+<p>2.上下文语义的合法性检查</p>
+<p>同一个标识符可能出现在不同的地方，需要在上下文中对标识符的属性进行一致性和合法性的检查。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如：int A[3,5];  float A[3,5];</span><br><span class="line">很明显这段代码将会出现语义上的冲突</span><br></pre></td></tr></table></figure>
+<p>3.作为目标代码生成阶段地址分配的依据</p>
+<p>符号变量需要由它符号类型以及次序确定该变量存储在符号表的哪个区域。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">例如：常见的区域有公共区（extern）、文件静态区（extern static）、函数静态区（函数中static）、还是函数运行时的动态区（auto）等。</span><br></pre></td></tr></table></figure>
+<h5 id="1-3-符号表的种类"><a href="#1-3-符号表的种类" class="headerlink" title="1.3 符号表的种类"></a>1.3 符号表的种类</h5><ul>
+<li><p>Global symbols(模块内部定义的全局符号） 由主模块定义并能够被其他模块引用的符号。</p>
+</li>
+<li><p>External symbols(外部定义的全局符号)  由其他模块定义并被主模块引用全局符号。</p>
+</li>
+<li><p>Local symbols(本模块的局部符号)  仅由主模块定义和引用的本地符号。</p>
+</li>
+</ul>
+<h4 id="二-怎么去除符号表"><a href="#二-怎么去除符号表" class="headerlink" title="二. 怎么去除符号表"></a>二. 怎么去除符号表</h4><hr>
+<h5 id="2-1-strip-命令"><a href="#2-1-strip-命令" class="headerlink" title="2.1 strip 命令"></a>2.1 strip 命令</h5><p>strip 经常用来去除目标文件(.so、.a、可执行程序等)中的一些符号表、调试符号表信息，以减小静态库、动态库和程序的大小。</p>
+<div align=center><img src="https://i.loli.net/2021/01/25/svNqUXJrIYc3B7F.png" style="zoom:50%;"/></div>
+
+<p>使用方法：strip 文件名</p>
+<p>通过ls -l 命令可知道原文件的大小。</p>
+<p>通过file 命令可知，原文件是否经过stripped过，也就是strip 处理过的。</p>
+<p>通过nm 命令，可查看原文件的符号表。 </p>
+<blockquote>
+<p>strip命令用法：<a target="_blank" rel="noopener" href="https://www.linuxidc.com/Linux/2011-05/35773.htm">https://www.linuxidc.com/Linux/2011-05/35773.htm</a></p>
+</blockquote>
+<h5 id="2-2-链接阶段使用-s-和-S参数"><a href="#2-2-链接阶段使用-s-和-S参数" class="headerlink" title="2.2 链接阶段使用-s 和 -S参数"></a>2.2 链接阶段使用-s 和 -S参数</h5><p>-s：用于去除所有符号信息</p>
+<p>-S：用于去除调试符号信息</p>
+<p>也可以直接在GCC中通过 -Wl,-s 和-Wl,-S来移除符号信息。</p>
+<h4 id="三-总结"><a href="#三-总结" class="headerlink" title="三 . 总结"></a>三 . 总结</h4><hr>
+<p>符号表基本只在编译阶段和链接阶段有用，移除符号表能够减少程序的大小也能提高一定的安全性能，但是移除符号表之后没办法调试，程序出了问题后，给定位问题带来了一定的难度。<strong>可以根据自己的实际情况，去选择是否需要去除符号表。</strong></p>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><hr>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/af6d0cefdfae">动态链接库优化—清除符号表信息</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b7e44f749211">程序的链接(一)：链接的概述</a> </p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bda60193808d">程序的链接(三)：符号和符号表</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/mayue_web/article/details/104001392">linux gcc strip命令简介</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://xuanxuanblingbling.github.io/ctf/tools/2019/09/06/symbol/">符号表是啥？strip去符号去了啥</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/aigoogle/article/details/45076617">符号表的作用和地位</a></p>
+</li>
+</ul>
 
     </div>
 
@@ -260,8 +326,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
-              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/C/" rel="tag"># C++</a>
+              <a href="/tags/%E7%BC%96%E8%AF%91/" rel="tag"># 编译</a>
           </div>
 
         
@@ -270,13 +336,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/mysql-learning11.html" rel="prev" title="如何正确显示随机消息">
-      <i class="fa fa-chevron-left"></i> 如何正确显示随机消息
+    <a href="/reading-learn02.html" rel="prev" title="《文化、现代化、价值投资与中国的读书笔记》">
+      <i class="fa fa-chevron-left"></i> 《文化、现代化、价值投资与中国的读书笔记》
     </a></div>
-      <div class="post-nav-item">
-    <a href="/mysql-learning13.html" rel="next" title="误删数据，如何恢复？">
-      误删数据，如何恢复？ <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -336,7 +399,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E4%B8%80%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%E6%98%AF%E4%B8%8D%E6%98%AF%E5%87%BA%E9%97%AE%E9%A2%98%E4%BA%86%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">如何判断一个数据库是不是出问题了？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#select-1-%E5%88%A4%E6%96%AD"><span class="nav-number">1.1.</span> <span class="nav-text">select 1 判断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%A1%A8%E5%88%A4%E6%96%AD"><span class="nav-number">1.2.</span> <span class="nav-text">查表判断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E5%88%A4%E6%96%AD"><span class="nav-number">1.3.</span> <span class="nav-text">更新判断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E7%BB%9F%E8%AE%A1"><span class="nav-number">1.4.</span> <span class="nav-text">内部统计</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80-%E7%AC%A6%E5%8F%B7%E5%92%8C%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">一. 符号和符号表</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 什么是符号表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-%E7%AC%A6%E5%8F%B7%E8%A1%A8%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 符号表的作用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-%E7%AC%A6%E5%8F%B7%E8%A1%A8%E7%9A%84%E7%A7%8D%E7%B1%BB"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 符号表的种类</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C-%E6%80%8E%E4%B9%88%E5%8E%BB%E9%99%A4%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">二. 怎么去除符号表</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-strip-%E5%91%BD%E4%BB%A4"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 strip 命令</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E9%93%BE%E6%8E%A5%E9%98%B6%E6%AE%B5%E4%BD%BF%E7%94%A8-s-%E5%92%8C-S%E5%8F%82%E6%95%B0"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 链接阶段使用-s 和 -S参数</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89-%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">三 . 总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">5.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

@@ -165,6 +165,123 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning14.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning14.html" class="post-title-link" itemprop="url">Kill不掉的语句</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 16:57:53 / 修改时间：17:02:33" itemprop="dateCreated datePublished" datetime="2021-01-23T16:57:53+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning14.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning14.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="Kill不掉的语句"><a href="#Kill不掉的语句" class="headerlink" title="Kill不掉的语句"></a>Kill不掉的语句</h3><p>两个kill命令：一个kill query + 线程id，表示终止这个线程中正在执行的语句。</p>
+<p>一个是kill connection + 线程id，表示断开这个线程的连接。当然如果这个线程有语句正在执行，也要先停止正在执行的语句。</p>
+<h4 id="kill执行的过程"><a href="#kill执行的过程" class="headerlink" title="kill执行的过程"></a>kill执行的过程</h4><p>1.一个语句执行过程中有多处“埋点”，在这些“埋点”的地方判断线程状态，如果发现线程状态是THD::KILL_QUERY，才开始进入语句终止逻辑。</p>
+<p>2.如果处于等待状态，必须是一个可以被唤醒的等待，否则根本不会执行到“埋点”处</p>
+<p>3.语句从开始进入终止逻辑，到终止逻辑完全完成，是由一个过程的。</p>
+<h4 id="kill无效的两类情况"><a href="#kill无效的两类情况" class="headerlink" title="kill无效的两类情况"></a>kill无效的两类情况</h4><p>1.线程没有执行到判断线程状态的逻辑。</p>
+<p>2.终止逻辑耗时较长。</p>
+<ul>
+<li>超大事务执行期间被Kill。回滚需要对事务执行期间生成的所有新数据版本做回收操作，耗时很长。</li>
+<li>大查询回滚。产生了比较大的临时文件，删除临时文件可能需要等待IO资源，导致耗时边长。</li>
+<li>DDL命令执行到最后的阶段，如果被Kill，需要删除中间过程的临时文件，也可能受IO资源影响。</li>
+<li></li>
+</ul>
+<h4 id="关于kill客户端的误解"><a href="#关于kill客户端的误解" class="headerlink" title="关于kill客户端的误解"></a>关于kill客户端的误解</h4><p>1.Ctil + C 是MySQL客户端另外启动一个连接，然后发送一个kill query命令。</p>
+<p>2.如果库里面的表特别多，连接就会很慢。</p>
+<ul>
+<li>执行show databases;</li>
+<li>切到db1库，执行show tables;</li>
+<li>把这两个命令的结果用于构建一个本地的哈希表</li>
+</ul>
+<p>真正耗时的步骤在第三步。我们感知的连接过程慢，其实并不是连接慢，也不是服务器慢，而是客户端慢。</p>
+<p>如果在命令中加上-A，就可以关闭这个自动补全的功能，然后迅速返回。</p>
+<p>3.-quick是一个更容易引起误会的参数，设置这个参数可能会降低服务端的性能。</p>
+<p>客户端接受服务器返回结果方式两种</p>
+<ul>
+<li>本地缓存，也就是在本地开一片内存，结果存起来。如果用API开发，对应就是mysql_store_result。</li>
+<li>不缓存，读一个处理一个。如果用API开发，对应就是mysql_use_result。</li>
+</ul>
+<p>MySQL客户端默认采用第一种方式，如果加上-quick，就会使用第二种不缓存的方式。</p>
+<p>-quick可以达到以下的三种效果</p>
+<ul>
+<li>跳过表名的自动补全功能。</li>
+<li>mysql_store_result需要申请本地内存来缓存结果，如果结果太大，可能会影响客户端本地机器性能。</li>
+<li>不会把执行命令记录到本地的命令历史文件中。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning13.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1181,105 +1298,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning04.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning04.html" class="post-title-link" itemprop="url">count(*)很“慢”？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 19:35:58 / 修改时间：19:47:00" itemprop="dateCreated datePublished" datetime="2021-01-22T19:35:58+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning04.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning04.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="count-很“慢”？"><a href="#count-很“慢”？" class="headerlink" title="count(*)很“慢”？"></a>count(*)很“慢”？</h3><h4 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h4><p>1.MyISAM引擎把一个表的总行数存在磁盘上，执行count(*)的时候会直接返回这个数。</p>
-<p>2.InnoDB时，则需要一行一行的从引擎里面读出来，然后累计计数。</p>
-<p>对于count(*)这样的操作，MySQL优化器会找到最小的那棵树来遍历。再保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。</p>
-<p>show table status命令是采用采样估计来估算的，不能直接使用。</p>
-<h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>1.通过缓存保存计数。</p>
-<p>将计数保存在缓存系统中的方式，还不只是丢失更新的问题。即使Redis 正常工作，这个值还是逻辑上不精确的。</p>
-<p>2.在数据库保存计数</p>
-<p>由于事务的可见性，可保证逻辑上的数据的一致性。</p>
-<h4 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h4><p>count()函数的参数不是NULL，累计值就加1，否则不加。最后返回累计值。</p>
-<p>count(*)，count(主键)，count(1)，count(字段)的区别</p>
-<p>count(主键id)，遍历每一行把每一行的id值取出来，返回给id层，server层拿到id后，判断不为空，则按行累加。</p>
-<p>count(1),server层对于返回的每一行，放一个数字“1”进去，按行累加。</p>
-<p>count(字段)：一行一行的从记录里面读取字段</p>
-<p>1.定义为not null的话，一行行的从记录里面读出这个字段，判断不能为null，按行累加。</p>
-<p>2.定义为允许null，那么执行的时候，判断到有可能是null，还要把值取出来判断一下，不是null才累加。</p>
-<p>count(*),并不会把全部字段取出来，而是专门做了优化，不取值。</p>
-<p>按照效率排序的话：count(字段)&lt;count(主键 id)&lt;count(1)≈count(*)。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1351,20 +1369,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

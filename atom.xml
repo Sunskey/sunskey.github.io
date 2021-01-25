@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-01-24T08:53:32.330Z</updated>
+  <updated>2021-01-25T14:29:18.907Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -17,11 +17,39 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>符号和符号表</title>
+    <link href="https://sunskey.top/c-symbols.html"/>
+    <id>https://sunskey.top/c-symbols.html</id>
+    <published>2021-01-25T14:19:29.000Z</published>
+    <updated>2021-01-25T14:29:18.907Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h4&gt;&lt;hr&gt;
+&lt;p&gt;某日早上， Sunskey 正喝着咖啡，悠闲的听着小曲（不存在的，苦逼写代码）。领导火急火燎的走到了我面前，咱们的加密工具</summary>
+        
+      
+    
+    
+    
+    <category term="Linux" scheme="https://sunskey.top/categories/Linux/"/>
+    
+    
+    <category term="C++" scheme="https://sunskey.top/tags/C/"/>
+    
+    <category term="编译" scheme="https://sunskey.top/tags/%E7%BC%96%E8%AF%91/"/>
+    
+  </entry>
+  
+  <entry>
     <title>《文化、现代化、价值投资与中国的读书笔记》</title>
     <link href="https://sunskey.top/reading-learn02.html"/>
     <id>https://sunskey.top/reading-learn02.html</id>
     <published>2021-01-24T08:50:18.000Z</published>
-    <updated>2021-01-24T08:53:32.330Z</updated>
+    <updated>2021-01-25T01:45:34.592Z</updated>
     
     
       
@@ -62,9 +90,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -89,9 +117,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -116,9 +144,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -164,9 +192,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -191,9 +219,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -218,9 +246,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -245,9 +273,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -272,9 +300,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -299,9 +327,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -326,9 +354,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -353,9 +381,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -381,9 +409,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -408,9 +436,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -435,9 +463,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -462,9 +490,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -489,9 +517,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
     
   </entry>
   
@@ -516,36 +544,9 @@
     <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
     
     
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
     <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
     
-  </entry>
-  
-  <entry>
-    <title>count(*)很“慢”？</title>
-    <link href="https://sunskey.top/mysql-learning04.html"/>
-    <id>https://sunskey.top/mysql-learning04.html</id>
-    <published>2021-01-22T11:35:58.000Z</published>
-    <updated>2021-01-22T11:47:00.193Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;count-很“慢”？&quot;&gt;&lt;a href=&quot;#count-很“慢”？&quot; class=&quot;headerlink&quot; title=&quot;count(*)很“慢”？&quot;&gt;&lt;/a&gt;count(*)很“慢”？&lt;/h3&gt;&lt;h4 id=&quot;实现方式&quot;&gt;&lt;a href=&quot;#实现方式&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
     <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
-    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
