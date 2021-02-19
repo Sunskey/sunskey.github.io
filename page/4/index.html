@@ -23,7 +23,7 @@
   <meta name="description" content="做时间的朋友">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sunskey">
-<meta property="og:url" content="https://sunskey.top/archives/2021/index.html">
+<meta property="og:url" content="https://sunskey.top/page/4/index.html">
 <meta property="og:site_name" content="Sunskey">
 <meta property="og:description" content="做时间的朋友">
 <meta property="og:locale" content="zh_CN">
@@ -31,20 +31,20 @@
 <meta property="article:tag" content="java, hexo, blog, next">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://sunskey.top/archives/2021/">
+<link rel="canonical" href="https://sunskey.top/page/4/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
+    isHome : true,
     isPost : false,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>归档 | Sunskey</title>
+  <title>Sunskey - 日拱一卒，不期而至</title>
   
 
 
@@ -159,234 +159,115 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html">
 
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html" class="post-title-link" itemprop="url">线程安全学习笔记(一)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-12-25 13:56:53 / 修改时间：19:31:52" itemprop="dateCreated datePublished" datetime="2020-12-25T13:56:53+08:00">2020-12-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80.html" itemprop="commentCount"></span>
+    </a>
+  </span>
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        
-        <span class="collection-header">还行! 目前共计 31 篇日志。 继续努力。</span>
-      </div>
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+          <h3 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h3><p>线程安全是一个多线程环境下正确性的概念，也就是保证多线程环境下、可修改的状态的正确性。</p>
+<h4 id="线程安全基本特性"><a href="#线程安全基本特性" class="headerlink" title="线程安全基本特性"></a>线程安全基本特性</h4><ul>
+<li>原子性，简单来说相关操作不会被其他线程干扰，一般通过同步机制实现。</li>
+<li>可见性，一个线程修改了某个共享变量，其状态能够立即被其他线程知晓，volatile保证可见性。</li>
+<li>有序性，保证线程内串行语义，避免指令重排。</li>
+</ul>
+<p>所谓的公平性是指在竞争场景中，当公平性为真时，会倾向于将锁赋予等待时间最久的线程 。公平性是减少线程“饥饿”。</p>
+<p>如果说ReentranLock是synchronized的替代选择，Condition则是将wait、notify、nofityAll等操作转为为相关的对象，将复杂而晦涩的同步操作转变为直观可控的对象行为。</p>
+<p>Condition通过signal/wait的组合，完成了条件判断和通知等待线程。</p>
+<h4 id="Sync和Lock的区别"><a href="#Sync和Lock的区别" class="headerlink" title="Sync和Lock的区别"></a>Sync和Lock的区别</h4><p>1.用法比较</p>
+<p>Lock使用起来比较灵活，但是必须有释放锁的配合动作。</p>
+<p>Lock必须手动获取和释放锁，而synchronized不需要手动释放。</p>
+<p>Lock只适用于代码块锁，而synchronized可用于修饰方法、代码块等。</p>
+<p>2.特性比较</p>
+<p>能被中断的特性：与synchronized不同，获取锁的线程能够响应中断，当获取到锁的线程被中断时，中断异常将会被抛出，同时锁会被释放。</p>
+<p>3.注意事项</p>
+<p>一定要在finally中，释放锁，ReentranLock提供的newCondition的方法，以便用户在用一锁的情况下可以根据不同的情况执行等待或者唤醒的动作。</p>
+<h4 id="Synchronized实现"><a href="#Synchronized实现" class="headerlink" title="Synchronized实现"></a>Synchronized实现</h4><p>sync代码块是由monitorenter/monitorexit 指令实现的，Monitor对象是同步的基本实现。</p>
+<p>Java提供了三种被不同的Monitor实现，三种不同的锁：偏向锁、轻量级锁和重量级锁。</p>
+<p>所谓锁的升级、降级、就是JVM优化synchronized 运行的机制，当JVM检测到不同的竞争状况时，会自动切换到合适的锁实现。</p>
+<p>当没有竞争时，默认会使用偏向锁。JVM会利用CAS操作，在对象头上的Mark Word 部分设置线程ID，如果有另外的线程试图锁定某个这个已经被偏斜的对象，JVM就需要撤销偏向锁，并切换到轻量锁的实现。轻量级锁通过CAS操作Mark Word来试图获取锁，如果重试成功，就使用普通的轻量级锁，否则，进一步升级为重量级锁。</p>
+
+      
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-02-19T21:18:30+08:00"
-              content="2021-02-19">
-          02-19
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/lerema01.html" itemprop="url">
-            <span itemprop="name">lerema01</span>
-          </a>
-      </div>
-
-    </header>
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
   </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-25T22:19:29+08:00"
-              content="2021-01-25">
-          01-25
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/c-symbols.html" itemprop="url">
-            <span itemprop="name">符号和符号表</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-24T16:50:18+08:00"
-              content="2021-01-24">
-          01-24
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/reading-learn02.html" itemprop="url">
-            <span itemprop="name">《文化、现代化、价值投资与中国的读书笔记》</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T19:29:42+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning22.html" itemprop="url">
-            <span itemprop="name">MySQL主备高可用</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T19:27:32+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning21.html" itemprop="url">
-            <span itemprop="name">MySQL 扩展知识点</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T19:20:21+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning20.html" itemprop="url">
-            <span itemprop="name">MySQL 自增主键</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T19:16:33+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning19.html" itemprop="url">
-            <span itemprop="name">MySQL 快速复制一张表</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T19:09:43+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning18.html" itemprop="url">
-            <span itemprop="name">MySQL Memory表</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T19:05:05+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning17.html" itemprop="url">
-            <span itemprop="name">MySQL 临时表</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-23T18:59:24+08:00"
-              content="2021-01-23">
-          01-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-learning16.html" itemprop="url">
-            <span itemprop="name">Join 相关知识点</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-
-    </div>
-  </div>
   
   
   
+
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/2021/page/2/">2</a><a class="page-number" href="/archives/2021/page/3/">3</a><a class="extend next" rel="next" href="/archives/2021/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
   </nav>
 
 
