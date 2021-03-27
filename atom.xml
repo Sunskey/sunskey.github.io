@@ -6,7 +6,7 @@
   <link href="https://sunskey.top/atom.xml" rel="self"/>
   
   <link href="https://sunskey.top/"/>
-  <updated>2021-03-02T03:38:53.493Z</updated>
+  <updated>2021-03-27T02:50:17.616Z</updated>
   <id>https://sunskey.top/</id>
   
   <author>
@@ -15,6 +15,56 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>跳跃游戏</title>
+    <link href="https://sunskey.top/leetcode-55.html"/>
+    <id>https://sunskey.top/leetcode-55.html</id>
+    <published>2021-03-27T02:19:00.000Z</published>
+    <updated>2021-03-27T02:50:17.616Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;55-跳跃游戏&quot;&gt;&lt;a href=&quot;#55-跳跃游戏&quot; class=&quot;headerlink&quot; title=&quot;55 跳跃游戏&quot;&gt;&lt;/a&gt;55 跳跃游戏&lt;/h2&gt;&lt;h3 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="leetcode" scheme="https://sunskey.top/categories/leetcode/"/>
+    
+    
+    <category term="贪心" scheme="https://sunskey.top/tags/%E8%B4%AA%E5%BF%83/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>删除链表重复的数组</title>
+    <link href="https://sunskey.top/leetcode-83.html"/>
+    <id>https://sunskey.top/leetcode-83.html</id>
+    <published>2021-03-26T07:51:52.000Z</published>
+    <updated>2021-03-27T02:09:06.249Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;83-删除链表的重复数组&quot;&gt;&lt;a href=&quot;#83-删除链表的重复数组&quot; class=&quot;headerlink&quot; title=&quot;83 删除链表的重复数组&quot;&gt;&lt;/a&gt;83 删除链表的重复数组&lt;/h2&gt;&lt;h3 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="leetcode" scheme="https://sunskey.top/categories/leetcode/"/>
+    
+    
+    <category term="链表" scheme="https://sunskey.top/tags/%E9%93%BE%E8%A1%A8/"/>
+    
+  </entry>
   
   <entry>
     <title>组合总数</title>
@@ -480,60 +530,6 @@
         
         
     <summary type="html">&lt;h3 id=&quot;什么是幻读&quot;&gt;&lt;a href=&quot;#什么是幻读&quot; class=&quot;headerlink&quot; title=&quot;什么是幻读&quot;&gt;&lt;/a&gt;什么是幻读&lt;/h3&gt;&lt;img src=&quot;https://i.loli.net/2021/01/22/VCiQI2LT6zBneGM.png&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>order by 工作原理</title>
-    <link href="https://sunskey.top/mysql-learning08.html"/>
-    <id>https://sunskey.top/mysql-learning08.html</id>
-    <published>2021-01-22T12:37:19.000Z</published>
-    <updated>2021-01-22T12:55:36.703Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;order-by工作原理&quot;&gt;&lt;a href=&quot;#order-by工作原理&quot; class=&quot;headerlink&quot; title=&quot;order by工作原理&quot;&gt;&lt;/a&gt;order by工作原理&lt;/h3&gt;&lt;h4 id=&quot;全字段排序&quot;&gt;&lt;a href=&quot;#全字段排序&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="后端" scheme="https://sunskey.top/categories/%E5%90%8E%E7%AB%AF/"/>
-    
-    
-    <category term="学习笔记" scheme="https://sunskey.top/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    
-    <category term="MySQL" scheme="https://sunskey.top/tags/MySQL/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>MySQL 保证数据不丢失的秘密</title>
-    <link href="https://sunskey.top/mysql-learning07.html"/>
-    <id>https://sunskey.top/mysql-learning07.html</id>
-    <published>2021-01-22T12:18:12.000Z</published>
-    <updated>2021-01-22T12:55:39.628Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h3 id=&quot;保证数据不丢失的秘密&quot;&gt;&lt;a href=&quot;#保证数据不丢失的秘密&quot; class=&quot;headerlink&quot; title=&quot;保证数据不丢失的秘密&quot;&gt;&lt;/a&gt;保证数据不丢失的秘密&lt;/h3&gt;&lt;h4 id=&quot;binlog写入机制&quot;&gt;&lt;a</summary>
         
       
     

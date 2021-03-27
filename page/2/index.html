@@ -165,6 +165,226 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning18.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning18.html" class="post-title-link" itemprop="url">MySQL Memory表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:09:43 / 修改时间：19:21:01" itemprop="dateCreated datePublished" datetime="2021-01-23T19:09:43+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning18.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning18.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-Memory表"><a href="#MySQL-Memory表" class="headerlink" title="MySQL Memory表"></a>MySQL Memory表</h3><h4 id="Memory的基础知识"><a href="#Memory的基础知识" class="headerlink" title="Memory的基础知识"></a>Memory的基础知识</h4><p>内存表的数据部分以数组的方式单独存放，而主键id索引里，存的是每个数据的位置。主键id是hash索引，所以索引上的key并不是有序的。</p>
+<p>InnoDB和Memory引擎的数据组织方式是不同的：</p>
+<p>InnoDB引擎把数据放在主键索引上，其他索引上保存的主键id。这中方式成为索引组织表。</p>
+<p>Memory引擎采用的是把数据单独存放，索引上保存数据位置的数据组织形式，我们称之为堆组织表。</p>
+<h4 id="InnoDB和Memory引擎的区别"><a href="#InnoDB和Memory引擎的区别" class="headerlink" title="InnoDB和Memory引擎的区别"></a>InnoDB和Memory引擎的区别</h4><p>1.InnoDB表的数据总是有序存放的，而内存表就是按照写入的顺序。</p>
+<p>2.当数据文件有空洞时候，InnoDB表在插入新数据的时候，为了保证数据有序性，只能在固定的位置写入新值，而内存表找到空位就可以插入新值。</p>
+<p>3.InnoDB 表用主键索引查询时需要走一次索引查找，用普通索引查询的时候，需要走两次。而内存表没有这个区别，索引的“地位”都是相同的。</p>
+<p>4.数据位置发生变化的时候，InnoDB表只需要修改主键索引，而内存表需要修改所有索引。</p>
+<p>5.InnoDB 支持变长数据类型，不同记录的长度不同；内存表不支持Blob和Text字段，并且即使定义了 varchar（N）,实际也当作char(N)，也就是固定长度字符串来存储，因此内存表的每行数据长度相同。</p>
+<h4 id="不建议在生产环境上使用内存表"><a href="#不建议在生产环境上使用内存表" class="headerlink" title="不建议在生产环境上使用内存表"></a>不建议在生产环境上使用内存表</h4><ul>
+<li>锁粒度问题</li>
+</ul>
+<p>内存表不支持行锁，只支持表锁。跟行锁比起来对并发的支持不够好，决定了它在处理并发事务的时候，性能也不会太好。</p>
+<ul>
+<li>数据持久化问题</li>
+</ul>
+<p>M-S模式下，slave机器重启或者升级，会导致“数据丢失”。MySQL担心主库重启后，出现主备不一致，会在binlog里面写入一行DELETE FROM t1。</p>
+<p>双M模式下，在备库重启的时候，备库的binlog的里面delete语句会传到主库，然后把主库内存表的内存删除。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning17.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Sunskey">
+      <meta itemprop="description" content="做时间的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sunskey">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-learning17.html" class="post-title-link" itemprop="url">MySQL 临时表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-01-23 19:05:05 / 修改时间：19:16:18" itemprop="dateCreated datePublished" datetime="2021-01-23T19:05:05+08:00">2021-01-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论次数：</span>
+    
+    <a title="valine" href="/mysql-learning17.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning17.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="MySQL-临时表"><a href="#MySQL-临时表" class="headerlink" title="MySQL 临时表"></a>MySQL 临时表</h3><p>内存表，指的使用Memory引擎的表，建表语法是create table… engine = memory。这种表的数据都保存在内存里，系统重启的时候会被清空，但是表结构还在。</p>
+<p>临时表，可以使用各种引擎（MySQL、Memory），写数据的时候写到磁盘上。</p>
+<h4 id="临时表的特性"><a href="#临时表的特性" class="headerlink" title="临时表的特性"></a>临时表的特性</h4><p>1.建表语法是create temporary table ….</p>
+<p>2.一个临时表只能被创建它的session访问，对其他线程不可见。</p>
+<p>3.临时表可以与普通表同名</p>
+<p>4.session A内有同名的临时表和普通表的时候，show create语句，以及增删改查访问的临时表。</p>
+<p>5.show tables命令不显示临时表。</p>
+<p>由于临时表只能被创建它的sesssion访问，session结束会自动删除，所以临时表就特别适合优化join的场景。</p>
+<h4 id="临时表的应用"><a href="#临时表的应用" class="headerlink" title="临时表的应用"></a>临时表的应用</h4><p>1.由于不用担心线程之间的重名冲突，临时表经常会被用在复制查询的优化过程中。其中，分库分表系统的跨库查询就是一个典型的使用场景。</p>
+<p>分区key的选择是“减少跨库和跨表查询”。如果大部分的语句都会包含f的等值条件，那么就要用f做分区键。</p>
+<p>但是如果查询条件中没有分区字段，只能到所有的分区中查询满足条件的所有行，然后统一做order by的操作。两种常见的思路。</p>
+<p>1.在proxy层的进程代码中实现排序。</p>
+<p>优点：处理速度快。缺点：需要开发的工作量比较大，对proxy端的压力比较大。</p>
+<p>2.在各个分库拿到的数据，汇总到一个MySQL实例的一个表中，然后在这个汇总实例上做逻辑操作。</p>
+<p>在汇总库中创建一个临时库temp_ht，包含三个字段 v、k、modified；</p>
+<p>在各个分库上执行</p>
+<p>select v,k,t_modified from ht_x where k &gt;= M order by t_modified desc limit 100;</p>
+<p>把分库执行的结果插入到temp_ht表中；</p>
+<p>执行 select v from temp_ht order by t_modified desc limit 100; 得到结果。</p>
+<p>在实际中，往往会发现每个分库的计算量都不饱和，所以会直接把临时表temp_ht放到32个分库中的某一个上。</p>
+<h4 id="临时表的命名"><a href="#临时表的命名" class="headerlink" title="临时表的命名"></a>临时表的命名</h4><p>MySQL用一个frm文件保存表结构的定义，这个frm文件放在临时文件下，文件名的后缀是.frm，前缀是“#sql{进程 id}<em>{线程</em> id}_序列号”</p>
+<p>5.6以及之前的版本里，MySQL会在临时文件目录下创建一个相同前缀，以.ibd为后缀的文件，用来存放数据文件。</p>
+<p>5.7版本开始，MySQL引入了一个临时文件表空间，专门用来存放临时文件的数据。</p>
+<p>MySQL维护数据表，除了物理上要有文外，内存里面也有一套机制区别不同的表，每个表都对应一个table_def_key。</p>
+<p>一个普通的table_def_key的值是由“库名+表名“得到的。</p>
+<p>临时表，则是在”库名+表名“基础上，又加入了”server_id+thread_id”</p>
+<p>在实现上，每个线程都维护了自己的临时表链表。</p>
+<h4 id="临时表和主备复制"><a href="#临时表和主备复制" class="headerlink" title="临时表和主备复制"></a>临时表和主备复制</h4><p>当前binlog_format =row，那么跟 临时表有关的语句，就不会记录到binlog里面，也就是在binglog_format=statemnt/mixed的时候，binlog中才会记录临时表的操作。</p>
+<p>这种情况下，创建临时表的语句会传到备库执行，因此备库的同步线程会创建这个临时表。主库在线程退出的时候，会自动删除临时表，但是备库同步线程是持续运行的。所以这时候需要在主库再写一个DROP TEMPORARY TBAlE传给备库执行。</p>
+<p>不同线程创建同名给的临时表是没问题的，但是传到备库是怎么执行的呢？</p>
+<p>MySQL在记录binlog的时候，会在主库执行这个语句的线程id写到binlog中。这样，在备库的应用线程就能直到每个语句的主库线程id，并利用这个线程id来构造临时表的table_def_table。</p>
+<h4 id="内存临时表"><a href="#内存临时表" class="headerlink" title="内存临时表"></a>内存临时表</h4><h5 id="1-union-执行流程"><a href="#1-union-执行流程" class="headerlink" title="1. union 执行流程"></a>1. union 执行流程</h5><p>在union时，这里的内存临时表起到了暂存数据的作用，而且计算过程还用上了临时表主键id的唯一约束，实现了union的语义。</p>
+<h5 id="2-group-by-执行流程"><a href="#2-group-by-执行流程" class="headerlink" title="2. group by 执行流程"></a>2. group by 执行流程</h5><p>如果需要并不需要对结果进行排序，那可以在SQL语句末尾增加 order by null。</p>
+<p>group by 优化方法 – 索引</p>
+<p>MySQL 5.7 版本支持了generated column 机制，用来实现列数据的关联更新。你可以用下面的方法创建一个列z，然后在z 列上创建一个索引。</p>
+<p>group by 优化方法 – 直接排序</p>
+<p>在group by语句中加入SQL_BIG_RESULT这个提示(hint)，就可以告诉优化器：这个语句涉及的数据量很大，请直接用磁盘临时表。</p>
+<p>select SQL_BIG_RESULT id%100 as m, count(*) as c from t1 group by m;</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning16.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1130,232 +1350,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning08.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning08.html" class="post-title-link" itemprop="url">order by 工作原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 20:37:19 / 修改时间：20:55:36" itemprop="dateCreated datePublished" datetime="2021-01-22T20:37:19+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning08.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning08.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="order-by工作原理"><a href="#order-by工作原理" class="headerlink" title="order by工作原理"></a>order by工作原理</h3><h4 id="全字段排序"><a href="#全字段排序" class="headerlink" title="全字段排序"></a>全字段排序</h4><p>MySQL会给每个线程分配一块内存用于排序，称为sort buffer。</p>
-<p>1.初始化 sort_buffer，确定放入 name、city、age 这三个字段；</p>
-<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
-<p>3.到主键 id 索引取出整行，取 name、city、age 三个字段的值，存入 sort_buffer 中；</p>
-<p>4.从索引 city 取下一个记录的主键 id；</p>
-<p>5.重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的 ID_Y；</p>
-<p>6.对 sort_buffer 中的数据按照字段 name 做快速排序；</p>
-<p>7.按照排序结果取前 1000 行返回给客户端。</p>
-<p>sort_buffer_size ，就是MySQL为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于sort_buffer_size，排序就在内存中完成。如果数据量太大，内存放不下，则不得不利用磁盘临时文件辅助排序。</p>
-<img src="https://i.loli.net/2021/01/22/XrfTwBDKqWbPmFd.png" style="zoom:50%;" />
-
-<h4 id="rowid排序"><a href="#rowid排序" class="headerlink" title="rowid排序"></a>rowid排序</h4><p>如果sort_buffer里面要存放的字段数太多，这样内存能存的行数很少，要分成很多个临时文件，排序性能会很差。可以通过修改max_length_for_sort_data的值来改变排序算法。</p>
-<p>1.初始化 sort_buffer，确定放入两个字段，即 name 和 id；</p>
-<p>2.从索引 city 找到第一个满足 city=’杭州’条件的主键 id，也就是图中的 ID_X；</p>
-<p>3.到主键 id 索引取出整行，取 name、id 这两个字段，存入 sort_buffer 中；</p>
-<p>4.从索引 city 取下一个记录的主键 id；</p>
-<p>5.重复步骤 3、4 直到不满足 city=’杭州’条件为止，也就是图中的 ID_Y；</p>
-<p>6.对 sort_buffer 中的数据按照字段 name 进行排序；</p>
-<p>7.遍历排序结果，取前 1000 行，并按照 id 的值回到原表中取出 city、name 和 age 三个字段返回给客户端。</p>
-<img src="https://i.loli.net/2021/01/22/9LYQciKfheZ5lxE.png" style="zoom:50%;" />
-
-<h4 id="全字段排序-VS-Rowid排序"><a href="#全字段排序-VS-Rowid排序" class="headerlink" title="全字段排序 VS Rowid排序"></a>全字段排序 VS Rowid排序</h4><p>由于Rowid排序涉及到回表，如果内存足够，就优先使用内存，即全字段排序。</p>
-<p>优化手段：可以使用覆盖索引，索引上的信息足够满足查询请求，不需要再回主键索引上去取数据。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunskey.top/mysql-learning07.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Sunskey">
-      <meta itemprop="description" content="做时间的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sunskey">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/mysql-learning07.html" class="post-title-link" itemprop="url">MySQL 保证数据不丢失的秘密</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-01-22 20:18:12 / 修改时间：20:55:39" itemprop="dateCreated datePublished" datetime="2021-01-22T20:18:12+08:00">2021-01-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">评论次数：</span>
-    
-    <a title="valine" href="/mysql-learning07.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/mysql-learning07.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="保证数据不丢失的秘密"><a href="#保证数据不丢失的秘密" class="headerlink" title="保证数据不丢失的秘密"></a>保证数据不丢失的秘密</h3><h4 id="binlog写入机制"><a href="#binlog写入机制" class="headerlink" title="binlog写入机制"></a>binlog写入机制</h4><p>binlog写入逻辑：事务执行过程中，先把日志写到binlog cache，事务提交的时候，再把binlog cache写到binlog中。</p>
-<p>每个线程由自己的binlog cache ,但是共用同一份binlog文件。</p>
-<p>write，指的是把日志写入文件系统的page cache,并没有把数据持久化到磁盘，所以速度快。</p>
-<p>fsync，将数据持久化到磁盘的操作。</p>
-<img src="https://i.loli.net/2021/01/22/unLfoqTdmyXH1pc.png" style="zoom:50%;" />
-
-<p>write和fsync的时机，是由参数sync_binlog控制的；</p>
-<p>1.sync_binlog = 0的时候，表示每次提交事务都只write，不fsync;</p>
-<p>2.sync_binlog =1的时候，表示每次提交事务都会执行fsync;</p>
-<p>3.sync_binlog=N(N&gt;1) 的时候，表示每次提交事务都 write，但累积 N 个事务后才 fsync。</p>
-<h4 id="redo-log的写入机制"><a href="#redo-log的写入机制" class="headerlink" title="redo log的写入机制"></a>redo log的写入机制</h4><img src="https://static001.geekbang.org/resource/image/9d/d4/9d057f61d3962407f413deebc80526d4.png" alt="img" style="zoom:50%;" />
-
-<p>1.存在redo log buffer中，物理上是在MySQL进程内存中。</p>
-<p>2.写到磁盘（write）,但是没有持久化(fsync)，物理上文件系统的page cache里面。</p>
-<p>3.持久化到磁盘，对应的是hard disk。</p>
-<p>InnoDB提供了innodb_flush_log_at_trx_commit参数控制redo log的写入策略。</p>
-<p>0：表示每次事务提交时都只是把redo log留在redo log buffer中</p>
-<p>1：表示每次事务提交都将redo log持久化硬盘</p>
-<p>2：每次提交都只是把redo log写到page cache</p>
-<p>InnoDB有一个后台线程，每间隔一秒，就会把redo log buffer中的日志，调用write 写到文件系统的page cache ，然后fsync持久化磁盘。</p>
-<p>3种情况会把让没有提交事务的redo log写入到磁盘中</p>
-<p>1.后台线程每秒一次的轮询操作。</p>
-<p>2.redo log buffer占用的空间即将达到innodb_log_buffer_size一半的时候，后台线程会主动写盘。</p>
-<p>3.并行的事务提交的时候，顺带将这个事务的redo log buffer持久化到磁盘。</p>
-<p>MySQL的双一配置。指的就是sync_binlog和innodb_flush_log_at_trx_commit都设置成1。一个事务完整提交前，需要等待两次刷盘，一次是redo log（prepare ）,一次是binlog.</p>
-<p>日志逻辑序列（LSN）是单调递增的，用来对应redo log的一个个写入点。每次写入length的redo log，LSN的值就会加上length。</p>
-<p>一次组提交里面，里面的组员越多，节约磁盘IOPS的效果越好。</p>
-<p>日志记录过程</p>
-<img src="https://i.loli.net/2021/01/22/B2GzKH3tRJqySns.png" style="zoom:50%;" />
-
-
-
-<p>如果想binlog提升组提交的效果，可以通过设置binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count 来实现。</p>
-<p>1.binlog_group_commit_sync_delay参数，表示多少微秒后才调用fsync</p>
-<p>2.binlog_group_commit_sync_no_delay_count，表示多少次以后才调用fsync</p>
-<p>如果MySQL出现了性能瓶颈，而且瓶颈在IO上</p>
-<p>1.通过设置binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count参数你，减少binlog的写盘速度。</p>
-<p>2.将sync_binlog设置大于1，这样做的风险是，这个主机掉电会丢失binlog日志。</p>
-<p>3.innodb_flush_log_at_trx_commit 设置为 2。这样做的风险是，主机掉电的时候会丢数据。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1427,7 +1421,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1440,7 +1434,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
